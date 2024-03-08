@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 import typer
 
@@ -14,10 +15,10 @@ task_app = typer.Typer(
 
 
 @task_app.command()
-def list():
+def list(sort: str = typer.Option(None, "--sort")):
     """List all tasks."""
     store = get_store()
-    tasks = store.get_all_tasks()
+    tasks = store.get_all_tasks(sort_by=sort, asc=True)
     console.print(Task.as_rich_table(tasks))
 
 

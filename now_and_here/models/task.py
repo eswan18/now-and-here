@@ -91,3 +91,7 @@ class Task:
 
     def as_json(self) -> str:
         return RootModel[Task](self).model_dump_json()
+    
+    @classmethod
+    def sortable_columns(cls) -> tuple[str, ...]:
+        return ('due',)
