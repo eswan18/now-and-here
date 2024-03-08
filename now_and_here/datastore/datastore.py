@@ -1,5 +1,3 @@
-# an abstract datastore class
-# Classes inheriting from this class must implement its methods or there will be an immediate error
 from abc import ABC, abstractmethod
 from typing import Any
 

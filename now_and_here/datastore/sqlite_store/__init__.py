@@ -1,4 +1,4 @@
-from .sqlite_store import SQLiteStore
+from .unstructed_sqlite_store import UnstructuredSQLiteStore
 
 
-__all__ = ['SQLiteStore']
+__all__ = ['UnstructuredSQLiteStore']

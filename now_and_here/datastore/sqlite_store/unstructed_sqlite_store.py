@@ -6,7 +6,7 @@ from now_and_here.models import Task, Project, Label
 from .create import create_db
 
 
-class SQLiteStore(datastore.DataStore):
+class UnstructuredSQLiteStore(datastore.DataStore):
     
     def __init__(self, path: Path):
         self.conn = sqlite3.connect(path)
