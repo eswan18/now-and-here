@@ -22,13 +22,20 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         create_db(path)
 
     def save_task(self, task: Task) -> str:
-        data = RootModel[Task](task).model_dump_json()
+        data = task.as_json()
         with self.conn as conn:
             conn.execute("INSERT INTO tasks (id, json) VALUES (?, ?)", (task.id, data))
         return task.id
 
     def get_task(self, id: str) -> Task:
-        pass
+        with self.conn as conn:
+            cursor = conn.execute("SELECT json FROM tasks WHERE id = (?)", (id,))
+            row = cursor.fetchone()
+        if not row:
+            raise ValueError(f"No task with id {id}")
+        data = json.loads(row[0])
+        task = Task(**data)
+        return task
 
     def get_all_tasks(self) -> list[Task]:
         # Pull all items from the tasks table.
@@ -38,7 +45,10 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         return tasks
 
     def update_task(self, id: str, task: Task) -> None:
-        pass
+        data = task.as_json()
+        with self.conn as conn:
+            conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
+
 
     def delete_task(self, id: str) -> bool:
         with self.conn as conn:

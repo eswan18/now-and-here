@@ -3,15 +3,16 @@ from typing import Iterable
 from datetime import datetime
 
 from pydantic.dataclasses import dataclass
-from pydantic import Field
+from pydantic import Field, RootModel
 from rich.text import Text
 from rich.table import Table
-from rich.console import Console
-from rich.padding import Padding
+from rich.console import Console, ConsoleOptions, RenderResult
+from rich.rule import Rule
 
-from .common import ID_LENGTH, random_id
+from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
 from .project import Project
+from now_and_here.time import relative_time
 
 
 @dataclass
@@ -50,27 +51,43 @@ class Task:
         due = console.input("Due date [YYYY-MM-DD]: ")
         if due:
             task.due = datetime.fromisoformat(due)
+            console.log(
+                "WARNING: datetime being stored as local time. This should be fixed in a future release."
+            )
         return task
 
     def _as_rich_table_row(self) -> tuple[str, str, str, str, str]:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")
-        # Split task IDs with a dash for readability.
-        first_half_len = len(self.id) // 2
-        t_id = f"{self.id[:first_half_len]}-{self.id[first_half_len:]}"
         done = "✓" if self.done else ""
-        priority = str(self.priority)
-        match priority:
-            case "0":
-                priority = Padding("0", (0, 1), style="blue")
-            case "1":
-                priority = Padding("1", (0, 1), style="yellow")
-            case "2":
-                priority = Padding("2", (0, 1), style="red")
-            case "3":
-                priority = Padding("3", (0, 1), style="bold red")
+        priority = format_priority(self.priority)
+        # Display dates as "in 3 days" or "in 17 hours", with the precise time listed
+        # below in italic.
+        due = self.due
+        if self.due:
+            due = Text(f"{relative_time(due)}") + Text(
+                "\n" + due.strftime("%Y-%m-%d %H:%M"), style="italic dim"
+            )
+        return format_id(self.id), desc, done, priority, due
 
-        # Convert to yyyy-mm-dd hh:mm format or None
-        due = self.due.strftime("%Y-%m-%d %H:%M") if self.due else None
-        return t_id, desc, done, priority, due
+    def __rich_console__(
+        self, console: Console, options: ConsoleOptions
+    ) -> RenderResult:
+        task_id = Text(format_id(self.id), style="cyan")
+        task_title = Text("Task ") + task_id
+        yield Rule(task_title)
+        yield Text("Name: ") + Text(self.name, style="magenta")
+        if self.description:
+            yield Text("Description: ") + Text(self.description, style="dim magenta")
+        else:
+            yield Text("Description: ") + Text("None", style="dim")
+        yield Text("Priority: ") +  format_priority(self.priority)
+        yield Text(f"Done: {self.done}")
+        if self.due:
+            yield Text(f"Due: ") + Text(self.due.isoformat())
+        else:
+            yield Text("Due: ") + Text("None", style="dim")
+
+    def as_json(self) -> str:
+        return RootModel[Task](self).model_dump_json()
