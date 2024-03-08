@@ -1,16 +1,14 @@
 from pathlib import Path
 import logging
 
-import rich
 import typer
 
 from now_and_here.datastore import UnstructuredSQLiteStore
 from .task import task_app
 from .project import project_app
 from .label import label_app
-
-
 from .common import STOREFILE
+from .console import console
 
 
 app = typer.Typer(
@@ -31,10 +29,11 @@ def init():
     """Check if the store exists and create it if it doesn't."""
     store_path = Path(STOREFILE)
     if not UnstructuredSQLiteStore.exists(store_path):
-        UnstructuredSQLiteStore.create_self(store_path)
-        rich.print(f"Store created at {store_path}")
+        with console.status("Creating store..."):
+            UnstructuredSQLiteStore.create_self(store_path)
+        console.print(f"Store created at {store_path}")
     else:
-        rich.print(f"Store already exists at {store_path}")
+        console.print(f"Store already exists at {store_path}")
 
 
 @app.callback()

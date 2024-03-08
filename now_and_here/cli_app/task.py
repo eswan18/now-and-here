@@ -1,8 +1,8 @@
-import rich
 import typer
 
-from now_and_here.models import Task
+from now_and_here.models.task import Task
 from .common import get_store
+from .console import console
 
 
 task_app = typer.Typer(
@@ -15,7 +15,7 @@ def list():
     """List all tasks."""
     store = get_store()
     tasks = store.get_all_tasks()
-    rich.print(tasks)
+    console.print(Task.as_rich_table(tasks))
 
 @task_app.command()
 def add(name: str = typer.Option(None, prompt=True)):
@@ -23,13 +23,13 @@ def add(name: str = typer.Option(None, prompt=True)):
     store = get_store()
     task = Task(name=name)
     store.save_task(task)
-    rich.print("Task saved")
+    console.print("Task saved")
 
 @task_app.command()
 def delete(id: str):
     """Delete a task."""
     store = get_store()
     if store.delete_task(id):
-        rich.print("Task deleted")
+        console.print("Task deleted")
     else:
-        rich.print("Task not found")
+        console.print("Task not found")
