@@ -7,37 +7,45 @@ from now_and_here.models import Task, Project, Label
 class DataStore(ABC):
 
     @abstractmethod
-    def save_task(self, task: Task) -> int:
+    def save_task(self, task: Task) -> str:
         pass
 
     @abstractmethod
-    def get_task(self, id: int) -> Task:
+    def get_task(self, id: str) -> Task:
         pass
 
     @abstractmethod
-    def update_task(self, id: int, task: Task) -> None:
+    def get_all_tasks(self) -> list[Task]:
         pass
 
     @abstractmethod
-    def save_project(self, project: Project) -> int:
+    def update_task(self, id: str, task: Task) -> None:
         pass
 
     @abstractmethod
-    def get_project(self, id: int) -> Project:
+    def delete_task(self, id: str) -> bool:
         pass
 
     @abstractmethod
-    def update_project(self, id: int, project: Project) -> None:
+    def save_project(self, project: Project) -> str:
         pass
 
     @abstractmethod
-    def save_label(self, label: Label) -> int:
+    def get_project(self, id: str) -> Project:
         pass
 
     @abstractmethod
-    def get_label(self, id: int) -> Label:
+    def update_project(self, id: str, project: Project) -> None:
         pass
 
     @abstractmethod
-    def update_label(self, id: int, label: Label) -> None:
+    def save_label(self, label: Label) -> str:
+        pass
+
+    @abstractmethod
+    def get_label(self, id: str) -> Label:
+        pass
+
+    @abstractmethod
+    def update_label(self, id: str, label: Label) -> None:
         pass

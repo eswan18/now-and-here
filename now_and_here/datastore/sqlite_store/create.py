@@ -10,7 +10,7 @@ def create_db(path: Path):
         for table in TABLES:
             query = (
                 f"CREATE TABLE IF NOT EXISTS {table} ("
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "id VARCHAR(12) PRIMARY KEY,"
                 "json TEXT NOT NULL"
                 ")"
             )

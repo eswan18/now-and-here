@@ -5,11 +5,25 @@ import rich
 import typer
 
 from now_and_here.datastore import UnstructuredSQLiteStore
+from .task import task_app
+from .project import project_app
+from .label import label_app
 
 
-STOREFILE = ".now_and_here.store.sqlite"
+from .common import STOREFILE
 
-app = typer.Typer(no_args_is_help=True)
+
+app = typer.Typer(
+    help="Locally-hosted task management system.",
+    no_args_is_help=True,
+)
+app.add_typer(task_app, name="task")
+app.add_typer(project_app, name="project")
+app.add_typer(label_app, name="label")
+# Add "aliases" -- shorter versions of the command names.
+app.add_typer(task_app, name="t")
+app.add_typer(project_app, name="p")
+app.add_typer(label_app, name="l")
 
 
 @app.command()
@@ -33,6 +47,6 @@ def main(verbosity: int = typer.Option(0, "--verbose", "-v", count=True)):
         level = logging.DEBUG
     else:
         typer.echo("Max verbosity level is 2", err=True)
-        typer.Exit(1)
+        raise typer.Exit(1)
     package_logger = logging.getLogger("now_and_here")
     package_logger.setLevel(level)    
