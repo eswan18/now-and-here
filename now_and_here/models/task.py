@@ -4,7 +4,10 @@ from datetime import datetime
 
 from pydantic.dataclasses import dataclass
 from pydantic import Field
+from rich.text import Text
 from rich.table import Table
+from rich.console import Console
+from rich.padding import Padding
 
 from .common import ID_LENGTH, random_id
 from .label import Label
@@ -25,26 +28,49 @@ class Task:
 
     @classmethod
     def as_rich_table(cls, tasks: Iterable[Task]) -> Table:
-        table = Table(title="Tasks")
-        table.add_column("ID", justify="left", style="cyan", width=ID_LENGTH)
-        table.add_column("Task", style="magenta", max_width=50)
+        table = Table(title="Tasks", leading=1)
+        table.add_column("ID", justify="left", style="cyan", width=ID_LENGTH + 1)
+        table.add_column("Task", style="magenta", max_width=100)
         table.add_column("Done", justify="right", width=6)
         table.add_column("Priority", justify="right", width=8)
-        table.add_column("Due", justify="right", width=10)
+        table.add_column("Due", justify="right", max_width=24)
         for task in tasks:
-            priority = str(task.priority)
-            match priority:
-                case "0":
-                    priority = f"[blue]0[/blue]"
-                case "1":
-                    priority = f"[yellow]1[/yellow]"
-                case "2":
-                    priority = f"[orange]2[/orange]"
-                case "3":
-                    priority = f"[bold red]3[/bold red]"
-            done = "✓" if task.done else ""
-            description = task.name
-            if task.description:
-                description += f"\n[green]{task.description}[/green]"
-            table.add_row(task.id, task.name, done, priority, task.due)
+            table.add_row(*task._as_rich_table_row())
         return table
+
+    @classmethod
+    def from_prompt(cls, console: Console) -> Task:
+        name = console.input("Task name: ")
+        task = Task(name=name)
+        task.description = console.input("Description [blank for None]: ", markup=False)
+        if task.description == "":
+            task.description = None
+        priority = console.input("Priority [0-3]: ")
+        task.priority = int(priority)
+        due = console.input("Due date [YYYY-MM-DD]: ")
+        if due:
+            task.due = datetime.fromisoformat(due)
+        return task
+
+    def _as_rich_table_row(self) -> tuple[str, str, str, str, str]:
+        desc = Text(self.name)
+        if self.description:
+            desc += Text(f"\n{self.description}", style="italic dim")
+        # Split task IDs with a dash for readability.
+        first_half_len = len(self.id) // 2
+        t_id = f"{self.id[:first_half_len]}-{self.id[first_half_len:]}"
+        done = "✓" if self.done else ""
+        priority = str(self.priority)
+        match priority:
+            case "0":
+                priority = Padding("0", (0, 1), style="blue")
+            case "1":
+                priority = Padding("1", (0, 1), style="yellow")
+            case "2":
+                priority = Padding("2", (0, 1), style="red")
+            case "3":
+                priority = Padding("3", (0, 1), style="bold red")
+
+        # Convert to yyyy-mm-dd hh:mm format or None
+        due = self.due.strftime("%Y-%m-%d %H:%M") if self.due else None
+        return t_id, desc, done, priority, due

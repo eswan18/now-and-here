@@ -20,11 +20,14 @@ def list():
 
 
 @task_app.command()
-def add(name: str = typer.Option(None, prompt=True)):
+def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
     """Add a task."""
-    store = get_store()
-    task = Task(name=name)
-    store.save_task(task)
+    if not interactive:
+        raise typer.BadParameter("Only interactive mode is supported for now.")
+    task = Task.from_prompt(console)
+    with console.status("Saving..."):
+        store = get_store()
+        store.save_task(task)
     console.print("Task saved")
 
 
