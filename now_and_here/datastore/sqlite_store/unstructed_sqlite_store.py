@@ -10,14 +10,13 @@ from .create import create_db
 
 
 class UnstructuredSQLiteStore(datastore.DataStore):
-    
     def __init__(self, path: Path):
         self.conn = sqlite3.connect(path)
-    
+
     @classmethod
     def exists(cls, path: Path) -> bool:
         return path.exists()
-    
+
     @classmethod
     def create_self(cls, path: Path):
         create_db(path)

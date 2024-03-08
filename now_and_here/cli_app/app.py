@@ -48,4 +48,4 @@ def main(verbosity: int = typer.Option(0, "--verbose", "-v", count=True)):
         typer.echo("Max verbosity level is 2", err=True)
         raise typer.Exit(1)
     package_logger = logging.getLogger("now_and_here")
-    package_logger.setLevel(level)    
+    package_logger.setLevel(level)

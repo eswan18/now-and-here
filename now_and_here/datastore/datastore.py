@@ -5,7 +5,6 @@ from now_and_here.models import Task, Project, Label
 
 
 class DataStore(ABC):
-
     @abstractmethod
     def save_task(self, task: Task) -> str:
         pass

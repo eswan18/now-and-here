@@ -2,8 +2,9 @@ import logging
 from pathlib import Path
 import sqlite3
 
-TABLES = ['tasks', 'projects', 'labels']
+TABLES = ["tasks", "projects", "labels"]
 logger = logging.getLogger(__name__)
+
 
 def create_db(path: Path):
     with sqlite3.connect(path) as conn:

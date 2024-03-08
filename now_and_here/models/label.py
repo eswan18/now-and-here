@@ -2,6 +2,7 @@ from pydantic.dataclasses import dataclass, Field
 
 from .common import random_id
 
+
 @dataclass
 class Label:
     id: str = Field(default_factory=random_id)

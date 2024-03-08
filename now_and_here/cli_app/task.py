@@ -10,12 +10,14 @@ task_app = typer.Typer(
     no_args_is_help=True,
 )
 
+
 @task_app.command()
 def list():
     """List all tasks."""
     store = get_store()
     tasks = store.get_all_tasks()
     console.print(Task.as_rich_table(tasks))
+
 
 @task_app.command()
 def add(name: str = typer.Option(None, prompt=True)):
@@ -24,6 +26,7 @@ def add(name: str = typer.Option(None, prompt=True)):
     task = Task(name=name)
     store.save_task(task)
     console.print("Task saved")
+
 
 @task_app.command()
 def delete(id: str):
