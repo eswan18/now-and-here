@@ -8,7 +8,10 @@ from rich.text import Text
 from rich.table import Table
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.rule import Rule
-from rich.prompt import Prompt, IntPrompt, Confirm
+from rich.prompt import Prompt, IntPrompt
+from rich.panel import Panel
+from rich.layout import Layout
+from rich.padding import Padding
 
 from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
@@ -122,6 +125,56 @@ class Task:
         else:
             due = Text("None", style="dim")
         return format_id(self.id), desc, priority, done, due
+
+    def as_card(self) -> Panel:
+        if self.due:
+            due_layout = Layout(name="due")
+            due_layout.split_column(
+                Text(relative_time(self.due)),
+                Text(format_time(self.due), style="dim italic"),
+            )
+        else:
+            due_layout = Layout(Text("No due date", style="dim"), name="due")
+        status = Panel(
+            ":white_heavy_check_mark:" if self.done else "", width=6, height=3
+        )
+        if self.description:
+            desc_layout = Layout(
+                Padding(
+                    Text(self.description, style="italic magenta", overflow="ellipsis"),
+                    (0, 1),
+                ),
+                name="desc",
+                minimum_size=5,
+            )
+        else:
+            desc_layout = Layout(Text(" "), visible=True, name="desc")
+
+        layout = Layout()
+        layout.split_column(
+            Layout(name="header", size=3),
+            Layout(name="body"),
+        )
+        layout["header"].split_row(
+            Layout(status, name="status", size=7),
+            Layout(
+                Padding(Text(self.name, style="magenta"), (1, 0)),
+                name="name",
+                size=30,
+            ),
+        )
+        priority_layout = Layout(name="priority")
+        priority_text = format_priority(self.priority)
+        priority_text.justify = "right"
+        priority_layout.split_column(
+            Layout(Text("Priority", justify="right")),
+            Layout(priority_text),
+        )
+        priority_layout.size = 10
+
+        layout["body"].split_column(desc_layout, Layout(name="footer", size=3))
+        layout["body"]["footer"].split_row(due_layout, priority_layout)
+        return Panel(layout, width=40, height=15, expand=False)
 
     def __rich_console__(
         self, console: Console, options: ConsoleOptions
