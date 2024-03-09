@@ -18,7 +18,7 @@ def relative_time(
     if delta > timedelta(days=2):
         return f"in {delta.days} days"
     if delta > timedelta(hours=1, minutes=30):
-        return f"in {delta.seconds // 3600} hours"
+        return f"in {delta.days * 24 + delta.seconds // 3600} hours"
     return f"in {delta.seconds // 60} minutes"
 
 

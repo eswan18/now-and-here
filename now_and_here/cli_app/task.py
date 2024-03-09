@@ -17,7 +17,7 @@ task_app = typer.Typer(
 
 @task_app.command()
 def list(
-    sort: str = typer.Option(None, "--sort", help="Sort by a column."),
+    sort: str = typer.Option("due", "--sort", help="Sort by a column."),
     desc: bool = typer.Option(False, "--desc", help="Sort in descending order."),
     include_done: bool = typer.Option(
         False, "--show-done", help="Include tasks marked as done."

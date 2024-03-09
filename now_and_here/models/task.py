@@ -32,8 +32,8 @@ class Task:
         table = Table(title="Tasks", leading=1)
         table.add_column("ID", justify="left", style="cyan", width=ID_LENGTH + 1)
         table.add_column("Task", style="magenta", max_width=100)
-        table.add_column("Done", justify="right", width=4)
         table.add_column("Priority", justify="right", width=8)
+        table.add_column("Done", justify="center", width=4)
         table.add_column("Due", justify="right", max_width=24)
         for task in tasks:
             table.add_row(*task._as_rich_table_row())
@@ -57,8 +57,8 @@ class Task:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")
-        done = "✓" if self.done else ""
         priority = format_priority(self.priority)
+        done = ":white_heavy_check_mark:" if self.done else ""
         if self.due is not None:
             # Display dates as "in 3 days" or "in 17 hours", with the precise time
             # listed below in italic.
@@ -67,7 +67,7 @@ class Task:
             )
         else:
             due = Text("None", style="dim")
-        return format_id(self.id), desc, done, priority, due
+        return format_id(self.id), desc, priority, done, due
 
     def __rich_console__(
         self, console: Console, options: ConsoleOptions
