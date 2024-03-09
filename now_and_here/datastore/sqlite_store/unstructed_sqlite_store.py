@@ -73,6 +73,16 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         with self.conn as conn:
             conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
 
+    def checkoff_task(self, id: str) -> None:
+        task = self.get_task(id)
+        task.done = True
+        self.update_task(id, task)
+
+    def uncheckoff_task(self, id: str) -> None:
+        task = self.get_task(id)
+        task.done = False
+        self.update_task(id, task)
+
     def delete_task(self, id: str) -> bool:
         with self.conn as conn:
             result = conn.execute("DELETE FROM tasks WHERE id = ?", (id,))

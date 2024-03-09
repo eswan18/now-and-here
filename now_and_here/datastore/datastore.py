@@ -28,6 +28,14 @@ class DataStore(ABC):
         pass
 
     @abstractmethod
+    def checkoff_task(self, id: str) -> None:
+        pass
+
+    @abstractmethod
+    def uncheckoff_task(self, id: str) -> None:
+        pass
+
+    @abstractmethod
     def delete_task(self, id: str) -> bool:
         pass
 

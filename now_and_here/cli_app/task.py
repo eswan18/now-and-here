@@ -86,9 +86,6 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
 @task_app.command()
 def checkoff(
     ids: list[str],
-    uncheck: bool = typer.Option(
-        False, "--uncheck", "-u", help="Unmark tasks instead."
-    ),
 ):
     """Mark a task as done or not done."""
     store = get_store()
@@ -96,15 +93,22 @@ def checkoff(
         # Since we display IDs with dashes in them but don't actually store dashes, strip
         # them from input.
         id = raw_id.replace("-", "")
-        task = store.get_task(id)
-        if uncheck:
-            task.done = False
-            store.update_task(id, task)
-            console.print(f"Task [cyan]{raw_id}[/cyan] unmarked as done")
-        else:
-            task.done = True
-            store.update_task(id, task)
-            console.print(f"Task [cyan]{raw_id}[/cyan] marked as done")
+        store.checkoff_task(id)
+        console.print(f"Task [cyan]{raw_id}[/cyan] marked as done")
+
+
+@task_app.command()
+def uncheckoff(
+    ids: list[str],
+):
+    """Mark a task as not done."""
+    store = get_store()
+    for raw_id in ids:
+        # Since we display IDs with dashes in them but don't actually store dashes, strip
+        # them from input.
+        id = raw_id.replace("-", "")
+        store.uncheckoff_task(id)
+        console.print(f"Task [cyan]{raw_id}[/cyan] unmarked as done")
 
 
 @task_app.command()
