@@ -37,7 +37,7 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         task = Task(**data)
         return task
 
-    def get_all_tasks(self, sort_by: str | None = None, asc: bool = True) -> list[Task]:
+    def get_all_tasks(self, sort_by: str | None = None, desc: bool = False) -> list[Task]:
         """Pull all items from the tasks table."""
         # Some very limited validation to avoid extremely easy sql injection.
 
@@ -45,8 +45,8 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         if sort_by:
             if sort_by not in Task.sortable_columns():
                 raise ValueError(f"Cannot sort on column {sort_by}")
-            asc = "ASC" if asc else "DESC"
-            query +=  f" ORDER BY '{sort_by}' {asc}"
+            asc = "DESC" if desc else "ASC"
+            query +=  f" ORDER BY json -> '{sort_by}' {asc} NULLS LAST"
         with self.conn as conn:
             cursor = conn.execute(query)
             tasks = [Task(**json.loads(data)) for (data,) in cursor.fetchall()]

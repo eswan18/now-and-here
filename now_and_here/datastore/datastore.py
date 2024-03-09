@@ -13,7 +13,7 @@ class DataStore(ABC):
         pass
 
     @abstractmethod
-    def get_all_tasks(self) -> list[Task]:
+    def get_all_tasks(self, sort_by: str | None, desc: bool) -> list[Task]:
         pass
 
     @abstractmethod

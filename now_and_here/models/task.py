@@ -12,7 +12,7 @@ from rich.rule import Rule
 from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
 from .project import Project
-from now_and_here.time import relative_time
+from now_and_here.time import relative_time, parse_time, format_time
 
 
 @dataclass
@@ -32,7 +32,7 @@ class Task:
         table = Table(title="Tasks", leading=1)
         table.add_column("ID", justify="left", style="cyan", width=ID_LENGTH + 1)
         table.add_column("Task", style="magenta", max_width=100)
-        table.add_column("Done", justify="right", width=6)
+        table.add_column("Done", justify="right", width=4)
         table.add_column("Priority", justify="right", width=8)
         table.add_column("Due", justify="right", max_width=24)
         for task in tasks:
@@ -48,12 +48,9 @@ class Task:
             task.description = None
         priority = console.input("Priority [0-3]: ")
         task.priority = int(priority)
-        due = console.input("Due date [YYYY-MM-DD]: ")
+        due = console.input("Due date [blank for None]: ", markup=False)
         if due:
-            task.due = datetime.fromisoformat(due)
-            console.log(
-                "WARNING: datetime being stored as local time. This should be fixed in a future release."
-            )
+            task.due = parse_time(due)
         return task
 
     def _as_rich_table_row(self) -> tuple[str, str, str, str, str]:
@@ -67,7 +64,7 @@ class Task:
         due = self.due
         if self.due:
             due = Text(f"{relative_time(due)}") + Text(
-                "\n" + due.strftime("%Y-%m-%d %H:%M"), style="italic dim"
+                "\n" + format_time(due), style="italic dim"
             )
         return format_id(self.id), desc, done, priority, due
 
@@ -85,7 +82,7 @@ class Task:
         yield Text("Priority: ") +  format_priority(self.priority)
         yield Text(f"Done: {self.done}")
         if self.due:
-            yield Text(f"Due: ") + Text(self.due.isoformat())
+            yield Text(f"Due: {format_time(self.due)} ({relative_time(self.due)})")
         else:
             yield Text("Due: ") + Text("None", style="dim")
 
@@ -94,4 +91,4 @@ class Task:
     
     @classmethod
     def sortable_columns(cls) -> tuple[str, ...]:
-        return ('due',)
+        return ('due', 'priority')

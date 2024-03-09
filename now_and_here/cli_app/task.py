@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Literal
 
 import typer
 
 from now_and_here.models.task import Task
 from .common import get_store
+from now_and_here.models.common import format_id
+from now_and_here.time import parse_time
 from .console import console
 
 
@@ -15,10 +16,13 @@ task_app = typer.Typer(
 
 
 @task_app.command()
-def list(sort: str = typer.Option(None, "--sort")):
+def list(
+    sort: str = typer.Option(None, "--sort", help="Sort by a column."),
+    desc: bool = typer.Option(False, "--desc", help="Sort in descending order."),
+):
     """List all tasks."""
     store = get_store()
-    tasks = store.get_all_tasks(sort_by=sort, asc=True)
+    tasks = store.get_all_tasks(sort_by=sort, desc=desc)
     console.print(Task.as_rich_table(tasks))
 
 
@@ -34,7 +38,7 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
         store = get_store()
         store.save_task(task)
     console.print("Task saved!")
-    console.print(f"ID [cyan]{task.id}[/cyan]")
+    console.print(f"ID [cyan]{format_id(task.id)}[/cyan]")
 
 
 @task_app.command()
@@ -90,7 +94,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
         case "due":
             due = console.input("New value for due [blank for None]: ", markup=False)
             if due:
-                due = datetime.fromisoformat(due)
+                due = parse_time(due)
             else:
                 due = None
             task.due = due
@@ -99,3 +103,16 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
         case _:
             raise ValueError(f"Field name {field_name} must be one of {valid_fields}")
     store.update_task(id, task)
+
+
+@task_app.command()
+def done(id: str):
+    """Mark a task as done."""
+    # Since we display IDs with dashes in them but don't actually store dashes, strip
+    # them from input.
+    id = id.replace("-", "")
+    store = get_store()
+    task = store.get_task(id)
+    task.done = True
+    store.update_task(id, task)
+    console.print("Task marked as done")
