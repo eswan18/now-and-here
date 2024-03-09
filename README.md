@@ -1,5 +1,6 @@
 # Now and Here
 
 ```bash
-nh show
+nh init
+nh task list --show-done
 ```
