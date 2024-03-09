@@ -38,7 +38,7 @@ def _timedelta_to_str(delta: timedelta) -> str:
 
 def parse_time(input: str, warn_on_past: bool = False) -> datetime:
     """Parse user input into a datetime and convert it to UTC."""
-    date = dateparser.parse(input)
+    date = dateparser.parse(input, settings={"PREFER_DATES_FROM": "future"})
     if date is None:
         raise ValueError(f"Could not parse date: {input}")
     # Convert to UTC.

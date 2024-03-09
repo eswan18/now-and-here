@@ -23,11 +23,17 @@ def list_(
     include_done: bool = typer.Option(
         False, "--show-done", help="Include tasks marked as done."
     ),
+    id_only: bool = typer.Option(
+        False, "--id-only", help="Only show task IDs, not full details."
+    ),
 ):
     """List all tasks."""
     store = get_store()
     tasks = store.get_tasks(sort_by=sort, desc=desc, include_done=include_done)
-    console.print(Task.as_rich_table(tasks))
+    if id_only:
+        console.print("\n".join(format_id(task.id) for task in tasks))
+    else:
+        console.print(Task.as_rich_table(tasks))
 
 
 @task_app.command()
@@ -113,16 +119,27 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
 
 
 @task_app.command()
-def done(id: str):
-    """Mark a task as done."""
-    # Since we display IDs with dashes in them but don't actually store dashes, strip
-    # them from input.
-    id = id.replace("-", "")
+def checkoff(
+    ids: list[str],
+    uncheck: bool = typer.Option(
+        False, "--uncheck", "-u", help="Unmark tasks instead."
+    ),
+):
+    """Mark a task as done or not done."""
     store = get_store()
-    task = store.get_task(id)
-    task.done = True
-    store.update_task(id, task)
-    console.print("Task marked as done")
+    for raw_id in ids:
+        # Since we display IDs with dashes in them but don't actually store dashes, strip
+        # them from input.
+        id = raw_id.replace("-", "")
+        task = store.get_task(id)
+        if uncheck:
+            task.done = False
+            store.update_task(id, task)
+            console.print(f"Task [cyan]{raw_id}[/cyan] unmarked as done")
+        else:
+            task.done = True
+            store.update_task(id, task)
+            console.print(f"Task [cyan]{raw_id}[/cyan] marked as done")
 
 
 @task_app.command()
