@@ -95,9 +95,11 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
                 case _:
                     raise ValueError(f"Invalid value for done: '{done}'")
         case "due":
-            due = console.input("New value for due [blank for None]: ", markup=False)
-            if due:
-                due = parse_time(due)
+            due_str = console.input(
+                "New value for due [blank for None]: ", markup=False
+            )
+            if due_str:
+                due = parse_time(due_str)
             else:
                 due = None
             task.due = due

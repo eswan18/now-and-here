@@ -67,19 +67,19 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         return result.rowcount > 0
 
     def save_project(self, project: Project) -> str:
-        pass
+        raise NotImplementedError
 
     def get_project(self, id: str) -> Project:
-        pass
+        raise NotImplementedError
 
     def update_project(self, id: str, project: Project) -> None:
-        pass
+        raise NotImplementedError
 
     def save_label(self, label: Label) -> str:
-        pass
+        raise NotImplementedError
 
     def get_label(self, id: str) -> Label:
-        pass
+        raise NotImplementedError
 
     def update_label(self, id: str, label: Label) -> None:
-        pass
+        raise NotImplementedError

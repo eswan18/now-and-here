@@ -53,19 +53,20 @@ class Task:
             task.due = parse_time(due)
         return task
 
-    def _as_rich_table_row(self) -> tuple[str, str, str, str, str]:
+    def _as_rich_table_row(self) -> tuple[str, Text, str, Text, Text]:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")
         done = "✓" if self.done else ""
         priority = format_priority(self.priority)
-        # Display dates as "in 3 days" or "in 17 hours", with the precise time listed
-        # below in italic.
-        due = self.due
-        if self.due:
-            due = Text(f"{relative_time(due)}") + Text(
-                "\n" + format_time(due), style="italic dim"
+        if self.due is not None:
+            # Display dates as "in 3 days" or "in 17 hours", with the precise time
+            # listed below in italic.
+            due = Text(f"{relative_time(self.due)}") + Text(
+                "\n" + format_time(self.due), style="italic dim"
             )
+        else:
+            due = Text("None", style="dim")
         return format_id(self.id), desc, done, priority, due
 
     def __rich_console__(

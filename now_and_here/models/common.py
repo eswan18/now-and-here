@@ -19,7 +19,7 @@ def format_id(id: str) -> str:
     return t_id
 
 
-def format_priority(priority: int) -> str:
+def format_priority(priority: int) -> Text:
     """Format a priority in a user-friendly way."""
     match priority:
         case 0:
