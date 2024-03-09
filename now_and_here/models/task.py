@@ -79,7 +79,7 @@ class Task:
             yield Text("Description: ") + Text(self.description, style="dim magenta")
         else:
             yield Text("Description: ") + Text("None", style="dim")
-        yield Text("Priority: ") +  format_priority(self.priority)
+        yield Text("Priority: ") + format_priority(self.priority)
         yield Text(f"Done: {self.done}")
         if self.due:
             yield Text(f"Due: {format_time(self.due)} ({relative_time(self.due)})")
@@ -88,7 +88,7 @@ class Task:
 
     def as_json(self) -> str:
         return RootModel[Task](self).model_dump_json()
-    
+
     @classmethod
     def sortable_columns(cls) -> tuple[str, ...]:
-        return ('due', 'priority')
+        return ("due", "priority")

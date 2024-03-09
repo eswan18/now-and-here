@@ -18,6 +18,7 @@ def format_id(id: str) -> str:
     t_id = f"{id[:first_half_len]}-{id[first_half_len:]}"
     return t_id
 
+
 def format_priority(priority: int) -> str:
     """Format a priority in a user-friendly way."""
     match priority:

@@ -5,7 +5,9 @@ from typing import Callable
 import dateparser
 
 
-def relative_time(dt: datetime, today: datetime | Callable[..., datetime] = datetime.now) -> str:
+def relative_time(
+    dt: datetime, today: datetime | Callable[..., datetime] = datetime.now
+) -> str:
     # If today is a callable, call it to get the current date.
     if callable(today):
         today = today()
@@ -28,6 +30,7 @@ def parse_time(input: str) -> datetime:
     # Convert to UTC.
     date = date.astimezone(tz=pytz.utc)
     return date
+
 
 def format_time(dt: datetime) -> str:
     """Format a datetime in a user-friendly way, accounting for timezone."""
