@@ -121,3 +121,15 @@ def done(id: str):
     task.done = True
     store.update_task(id, task)
     console.print("Task marked as done")
+
+
+@task_app.command()
+def due(
+    include_done: bool = typer.Option(
+        False, "--show-done", help="Include tasks marked as done."
+    ),
+):
+    """List tasks that are currently due."""
+    store = get_store()
+    tasks = store.get_tasks(due_before=datetime.utcnow(), include_done=include_done)
+    console.print(Task.as_rich_table(tasks))

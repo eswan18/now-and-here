@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from now_and_here.models import Task, Project, Label
 
@@ -14,7 +15,11 @@ class DataStore(ABC):
 
     @abstractmethod
     def get_tasks(
-        self, sort_by: str | None, desc: bool, include_done: bool = False
+        self,
+        sort_by: str | None = "due",
+        desc: bool = False,
+        include_done: bool = False,
+        due_before: datetime | None = None,
     ) -> list[Task]:
         pass
 

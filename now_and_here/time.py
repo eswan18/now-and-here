@@ -14,12 +14,24 @@ def relative_time(
     # If today doesn't have a timezone, assume it's local time.
     if today.tzinfo is None:
         today = today.astimezone(pytz.utc)
-    delta = dt - today
+    if dt > today:
+        delta_str = _timedelta_to_str(dt - today)
+        return f"in {delta_str}"
+    else:
+        delta_str = _timedelta_to_str(today - dt)
+        return f"{delta_str} ago"
+
+
+def _timedelta_to_str(delta: timedelta) -> str:
+    """Convert a timedelta to a human-readable string."""
+    if delta < timedelta():
+        # Don't allow negative deltas.
+        raise ValueError(f"delta must be positive, got {delta}")
     if delta > timedelta(days=2):
-        return f"in {delta.days} days"
+        return f"{delta.days} days"
     if delta > timedelta(hours=1, minutes=30):
-        return f"in {delta.days * 24 + delta.seconds // 3600} hours"
-    return f"in {delta.seconds // 60} minutes"
+        return f"{delta.days * 24 + delta.seconds // 3600} hours"
+    return f"{delta.seconds // 60} minutes"
 
 
 def parse_time(input: str) -> datetime:

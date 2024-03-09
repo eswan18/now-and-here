@@ -53,7 +53,7 @@ class Task:
             task.due = parse_time(due)
         return task
 
-    def _as_rich_table_row(self) -> tuple[str, Text, str, Text, Text]:
+    def _as_rich_table_row(self) -> tuple[str, Text, Text, str, Text]:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")

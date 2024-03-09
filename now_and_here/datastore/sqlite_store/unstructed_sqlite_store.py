@@ -1,6 +1,7 @@
 import sqlite3
 import json
 from pathlib import Path
+from datetime import datetime
 
 from pydantic import RootModel
 
@@ -38,21 +39,34 @@ class UnstructuredSQLiteStore(datastore.DataStore):
         return task
 
     def get_tasks(
-        self, sort_by: str | None = None, desc: bool = False, include_done: bool = False
+        self,
+        sort_by: str | None = None,
+        desc: bool = False,
+        include_done: bool = False,
+        due_before: datetime | None = None,
     ) -> list[Task]:
         """Pull items from the tasks table."""
         # Some very limited validation to avoid extremely easy sql injection.
 
-        query = "SELECT json FROM tasks"
+        query = "SELECT json FROM tasks WHERE 1=1"
+        params = []
         if not include_done:
-            query += " WHERE json -> 'done' = 'false' OR json -> 'done' = FALSE"
+            query += " AND json ->> 'done' = FALSE"
+        if due_before:
+            query += f" AND datetime(json ->> 'due') <= datetime(?)"
+            params.append(due_before.isoformat())
         if sort_by:
             if sort_by not in Task.sortable_columns():
                 raise ValueError(f"Cannot sort on column {sort_by}")
             asc = "DESC" if desc else "ASC"
-            query += f" ORDER BY json -> '{sort_by}' {asc} NULLS LAST"
+            query += f" ORDER BY json ->> '{sort_by}' {asc} NULLS LAST"
+        print(query)
         with self.conn as conn:
-            cursor = conn.execute(query)
+            if params:
+                print(query, params)
+                cursor = conn.execute(query, params)
+            else:
+                cursor = conn.execute(query)
             tasks = [Task(**json.loads(data)) for (data,) in cursor.fetchall()]
         return tasks
 
