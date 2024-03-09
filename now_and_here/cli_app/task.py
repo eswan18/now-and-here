@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import typer
 
@@ -6,7 +6,7 @@ from now_and_here.models.task import Task
 from .common import get_store
 from now_and_here.models.common import format_id
 from now_and_here.time import parse_time
-from .console import console
+from now_and_here.console import console
 
 
 task_app = typer.Typer(
@@ -15,8 +15,9 @@ task_app = typer.Typer(
 )
 
 
-@task_app.command()
-def list(
+# We have to name this "list_" to avoid clobbering Python's built-in list function.
+@task_app.command(name="list")
+def list_(
     sort: str = typer.Option("due", "--sort", help="Sort by a column."),
     desc: bool = typer.Option(False, "--desc", help="Sort in descending order."),
     include_done: bool = typer.Option(
@@ -40,21 +41,22 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
     with console.status("Saving..."):
         store = get_store()
         store.save_task(task)
-    console.print("Task saved!")
-    console.print(f"ID [cyan]{format_id(task.id)}[/cyan]")
+    console.print("[green]Task saved![/green]")
+    console.print(f"ID: [cyan]{format_id(task.id)}[/cyan]")
 
 
 @task_app.command()
-def delete(id: str):
-    """Delete a task."""
-    # Since we display IDs with dashes in them but don't actually store dashes, strip
-    # them from input.
-    id = id.replace("-", "")
+def delete(ids: list[str]):
+    """Delete one or more tasks."""
     store = get_store()
-    if store.delete_task(id):
-        console.print("Task deleted")
-    else:
-        console.print("Task not found")
+    for raw_id in ids:
+        # Since we display IDs with dashes in them but don't actually store dashes,
+        # strip them from input.
+        id = raw_id.replace("-", "")
+        if store.delete_task(id):
+            console.print(f"Task [cyan]{raw_id}[/cyan] deleted")
+        else:
+            console.print(f"[red]Error:[/red] Task [cyan]{raw_id}[/cyan] not found")
 
 
 @task_app.command()
@@ -99,7 +101,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
                 "New value for due [blank for None]: ", markup=False
             )
             if due_str:
-                due = parse_time(due_str)
+                due = parse_time(due_str, warn_on_past=True)
             else:
                 due = None
             task.due = due
@@ -128,8 +130,24 @@ def due(
     include_done: bool = typer.Option(
         False, "--show-done", help="Include tasks marked as done."
     ),
+    due_before: str = typer.Option(
+        "now",
+        "--by",
+        help="Show tasks due at or before this time.",
+    ),
 ):
+    match due_before:
+        case "now":
+            before = datetime.utcnow()
+        case "today":
+            before = datetime.utcnow().replace(hour=23, minute=59, second=59)
+        case "tomorrow":
+            before = datetime.utcnow().replace(
+                hour=23, minute=59, second=59
+            ) + timedelta(days=1)
+        case _:
+            before = parse_time(due_before)
     """List tasks that are currently due."""
     store = get_store()
-    tasks = store.get_tasks(due_before=datetime.utcnow(), include_done=include_done)
+    tasks = store.get_tasks(due_before=before, include_done=include_done)
     console.print(Task.as_rich_table(tasks))

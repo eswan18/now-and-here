@@ -46,11 +46,13 @@ class Task:
         task.description = console.input("Description [blank for None]: ", markup=False)
         if task.description == "":
             task.description = None
-        priority = console.input("Priority [0-3]: ")
+        priority = console.input("Priority [0-3, default 0]: ")
+        if priority == "":
+            priority = "0"
         task.priority = int(priority)
         due = console.input("Due date [blank for None]: ", markup=False)
         if due:
-            task.due = parse_time(due)
+            task.due = parse_time(due, warn_on_past=True)
         return task
 
     def _as_rich_table_row(self) -> tuple[str, Text, Text, str, Text]:

@@ -1,6 +1,8 @@
 import pytz
 from datetime import datetime, timedelta
 from typing import Callable
+from now_and_here.console import console
+from rich.text import Text
 
 import dateparser
 
@@ -34,13 +36,20 @@ def _timedelta_to_str(delta: timedelta) -> str:
     return f"{delta.seconds // 60} minutes"
 
 
-def parse_time(input: str) -> datetime:
-    """Parse user input into a datetime and converts it to UTC."""
+def parse_time(input: str, warn_on_past: bool = False) -> datetime:
+    """Parse user input into a datetime and convert it to UTC."""
     date = dateparser.parse(input)
     if date is None:
         raise ValueError(f"Could not parse date: {input}")
     # Convert to UTC.
     date = date.astimezone(tz=pytz.utc)
+    if warn_on_past and date < datetime.now(tz=pytz.utc):
+        warning = Text(
+            f"Warning: parsed date is in the past. ({date})\n"
+            "This is probably not what you want.",
+            style="bold red",
+        )
+        console.print(warning, highlight=False)
     return date
 
 

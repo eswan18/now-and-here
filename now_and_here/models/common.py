@@ -1,14 +1,14 @@
 import random
-from string import ascii_lowercase, digits
+from string import ascii_lowercase
 
 from rich.text import Text
 
 
-ID_LENGTH = 5
+ID_LENGTH = 6
 
 
 def random_id() -> str:
-    return "".join(random.choices(ascii_lowercase + digits, k=ID_LENGTH))
+    return "".join(random.choices(ascii_lowercase, k=ID_LENGTH))
 
 
 def format_id(id: str) -> str:

@@ -8,7 +8,7 @@ from .task import task_app
 from .project import project_app
 from .label import label_app
 from .common import STOREFILE
-from .console import console
+from now_and_here.console import console
 
 
 app = typer.Typer(

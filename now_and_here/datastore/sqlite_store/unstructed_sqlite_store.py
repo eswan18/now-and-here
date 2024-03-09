@@ -60,10 +60,8 @@ class UnstructuredSQLiteStore(datastore.DataStore):
                 raise ValueError(f"Cannot sort on column {sort_by}")
             asc = "DESC" if desc else "ASC"
             query += f" ORDER BY json ->> '{sort_by}' {asc} NULLS LAST"
-        print(query)
         with self.conn as conn:
             if params:
-                print(query, params)
                 cursor = conn.execute(query, params)
             else:
                 cursor = conn.execute(query)
