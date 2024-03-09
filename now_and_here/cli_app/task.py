@@ -78,44 +78,9 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
     with console.status("Fetching task..."):
         store = get_store()
         task = store.get_task(id)
-    console.print(task)
-    console.print()
-    field_name = console.input("Update which field? ")
-    field_name = field_name.lower()
-    valid_fields = ("name", "description", "priority", "done", "due")
-    match field_name:
-        case "name":
-            name = console.input("New value for name: ")
-            task.name = name
-        case "description":
-            description = console.input("New value for description: ")
-            task.description = description
-        case "priority":
-            priority = console.input("New value for priority: ")
-            task.priority = int(priority)
-        case "done":
-            done = console.input("New value for done: ")
-            match done.lower():
-                case "yes" | "y" | "true" | "t":
-                    task.done = True
-                case "no" | "n" | "false" | "f":
-                    task.done = False
-                case _:
-                    raise ValueError(f"Invalid value for done: '{done}'")
-        case "due":
-            due_str = console.input(
-                "New value for due [blank for None]: ", markup=False
-            )
-            if due_str:
-                due = parse_time(due_str, warn_on_past=True)
-            else:
-                due = None
-            task.due = due
-        case "exit" | "quit" | "":
-            return
-        case _:
-            raise ValueError(f"Field name {field_name} must be one of {valid_fields}")
+    task.update_from_prompt(console)
     store.update_task(id, task)
+    console.print(f"[green]Task [cyan]{id}[/cyan] updated![/green]")
 
 
 @task_app.command()

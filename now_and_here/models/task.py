@@ -8,6 +8,7 @@ from rich.text import Text
 from rich.table import Table
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.rule import Rule
+from rich.prompt import Prompt, IntPrompt, Confirm
 
 from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
@@ -41,19 +42,70 @@ class Task:
 
     @classmethod
     def from_prompt(cls, console: Console) -> Task:
-        name = console.input("Task name: ")
+        name = Prompt.ask("Task name", console=console)
         task = Task(name=name)
-        task.description = console.input("Description [blank for None]: ", markup=False)
-        if task.description == "":
-            task.description = None
-        priority = console.input("Priority [0-3, default 0]: ")
-        if priority == "":
-            priority = "0"
-        task.priority = int(priority)
-        due = console.input("Due date [blank for None]: ", markup=False)
+        task.description = Prompt.ask(
+            "Description", console=console, default=None, show_default=True
+        )
+        priority = IntPrompt.ask(
+            "Priority", choices=list("0123"), default=0, console=console
+        )
+        task.priority = priority
+        due = Prompt.ask(
+            "Due date \[blank for None]",
+            console=console,
+            default=None,
+            show_default=True,
+        )
         if due:
             task.due = parse_time(due, warn_on_past=True)
         return task
+
+    def update_from_prompt(self, console: Console) -> None:
+        """Update the Task in-place from user input."""
+        valid_fields = ["name", "description", "priority", "due", "save", ""]
+        while True:
+            console.print(self)
+            field_name = Prompt.ask(
+                "Update which field? \[or 'save' to confirm changes]",
+                console=console,
+                choices=valid_fields,
+            )
+            match field_name:
+                case "name":
+                    self.name = Prompt.ask("New value for name", console=console)
+                case "description":
+                    self.description = Prompt.ask(
+                        "New value for description",
+                        console=console,
+                        default=None,
+                        show_default=True,
+                    )
+                case "priority":
+                    self.priority = IntPrompt.ask(
+                        "New value for priority",
+                        choices=list("0123"),
+                        default=0,
+                        console=console,
+                    )
+                case "due":
+                    due_str = Prompt.ask(
+                        "New value for due \[blank for None]",
+                        console=console,
+                        default=None,
+                        show_default=True,
+                    )
+                    if due_str:
+                        self.due = parse_time(due_str, warn_on_past=True)
+                    else:
+                        self.due = None
+                case "save" | "":
+                    return
+                case _:
+                    raise ValueError(
+                        f"Field name {field_name} must be one of {valid_fields}"
+                    )
+            console.print("\nUpdated task:")
 
     def _as_rich_table_row(self) -> tuple[str, Text, Text, str, Text]:
         desc = Text(self.name)
