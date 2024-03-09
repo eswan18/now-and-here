@@ -19,10 +19,11 @@ task_app = typer.Typer(
 def list(
     sort: str = typer.Option(None, "--sort", help="Sort by a column."),
     desc: bool = typer.Option(False, "--desc", help="Sort in descending order."),
+    include_done: bool = typer.Option(False, "--show-done", help="Include tasks marked as done."),
 ):
     """List all tasks."""
     store = get_store()
-    tasks = store.get_all_tasks(sort_by=sort, desc=desc)
+    tasks = store.get_tasks(sort_by=sort, desc=desc, include_done=include_done)
     console.print(Task.as_rich_table(tasks))
 
 
