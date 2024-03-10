@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Iterable
 from datetime import datetime
 
+import typer
 from pydantic.dataclasses import dataclass
 from pydantic import Field, RootModel
 from rich.text import Text
@@ -17,7 +18,7 @@ from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
 from .project import Project
 from now_and_here.time import relative_time, parse_time, format_time
-from now_and_here.models.repeat_interval import RepeatInterval
+from now_and_here.models.repeat_interval import RepeatInterval, try_parse
 
 
 @dataclass
@@ -64,6 +65,17 @@ class Task:
         )
         if due:
             task.due = parse_time(due, warn_on_past=True)
+        repeat = Prompt.ask(
+            "Repeat interval \[blank for None]",
+            console=console,
+            default=None,
+            show_default=True,
+        )
+        if repeat:
+            task.repeat = try_parse(repeat)
+            if task.repeat is None:
+                console.print(f"Could not parse repeat interval '{repeat}'")
+                typer.Exit(1)
         return task
 
     def update_from_prompt(self, console: Console) -> None:

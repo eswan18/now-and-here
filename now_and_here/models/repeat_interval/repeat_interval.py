@@ -1,10 +1,8 @@
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime
 from abc import ABC, abstractmethod
 from typing import Self
 
 from pydantic.dataclasses import dataclass
-import pytz
-
 
 # Some intervals I need to support:
 # "Regular"
@@ -23,6 +21,10 @@ import pytz
 # - every 2 years
 
 
+# Even though this abstract class has no data, it must be marked as a pydantic dataclass
+# because its subclasses are as well. Without this decorator, we get errors when the
+# other classes are created.
+@dataclass
 class RepeatInterval(ABC):
     @abstractmethod
     def next(self, current: datetime) -> datetime:
