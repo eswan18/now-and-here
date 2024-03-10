@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import Iterable
+from typing import Iterable, Annotated, Any
 from datetime import datetime
 
 import typer
-from pydantic.dataclasses import dataclass
 from pydantic import Field, RootModel
+from pydantic.dataclasses import dataclass
+from pydantic.functional_validators import SkipValidation
 from rich.text import Text
 from rich.table import Table
 from rich.console import Console, ConsoleOptions, RenderResult
@@ -32,7 +33,8 @@ class Task:
     labels: list[Label] = Field(default_factory=list)  # type: ignore [misc]
     priority: int = Field(default=0, ge=0, le=3)  # type: ignore [misc]
     due: datetime | None = Field(None)  # type: ignore [misc]
-    repeat: RepeatInterval | None = Field(None)  # type: ignore [misc]
+    # We can't validate this field because it's a protocol
+    repeat: SkipValidation[RepeatInterval | None] = Field(None)  # type: ignore [misc]
 
     @classmethod
     def as_rich_table(cls, tasks: Iterable[Task]) -> Table:

@@ -1,6 +1,5 @@
 from datetime import datetime
-from abc import ABC, abstractmethod
-from typing import Self
+from typing import Self, Protocol, runtime_checkable
 
 from pydantic.dataclasses import dataclass
 
@@ -21,23 +20,18 @@ from pydantic.dataclasses import dataclass
 # - every 2 years
 
 
-# Even though this abstract class has no data, it must be marked as a pydantic dataclass
-# because its subclasses are as well. Without this decorator, we get errors when the
-# other classes are created.
+@runtime_checkable
 @dataclass
-class RepeatInterval(ABC):
-    @abstractmethod
+class RepeatInterval(Protocol):
     def next(self, current: datetime) -> datetime:
         """Get the next occurrence of this interval after the given datetime."""
-        pass
+        ...
 
-    @abstractmethod
     def previous(self, current: datetime) -> datetime:
         """Get the previous occurrence of this interval before the given datetime."""
-        pass
+        ...
 
     @classmethod
-    @abstractmethod
     def try_parse(cls: type[Self], text: str) -> Self | None:
         """Try to parse a string into this repeat interval."""
-        pass
+        ...

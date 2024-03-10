@@ -1,16 +1,18 @@
+import json
 from datetime import datetime, time, timedelta
-from typing import Self
+from typing import Self, Any
 import re
 
 from pydantic.dataclasses import dataclass
 
-from .repeat_interval import RepeatInterval
-
 
 @dataclass
-class DailyInterval(RepeatInterval):
+class DailyInterval:
     days: int = 1
     at: time | None = None
+    # Unfortunately we have to override match_args so that this class conforms to the
+    # RepeatInterval protocol.
+    __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
         if self.at is None:
@@ -54,3 +56,17 @@ class DailyInterval(RepeatInterval):
                 at = time(hour, minute)
             return cls(days=days, at=at)
         return None
+
+    def as_json(self) -> str:
+        data = {
+            "kind": "DailyInterval",
+            "days": self.days,
+            "at": self.at.isoformat() if self.at else None,
+        }
+        return json.dumps(data)
+
+    def __str__(self) -> str:
+        if self.at is None:
+            return f"every {self.days} days"
+        else:
+            return f"every {self.days} days at {self.at.strftime('%I:%M %p')}"
