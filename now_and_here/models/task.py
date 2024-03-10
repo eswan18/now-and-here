@@ -17,19 +17,21 @@ from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
 from .project import Project
 from now_and_here.time import relative_time, parse_time, format_time
+from now_and_here.models.repeat_interval import RepeatInterval
 
 
 @dataclass
 class Task:
     id: str = Field(default_factory=random_id)
-    name: str = Field(..., min_length=1, max_length=100)
-    description: str | None = Field(None)
-    done: bool = Field(False)
-    parent: Task | None = Field(None)
-    project: Project | None = Field(None)
-    labels: list[Label] = Field(default_factory=list)
-    priority: int = Field(default=0, ge=0, le=3)
-    due: datetime | None = Field(None)
+    name: str = Field(..., min_length=1, max_length=100)  # type: ignore [misc]
+    description: str | None = Field(None)  # type: ignore [misc]
+    done: bool = Field(False)  # type: ignore [misc]
+    parent: Task | None = Field(None)  # type: ignore [misc]
+    project: Project | None = Field(None)  # type: ignore [misc]
+    labels: list[Label] = Field(default_factory=list)  # type: ignore [misc]
+    priority: int = Field(default=0, ge=0, le=3)  # type: ignore [misc]
+    due: datetime | None = Field(None)  # type: ignore [misc]
+    repeat: RepeatInterval | None = Field(None)  # type: ignore [misc]
 
     @classmethod
     def as_rich_table(cls, tasks: Iterable[Task]) -> Table:
@@ -46,7 +48,7 @@ class Task:
     @classmethod
     def from_prompt(cls, console: Console) -> Task:
         name = Prompt.ask("Task name", console=console)
-        task = Task(name=name)
+        task = Task(name=name)  # type: ignore [call-arg]
         task.description = Prompt.ask(
             "Description", console=console, default=None, show_default=True
         )
