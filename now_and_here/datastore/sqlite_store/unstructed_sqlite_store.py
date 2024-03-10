@@ -3,14 +3,11 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-from pydantic import RootModel
-
-from now_and_here.datastore import datastore
 from now_and_here.models import Task, Project, Label
 from .create import create_db
 
 
-class UnstructuredSQLiteStore(datastore.DataStore):
+class UnstructuredSQLiteStore:
     def __init__(self, path: Path):
         self.conn = sqlite3.connect(path)
 
