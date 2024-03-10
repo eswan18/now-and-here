@@ -43,8 +43,6 @@ class UnstructuredSQLiteStore:
         due_before: datetime | None = None,
     ) -> list[Task]:
         """Pull items from the tasks table."""
-        # Some very limited validation to avoid extremely easy sql injection.
-
         query = "SELECT json FROM tasks WHERE 1=1"
         params = []
         if not include_done:
@@ -53,6 +51,7 @@ class UnstructuredSQLiteStore:
             query += f" AND datetime(json ->> 'due') <= datetime(?)"
             params.append(due_before.isoformat())
         if sort_by:
+            # Some very limited validation to avoid extremely easy sql injection.
             if sort_by not in Task.sortable_columns():
                 raise ValueError(f"Cannot sort on column {sort_by}")
             asc = "DESC" if desc else "ASC"

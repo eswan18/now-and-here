@@ -236,3 +236,10 @@ class Task:
                 raise ValueError(f"Could not parse repeat interval '{repeat}'")
             values["repeat"] = parsed_repeat
         return Task(**values)
+
+    def clone(self) -> Task:
+        """Make a copy of this task."""
+        # Writing to/from json is kinda janky but we know it works robustly since that's
+        # how all tasks are stored on disk.
+        as_json = self.as_json()
+        return Task.from_json(as_json)
