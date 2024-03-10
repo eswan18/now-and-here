@@ -35,3 +35,7 @@ class RepeatInterval(Protocol):
     def try_parse(cls: type[Self], text: str) -> Self | None:
         """Try to parse a string into this repeat interval."""
         ...
+
+    def as_json(self) -> str:
+        """Serialize this repeat interval to JSON."""
+        ...

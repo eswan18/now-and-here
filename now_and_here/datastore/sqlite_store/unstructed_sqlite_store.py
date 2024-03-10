@@ -65,7 +65,7 @@ class UnstructuredSQLiteStore(datastore.DataStore):
                 cursor = conn.execute(query, params)
             else:
                 cursor = conn.execute(query)
-            tasks = [Task(**json.loads(data)) for (data,) in cursor.fetchall()]
+            tasks = [Task.from_json(data) for (data,) in cursor.fetchall()]
         return tasks
 
     def update_task(self, id: str, task: Task) -> None:

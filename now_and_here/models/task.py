@@ -1,9 +1,10 @@
 from __future__ import annotations
-from typing import Iterable, Annotated, Any
+import json
+from typing import Iterable
 from datetime import datetime
 
 import typer
-from pydantic import Field, RootModel
+from pydantic import Field, RootModel, field_serializer
 from pydantic.dataclasses import dataclass
 from pydantic.functional_validators import SkipValidation
 from rich.text import Text
@@ -19,7 +20,7 @@ from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
 from .project import Project
 from now_and_here.time import relative_time, parse_time, format_time
-from now_and_here.models.repeat_interval import RepeatInterval, try_parse
+from now_and_here.models.repeat_interval import RepeatInterval, try_parse, parse_json
 
 
 @dataclass
@@ -44,6 +45,7 @@ class Task:
         table.add_column("Priority", justify="right", width=8)
         table.add_column("Done", justify="center", width=4)
         table.add_column("Due", justify="right", max_width=24)
+        table.add_column("Repeat", justify="right", max_width=30)
         for task in tasks:
             table.add_row(*task._as_rich_table_row())
         return table
@@ -126,7 +128,7 @@ class Task:
                     )
             console.print("\nUpdated task:")
 
-    def _as_rich_table_row(self) -> tuple[str, Text, Text, str, Text]:
+    def _as_rich_table_row(self) -> tuple[str, Text, Text, str, Text, str]:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")
@@ -140,7 +142,8 @@ class Task:
             )
         else:
             due = Text("None", style="dim")
-        return format_id(self.id), desc, priority, done, due
+        repeat = str(self.repeat) if self.repeat is not None else ""
+        return format_id(self.id), desc, priority, done, due, repeat
 
     def as_card(self) -> Panel:
         if self.due:
@@ -216,3 +219,20 @@ class Task:
     @classmethod
     def sortable_columns(cls) -> tuple[str, ...]:
         return ("due", "priority")
+
+    @field_serializer("repeat")
+    def serialize(self, value: RepeatInterval | None) -> str | None:
+        if value is None:
+            return None
+        return value.as_json()
+
+    @classmethod
+    def from_json(cls, data: str) -> Task:
+        values = json.loads(data)
+        # We need a custom deserialization approach for the repeat field because it's a protocol
+        if repeat := values.get("repeat"):
+            parsed_repeat = parse_json(repeat)
+            if values["repeat"] is None:
+                raise ValueError(f"Could not parse repeat interval '{repeat}'")
+            values["repeat"] = parsed_repeat
+        return Task(**values)

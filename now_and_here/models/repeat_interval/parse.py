@@ -1,4 +1,4 @@
-from typing import Any
+import json
 
 from .repeat_interval import RepeatInterval
 from .daily_interval import DailyInterval
@@ -11,8 +11,9 @@ def try_parse(text: str) -> RepeatInterval | None:
     return None
 
 
-def parse_json(data: dict[str, Any]) -> RepeatInterval:
+def parse_json(text: str) -> RepeatInterval:
     """Parse a repeat interval from JSON data."""
+    data = json.loads(text)
     kind = data["kind"]
     match kind:
         case "DailyInterval":
