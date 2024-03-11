@@ -28,34 +28,43 @@ class WeeklyInterval:
 
     @classmethod
     def try_parse(cls, text: str) -> Self | None:
+        week_pattern = r"(?:week|\s*(?P<weeks>\d+) weeks?)"
+        on_pattern = r"(?P<weekdays>\w+(?:(?:,)\s(?:and\s+)?+\w+)*)"
+        at_pattern = r"(?P<hours>\d+)(?::(?P<minutes>\d+))?\s*(?P<ampm>am|pm)?"
+
         # Parse strings like: "every week", "every 3 weeks on Tuesday and Thursday",
         # "every 2 weeks at 3:00pm", "8:00 every 4 weeks on Monday, Sunday, and Thursday"
-        week_pattern = r"every (?:week|\s*(\d+) weeks?)"
-        on_pattern = r"on (\w+(?:(?:,)\s(?:and\s+)?+\w+)*)"
-        at_pattern = r"at (\d+)(?::(\d+))?\s*(am|pm)?"
-        pattern = f"{week_pattern}(?: {on_pattern})?(?: {at_pattern})?"
+        pattern = f"every {week_pattern}(?: on {on_pattern})?(?: at {at_pattern})?"
         match = re.match(pattern, text.lower())
         if match:
-            weeks = match.group(1)
-            weeks = int(weeks) if weeks is not None else 1
-            weekday_str: str | None = match.group(2)
-            if weekday_str is not None:
-                weekday_str = weekday_str.replace("and", "").replace(",", " ").strip()
-                weekday_names = [w.upper() for w in weekday_str.split(" ") if w != ""]
+            # Extract
+            weeks_match = match.group("weeks")
+            weekday_match: str | None = match.group("weekdays")
+            hours_match = match.group("hours")
+            minutes_match = match.group("minutes")
+            ampm_match = match.group("ampm")
+            # Parse
+            weeks = int(weeks_match) if weeks_match is not None else 1
+            if weekday_match is not None:
+                weekday_match = (
+                    weekday_match.replace("and", "").replace(",", " ").strip()
+                )
+                weekday_names = [w.upper() for w in weekday_match.split(" ") if w != ""]
                 weekdays = {Weekday[w.upper()] for w in weekday_names}
             else:
                 weekdays = None
             at = None
-            if match.group(3) is not None:
-                hour = int(match.group(3))
-                minute = int(match.group(4) or "0")
+            if hours_match is not None:
+                hour = int(hours_match)
+                minute = int(minutes_match or "0")
                 if hour == 12:
-                    if match.group(5) == "am":
+                    if ampm_match == "am":
                         hour = 0
-                elif 0 < hour < 12 and match.group(5) == "pm":
+                elif 0 < hour < 12 and ampm_match == "pm":
                     hour += 12
                 at = time(hour, minute)
             return cls(weeks=weeks, weekdays=weekdays, at=at)
+
         return None
 
     def as_json(self) -> str:
