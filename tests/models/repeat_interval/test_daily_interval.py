@@ -35,10 +35,13 @@ def test_try_parse_day_and_time_interval_valid(text: str, interval: DailyInterva
     [
         ("every 2 days at 3:00", DailyInterval(days=2, at=time(3, 0))),
         ("every 2 days at 3:00 am", DailyInterval(days=2, at=time(3, 0))),
+        ("every 2 days at 3:00am", DailyInterval(days=2, at=time(3, 0))),
         ("every 2 days at 3:00 pm", DailyInterval(days=2, at=time(15, 0))),
+        ("every 2 days at 3:00pm", DailyInterval(days=2, at=time(15, 0))),
         ("3:00 pm every 2 days", DailyInterval(days=2, at=time(15, 0))),
         ("every day at 12:00 pm", DailyInterval(days=1, at=time(12, 0))),
-        ("every day at 12:00 am", DailyInterval(days=1, at=time(0, 0))),
+        ("every day at 12:00pm", DailyInterval(days=1, at=time(12, 0))),
+        ("every day at 12:00am", DailyInterval(days=1, at=time(0, 0))),
         ("12:00 am every day", DailyInterval(days=1, at=time(0, 0))),
     ],
 )
