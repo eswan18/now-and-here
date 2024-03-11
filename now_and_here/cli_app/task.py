@@ -5,7 +5,7 @@ import typer
 from now_and_here.models.task import Task
 from .common import get_store
 from now_and_here.models.common import format_id
-from now_and_here.time import parse_time
+from now_and_here.time import parse_time, format_time
 from now_and_here.console import console
 
 
@@ -93,8 +93,16 @@ def checkoff(
         # Since we display IDs with dashes in them but don't actually store dashes, strip
         # them from input.
         id = raw_id.replace("-", "")
-        store.checkoff_task(id)
-        console.print(f"Task [cyan]{raw_id}[/cyan] marked as done")
+        was_updated, next_occurrence = store.checkoff_task(id)
+        if was_updated:
+            console.print(f"[green]Task [cyan]{raw_id}[/cyan] marked as done![/green]")
+            if next_occurrence:
+                nice_time = format_time(next_occurrence)
+                console.print(f"Next occurrence: [blue]{nice_time}[/blue]")
+        else:
+            console.print(
+                f"[red]Warning[/red]: Task [cyan]{raw_id}[/cyan] is already marked as done and was not updated"
+            )
 
 
 @task_app.command()
@@ -107,8 +115,13 @@ def uncheckoff(
         # Since we display IDs with dashes in them but don't actually store dashes, strip
         # them from input.
         id = raw_id.replace("-", "")
-        store.uncheckoff_task(id)
-        console.print(f"Task [cyan]{raw_id}[/cyan] unmarked as done")
+        was_updated = store.uncheckoff_task(id)
+        if was_updated:
+            console.print(f"[green]Task [cyan]{raw_id}[/cyan] unmarked as done[/green]")
+        else:
+            console.print(
+                f"[red]Warning[/red]: Task [cyan]{raw_id}[/cyan] is not marked as done and was not updated"
+            )
 
 
 @task_app.command()

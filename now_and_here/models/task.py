@@ -84,7 +84,7 @@ class Task:
 
     def update_from_prompt(self, console: Console) -> None:
         """Update the Task in-place from user input."""
-        valid_fields = ["name", "description", "priority", "due", "save", ""]
+        valid_fields = ["name", "description", "priority", "due", "save", "repeat", ""]
         while True:
             console.print(self)
             field_name = Prompt.ask(
@@ -120,6 +120,22 @@ class Task:
                         self.due = parse_time(due_str, warn_on_past=True)
                     else:
                         self.due = None
+                case "repeat":
+                    repeat_str = Prompt.ask(
+                        "New value for repeat \[blank for None]",
+                        console=console,
+                        default=None,
+                        show_default=True,
+                    )
+                    if repeat_str:
+                        self.repeat = try_parse(repeat_str)
+                        if self.repeat is None:
+                            console.print(
+                                f"Could not parse repeat interval '{repeat_str}'"
+                            )
+                            typer.Exit(1)
+                    else:
+                        self.repeat = None
                 case "save" | "":
                     return
                 case _:
@@ -212,6 +228,10 @@ class Task:
             yield Text(f"Due: {format_time(self.due)} ({relative_time(self.due)})")
         else:
             yield Text("Due: ") + Text("None", style="dim")
+        if self.repeat:
+            yield Text("Repeat: ") + Text(str(self.repeat))
+        else:
+            yield Text("Repeat: ") + Text("None", style="dim")
 
     def as_json(self) -> str:
         return RootModel[Task](self).model_dump_json()
@@ -238,8 +258,10 @@ class Task:
         return Task(**values)
 
     def clone(self) -> Task:
-        """Make a copy of this task."""
-        # Writing to/from json is kinda janky but we know it works robustly since that's
-        # how all tasks are stored on disk.
+        """Make a copy of this task with a new ID."""
+        # Writing to/from json is kinda janky, but we know it works robustly since
+        # that's how all tasks are stored on disk.
         as_json = self.as_json()
-        return Task.from_json(as_json)
+        new_task = Task.from_json(as_json)
+        new_task.id = random_id()
+        return new_task

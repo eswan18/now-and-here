@@ -1,15 +1,17 @@
 import sqlite3
-import json
 from pathlib import Path
 from datetime import datetime
+
+from rich.console import Console
 
 from now_and_here.models import Task, Project, Label
 from .create import create_db
 
 
 class UnstructuredSQLiteStore:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, console: Console):
         self.conn = sqlite3.connect(path)
+        self.console = console
 
     @classmethod
     def exists(cls, path: Path) -> bool:
@@ -31,8 +33,7 @@ class UnstructuredSQLiteStore:
             row = cursor.fetchone()
         if not row:
             raise ValueError(f"No task with id {id}")
-        data = json.loads(row[0])
-        task = Task(**data)
+        task = Task.from_json(row[0])
         return task
 
     def get_tasks(
@@ -69,15 +70,50 @@ class UnstructuredSQLiteStore:
         with self.conn as conn:
             conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
 
-    def checkoff_task(self, id: str) -> None:
-        task = self.get_task(id)
-        task.done = True
-        self.update_task(id, task)
+    def checkoff_task(self, id: str) -> tuple[bool, datetime | None]:
+        """
+        Mark a task as done.
 
-    def uncheckoff_task(self, id: str) -> None:
+        Returns True if the task was previously not done (False if not) along with the
+        next occurrence if this is a repeating task.
+        """
         task = self.get_task(id)
+        if task.done:
+            return False, None
+        if not task.repeat:
+            # If the task doesn't repeat, just mark it as done and return.
+            task.done = True
+            self.update_task(id, task)
+            return True, None
+        else:
+            # If the task repeats, we need to do a few things:
+            #    1. Mark the current task as done.
+            #    2. Create an identical task, due on the next occurrence.
+            #    3. Remove the repeat from the now-done task (the repeat lives on in the
+            #       new task.)
+            current_occurrence = task.due
+            if not current_occurrence:
+                raise ValueError("Repeating task has no current due date")
+            next_occurrence = task.repeat.next(current_occurrence)
+            new_task = task.clone()
+            new_task.due = next_occurrence
+
+            # Update current task
+            task.repeat = None
+            task.done = True
+            self.update_task(id, task)
+            # Save new task
+            self.save_task(new_task)
+            return True, new_task.due
+
+    def uncheckoff_task(self, id: str) -> bool:
+        """Mark a task as not done. Returns True if the task was previously done."""
+        task = self.get_task(id)
+        if not task.done:
+            return False
         task.done = False
         self.update_task(id, task)
+        return True
 
     def delete_task(self, id: str) -> bool:
         with self.conn as conn:
