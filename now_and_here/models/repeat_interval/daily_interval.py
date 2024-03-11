@@ -38,38 +38,30 @@ class DailyInterval:
 
     @classmethod
     def try_parse(cls, text: str) -> Self | None:
-        # Parse strings like "every day" or "every 3 days" or "every 2 days at 3:00 PM"
-        pattern = r"every (?:day|\s*(\d+) days?)(?: at (\d+)(?::(\d+))?\s*(am|pm)?)?"
-        match = re.match(pattern, text.lower())
-        if match:
-            days = match.group(1)
-            days = int(days) if days is not None else 1
-            at = None
-            if match.group(2) is not None:
-                hour = int(match.group(2))
-                minute = int(match.group(3) or "0")
-                if hour == 12:
-                    if match.group(4) == "am":
-                        hour = 0
-                elif 0 < hour < 12 and match.group(4) == "pm":
-                    hour += 12
-                at = time(hour, minute)
-            return cls(days=days, at=at)
-        # Parse strings like "3:00 every 4 days" or "3:00 pm every day"
-        pattern = r"(\d+):(\d+)\s*(am|pm)?\s*every (?:day|\s*(\d+) days?)"
-        match = re.match(pattern, text.lower())
-        if match:
-            hour = int(match.group(1))
-            minute = int(match.group(2))
-            days = match.group(4)
-            if hour == 12:
-                if match.group(3) == "am":
-                    hour = 0
-            elif 0 < hour < 12 and match.group(3) == "pm":
-                hour += 12
-            at = time(hour, minute)
-            days = int(days) if days else 1
-            return cls(days=days, at=at)
+        day_pattern = r"(?:day|\s*(?P<days>\d+) days?)"
+        at_pattern = r"(?P<hours>\d+)(?::(?P<minutes>\d+))?\s*(?P<ampm>am|pm)?"
+        patterns = [
+            # Strings like "every day" or "every 3 days" or "every 2 days at 3:00 PM"
+            f"every {day_pattern}(?: at {at_pattern})?",
+            # Strings like "3:00 every 4 days" or "3:00 pm every day"
+            f"{at_pattern}\\s*every {day_pattern}",
+        ]
+        for pattern in patterns:
+            match = re.match(pattern, text.lower())
+            if match:
+                days_match = match.group("days")
+                days = int(days_match) if days_match is not None else 1
+                at = None
+                if match.group("hours") is not None:
+                    hour = int(match.group("hours"))
+                    minute = int(match.group("minutes") or "0")
+                    if hour == 12:
+                        if match.group("ampm") == "am":
+                            hour = 0
+                    elif 0 < hour < 12 and match.group("ampm") == "pm":
+                        hour += 12
+                    at = time(hour, minute)
+                return cls(days=days, at=at)
         return None
 
     def as_json(self) -> str:
