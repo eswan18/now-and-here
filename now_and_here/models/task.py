@@ -41,9 +41,9 @@ class Task:
     def as_rich_table(cls, tasks: Iterable[Task]) -> Table:
         table = Table(title="Tasks", leading=1)
         table.add_column("ID", justify="left", style="cyan", width=ID_LENGTH + 1)
+        table.add_column("Done", justify="center", width=4)
         table.add_column("Task", style="magenta", max_width=100)
         table.add_column("Priority", justify="right", width=8)
-        table.add_column("Done", justify="center", width=4)
         table.add_column("Due", justify="right", max_width=24)
         table.add_column("Repeat", justify="right", max_width=30)
         for task in tasks:
@@ -144,7 +144,7 @@ class Task:
                     )
             console.print("\nUpdated task:")
 
-    def _as_rich_table_row(self) -> tuple[str, Text, Text, str, Text, str]:
+    def _as_rich_table_row(self) -> tuple[str, str, Text, Text, Text, str]:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")
@@ -159,7 +159,7 @@ class Task:
         else:
             due = Text("None", style="dim")
         repeat = str(self.repeat) if self.repeat is not None else ""
-        return format_id(self.id), desc, priority, done, due, repeat
+        return format_id(self.id), done, desc, priority, due, repeat
 
     def as_card(self) -> Panel:
         if self.due:
