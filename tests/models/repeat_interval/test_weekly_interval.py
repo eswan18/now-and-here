@@ -41,12 +41,12 @@ def test_try_parse_day_and_time_interval_valid(text: str, interval: WeeklyInterv
         ("every 2 weeks at 3:00 am", WeeklyInterval(weeks=2, at=time(3, 0))),
         ("every 2 weeks at 3:00am", WeeklyInterval(weeks=2, at=time(3, 0))),
         ("every 2 weeks at 3:00 pm", WeeklyInterval(weeks=2, at=time(15, 0))),
-        ("every 2 weeks at 3:00pm", WeeklyInterval(weeks=2, at=time(15, 0))),
-        # ("3:00 pm every 2 days", WeeklyInterval(weeks=2, at=time(15, 0))),
+        ("every 2 weeks at 3:15", WeeklyInterval(weeks=2, at=time(3, 15))),
+        ("3:15 pm every 2 weeks", WeeklyInterval(weeks=2, at=time(15, 15))),
         ("every week at 12:00 pm", WeeklyInterval(weeks=1, at=time(12, 0))),
         ("every week at 12:00pm", WeeklyInterval(weeks=1, at=time(12, 0))),
         ("every week at 12:00am", WeeklyInterval(weeks=1, at=time(0, 0))),
-        # ("12:00 am every day", WeeklyInterval(weeks=1, at=time(0, 0))),
+        ("12:00 am every week", WeeklyInterval(weeks=1, at=time(0, 0))),
     ],
 )
 def test_try_parse_am_pm_valid(text: str, interval: WeeklyInterval):
@@ -60,10 +60,47 @@ def test_try_parse_am_pm_valid(text: str, interval: WeeklyInterval):
             "every week on Saturday",
             WeeklyInterval(weeks=1, weekdays={Weekday.SATURDAY}),
         ),
+        ("every Saturday", WeeklyInterval(weeks=1, weekdays={Weekday.SATURDAY})),
+        (
+            "Monday, Sunday, and Thursday every 2 weeks",
+            WeeklyInterval(
+                weeks=2, weekdays={Weekday.MONDAY, Weekday.SUNDAY, Weekday.THURSDAY}
+            ),
+        ),
         (
             "every 2 weeks on Monday, Sunday, and Thursday",
             WeeklyInterval(
                 weeks=2, weekdays={Weekday.MONDAY, Weekday.SUNDAY, Weekday.THURSDAY}
+            ),
+        ),
+        (
+            "every 3 weeks on Tuesday and Wednesday at 3pm",
+            WeeklyInterval(
+                weeks=3, weekdays={Weekday.TUESDAY, Weekday.WEDNESDAY}, at=time(15, 0)
+            ),
+        ),
+        (
+            "3pm every 3 weeks on Tuesday and Wednesday",
+            WeeklyInterval(
+                weeks=3, weekdays={Weekday.TUESDAY, Weekday.WEDNESDAY}, at=time(15, 0)
+            ),
+        ),
+        (
+            "Saturday and Wednesday every 3 weeks",
+            WeeklyInterval(weeks=3, weekdays={Weekday.SATURDAY, Weekday.WEDNESDAY}),
+        ),
+        (
+            "Saturday and Sunday at 7am",
+            WeeklyInterval(
+                weeks=1, weekdays={Weekday.SATURDAY, Weekday.SUNDAY}, at=time(7, 0)
+            ),
+        ),
+        (
+            "Saturday and Sunday and Monday at 2:30pm every 3 weeks",
+            WeeklyInterval(
+                weeks=3,
+                weekdays={Weekday.SATURDAY, Weekday.SUNDAY, Weekday.MONDAY},
+                at=time(14, 30),
             ),
         ),
     ],
