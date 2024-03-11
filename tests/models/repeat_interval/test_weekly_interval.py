@@ -1,6 +1,3 @@
-# Parse strings like: "every week", "every 3 weeks on Tuesday and Thursday",
-# "every 2 weeks at 3:00pm", "8:00 every 4 weeks on Monday, Sunday, and Thursday"
-
 from datetime import time
 
 import pytest
@@ -25,9 +22,9 @@ def test_try_parse_just_week_interval_valid(text: str, interval: WeeklyInterval)
     "text,interval",
     [
         ("every week at 3:00", WeeklyInterval(weeks=1, at=time(3, 0))),
-        # ("3:00 every 4 weeks", WeeklyInterval(weeks=4, at=time(3, 0))),
+        ("3:00 every 4 weeks", WeeklyInterval(weeks=4, at=time(3, 0))),
         ("every 2 weeks at 15:00", WeeklyInterval(weeks=2, at=time(15, 0))),
-        # ("15:00 every 2 weeks", WeeklyInterval(weeks=2, at=time(15, 0))),
+        ("15:00 every 2 weeks", WeeklyInterval(weeks=2, at=time(15, 0))),
     ],
 )
 def test_try_parse_day_and_time_interval_valid(text: str, interval: WeeklyInterval):

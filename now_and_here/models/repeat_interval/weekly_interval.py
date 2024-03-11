@@ -4,7 +4,7 @@ from typing import Self, Any
 from enum import Enum
 import re
 
-from pydantic.dataclasses import dataclass, Field
+from pydantic.dataclasses import dataclass
 
 
 class Weekday(Enum):
@@ -16,6 +16,9 @@ class Weekday(Enum):
     FRIDAY = 5
     SATURDAY = 6
 
+    def __str__(self) -> str:
+        return self.name.title()
+
 
 @dataclass
 class WeeklyInterval:
@@ -25,6 +28,12 @@ class WeeklyInterval:
     # Unfortunately we have to override match_args so that this class conforms to the
     # RepeatInterval protocol.
     __match_args__ = ()
+
+    def next(self, current: datetime) -> datetime:
+        raise NotImplementedError
+
+    def previous(self, current: datetime) -> datetime:
+        raise NotImplementedError
 
     @classmethod
     def try_parse(cls, text: str) -> Self | None:
@@ -102,7 +111,7 @@ class WeeklyInterval:
     def __str__(self) -> str:
         s = f"every {self.weeks} weeks"
         if self.weekdays:
-            s += " on " + ", ".join(weekday.name for weekday in self.weekdays)
+            s += " on " + ", ".join(str(w) for w in self.weekdays)
         if self.at:
-            s += f" at {self.at.strftime('%I:%M %p')}"
+            s += f" at {self.at.strftime('%H:%M')}"
         return s

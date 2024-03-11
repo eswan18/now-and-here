@@ -73,7 +73,7 @@ class DailyInterval:
         return json.dumps(data)
 
     def __str__(self) -> str:
-        if self.at is None:
-            return f"every {self.days} days"
-        else:
-            return f"every {self.days} days at {self.at.strftime('%I:%M %p')}"
+        s = f"every {self.days} days"
+        if self.at is not None:
+            s += f" at {self.at.strftime('%H:%M')}"
+        return s
