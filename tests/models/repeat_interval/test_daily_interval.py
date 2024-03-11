@@ -13,7 +13,7 @@ from now_and_here.models.repeat_interval import DailyInterval
         ("every 3 days", DailyInterval(days=3, at=None)),
     ],
 )
-def test_try_parse_just_day_interval(text: str, interval: DailyInterval):
+def test_try_parse_just_day_interval_valid(text: str, interval: DailyInterval):
     assert DailyInterval.try_parse(text) == interval
 
 
