@@ -1,23 +1,29 @@
+from __future__ import annotations
+import functools
 import json
 from datetime import datetime, time, timedelta
-from typing import Self, Any
+from typing import Self
 from enum import Enum
 import re
 
 from pydantic.dataclasses import dataclass
 
 
+@functools.total_ordering
 class Weekday(Enum):
-    SUNDAY = 0
-    MONDAY = 1
-    TUESDAY = 2
-    WEDNESDAY = 3
-    THURSDAY = 4
-    FRIDAY = 5
-    SATURDAY = 6
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
 
     def __str__(self) -> str:
         return self.name.title()
+
+    def __lt__(self, other: Weekday) -> bool:
+        return self.value < other.value
 
 
 @dataclass
@@ -30,7 +36,30 @@ class WeeklyInterval:
     __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
-        raise NotImplementedError
+        at = self.at
+        if at is None:
+            at = current.time()
+        current_weekday = Weekday(current.weekday())
+        if self.weekdays is not None:
+            weekdays = sorted(list(self.weekdays))
+        else:
+            # Get the day of the week that the current date is on
+            weekdays = [current_weekday]
+        if current_weekday not in weekdays:
+            raise ValueError(
+                f"The current day of the week ({current.weekday()}) is not in the list "
+                f"of repeating weekdays ({weekdays})"
+            )
+        # If we're on the last repeating day of the week, we need to skip to the "next"
+        # valid week before searching for the next included weekday. If we repeat every
+        # week, that means doing nothing. If we repeat on a longer interval than that,
+        # we need to skip over some weeks.
+        if current_weekday >= weekdays[-1] and self.weeks > 1:
+            current = current + timedelta(weeks=self.weeks - 1)
+        while True:
+            current = current + timedelta(days=1)
+            if Weekday(current.weekday()) in weekdays:
+                return current
 
     def previous(self, current: datetime) -> datetime:
         raise NotImplementedError

@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import datetime, time
 
 import pytest
 
@@ -104,3 +104,57 @@ def test_try_parse_am_pm_valid(text: str, interval: WeeklyInterval):
 )
 def test_try_parse_weekdays_valid(text: str, interval: WeeklyInterval):
     assert WeeklyInterval.try_parse(text) == interval
+
+
+@pytest.mark.parametrize(
+    "interval,next",
+    [
+        (WeeklyInterval(weeks=1), datetime(2024, 1, 8, 15, 15)),
+        (WeeklyInterval(weeks=2), datetime(2024, 1, 15, 15, 15)),
+        (WeeklyInterval(weeks=3), datetime(2024, 1, 22, 15, 15)),
+        (WeeklyInterval(weeks=4), datetime(2024, 1, 29, 15, 15)),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 8, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=2, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 15, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=3, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 22, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=4, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 29, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.TUESDAY}),
+            datetime(2024, 1, 2, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.WEDNESDAY}),
+            datetime(2024, 1, 3, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.THURSDAY}),
+            datetime(2024, 1, 4, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.FRIDAY}),
+            datetime(2024, 1, 5, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.SATURDAY}),
+            datetime(2024, 1, 6, 15, 15),
+        ),
+        (
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.SUNDAY}),
+            datetime(2024, 1, 7, 15, 15),
+        ),
+    ],
+)
+def test_next(interval, next):
+    current = datetime(2024, 1, 1, 15, 15)
+    assert interval.next(current) == next
