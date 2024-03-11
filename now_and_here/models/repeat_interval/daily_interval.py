@@ -55,6 +55,21 @@ class DailyInterval:
                     hour += 12
                 at = time(hour, minute)
             return cls(days=days, at=at)
+        # Parse strings like "3:00 every 4 days" or "3:00 pm every day"
+        pattern = r"(\d+):(\d+)\s*(am|pm)?\s*every (?:day|\s*(\d+) days?)"
+        match = re.match(pattern, text.lower())
+        if match:
+            hour = int(match.group(1))
+            minute = int(match.group(2))
+            days = match.group(4)
+            if hour == 12:
+                if match.group(3) == "am":
+                    hour = 0
+            elif 0 < hour < 12 and match.group(3) == "pm":
+                hour += 12
+            at = time(hour, minute)
+            days = int(days) if days else 1
+            return cls(days=days, at=at)
         return None
 
     def as_json(self) -> str:
