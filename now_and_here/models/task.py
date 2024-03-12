@@ -3,7 +3,6 @@ import json
 from typing import Iterable, Self
 from datetime import datetime
 
-import typer
 from pydantic import Field, RootModel, field_serializer
 from pydantic.dataclasses import dataclass
 from pydantic.functional_validators import SkipValidation
@@ -11,7 +10,6 @@ from rich.text import Text
 from rich.table import Table
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.rule import Rule
-from rich.prompt import Prompt, IntPrompt
 from rich.panel import Panel
 from rich.layout import Layout
 from rich.padding import Padding
@@ -19,8 +17,8 @@ from rich.padding import Padding
 from .common import ID_LENGTH, random_id, format_id, format_priority
 from .label import Label
 from .project import Project
-from now_and_here.time import relative_time, parse_time, format_time
-from now_and_here.models.repeat_interval import RepeatInterval, try_parse, parse_json
+from now_and_here.time import relative_time, format_time
+from now_and_here.models.repeat_interval import RepeatInterval, parse_json
 
 
 @dataclass
@@ -50,68 +48,6 @@ class Task:
         for task in tasks:
             table.add_row(*task._as_rich_table_row())
         return table
-
-    def update_from_prompt(self, console: Console) -> None:
-        """Update the Task in-place from user input."""
-        valid_fields = ["name", "description", "priority", "due", "save", "repeat", ""]
-        while True:
-            console.print(self)
-            field_name = Prompt.ask(
-                "Update which field? \[or 'save' to confirm changes]",
-                console=console,
-                choices=valid_fields,
-            )
-            match field_name:
-                case "name":
-                    self.name = Prompt.ask("New value for name", console=console)
-                case "description":
-                    self.description = Prompt.ask(
-                        "New value for description",
-                        console=console,
-                        default=None,
-                        show_default=True,
-                    )
-                case "priority":
-                    self.priority = IntPrompt.ask(
-                        "New value for priority",
-                        choices=list("0123"),
-                        default=0,
-                        console=console,
-                    )
-                case "due":
-                    due_str = Prompt.ask(
-                        "New value for due \[blank for None]",
-                        console=console,
-                        default=None,
-                        show_default=True,
-                    )
-                    if due_str:
-                        self.due = parse_time(due_str, warn_on_past=True)
-                    else:
-                        self.due = None
-                case "repeat":
-                    repeat_str = Prompt.ask(
-                        "New value for repeat \[blank for None]",
-                        console=console,
-                        default=None,
-                        show_default=True,
-                    )
-                    if repeat_str:
-                        self.repeat = try_parse(repeat_str)
-                        if self.repeat is None:
-                            console.print(
-                                f"Could not parse repeat interval '{repeat_str}'"
-                            )
-                            typer.Exit(1)
-                    else:
-                        self.repeat = None
-                case "save" | "":
-                    return
-                case _:
-                    raise ValueError(
-                        f"Field name {field_name} must be one of {valid_fields}"
-                    )
-            console.print("\nUpdated task:")
 
     def _as_rich_table_row(self) -> tuple[str, str, Text, Text, Text, str, Text | None]:
         desc = Text(self.name)

@@ -145,7 +145,63 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
         except RecordNotFoundError:
             console.print(f"[red]Error:[/red] Task [cyan]{id}[/cyan] not found")
             raise typer.Exit(1)
-    task.update_from_prompt(console)
+    valid_fields = ["name", "description", "priority", "due", "save", "repeat", ""]
+    while True:
+        console.print(task)
+        field_name = Prompt.ask(
+            "Update which field? \[or 'save' to confirm changes]",
+            console=console,
+            choices=valid_fields,
+        )
+        match field_name:
+            case "name":
+                task.name = Prompt.ask("New value for name", console=console)
+            case "description":
+                task.description = Prompt.ask(
+                    "New value for description",
+                    console=console,
+                    default=None,
+                    show_default=True,
+                )
+            case "priority":
+                task.priority = IntPrompt.ask(
+                    "New value for priority",
+                    choices=list("0123"),
+                    default=0,
+                    console=console,
+                )
+            case "due":
+                due_str = Prompt.ask(
+                    "New value for due \[blank for None]",
+                    console=console,
+                    default=None,
+                    show_default=True,
+                )
+                if due_str:
+                    task.due = parse_time(due_str, warn_on_past=True)
+                else:
+                    task.due = None
+            case "repeat":
+                repeat_str = Prompt.ask(
+                    "New value for repeat \[blank for None]",
+                    console=console,
+                    default=None,
+                    show_default=True,
+                )
+                if repeat_str:
+                    task.repeat = try_parse(repeat_str)
+                    if task.repeat is None:
+                        console.print(f"Could not parse repeat interval '{repeat_str}'")
+                        typer.Exit(1)
+                else:
+                    task.repeat = None
+            case "save" | "":
+                break
+            case _:
+                raise ValueError(
+                    f"Field name {field_name} must be one of {valid_fields}"
+                )
+        console.print("\nUpdated task:")
     store.update_task(id, task)
     console.print(f"[green]Task [cyan]{id}[/cyan] updated![/green]")
 

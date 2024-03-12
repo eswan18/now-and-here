@@ -84,3 +84,12 @@ class Project:
     def serialize_parent(self, value: Project | None) -> str | None:
         # Save the parent project just by its ID.
         return value.id if value is not None else None
+
+    def clone(self) -> Self:
+        """Make a copy of this project with a new ID."""
+        # Writing to/from json is kinda janky, but we know it works robustly since
+        # that's how all projects are stored on disk.
+        as_json = self.as_json()
+        new_project = self.__class__.from_json(as_json)
+        new_project.id = random_id()
+        return new_project
