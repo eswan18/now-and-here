@@ -1,10 +1,12 @@
 import sqlite3
 from pathlib import Path
 from datetime import datetime
+import json
 
 from rich.console import Console
 
 from now_and_here.models import Task, Project, Label
+from now_and_here.datastore.errors import RecordNotFoundError, InvalidSortError
 from .create import create_db
 
 
@@ -28,41 +30,77 @@ class UnstructuredSQLiteStore:
         return task.id
 
     def get_task(self, id: str) -> Task:
+        query = """
+            SELECT json_set(
+                json_set(t.json, '$.project', json(p.json)),
+                '$.label',
+                json(l.json)
+            )
+            FROM tasks t
+            LEFT JOIN projects p
+                ON t.json ->> 'project' = p.id
+            LEFT JOIN labels l
+                ON t.json ->> 'label' = l.id 
+            WHERE t.id = (?)
+            LIMIT 1
+        """
         with self.conn as conn:
-            cursor = conn.execute("SELECT json FROM tasks WHERE id = (?)", (id,))
+            cursor = conn.execute(query, (id,))
             row = cursor.fetchone()
         if not row:
-            raise ValueError(f"No task with id {id}")
+            raise RecordNotFoundError(f"No task with id {id}")
         task = Task.from_json(row[0])
         return task
 
     def get_tasks(
         self,
+        project_name: str | None = None,
+        project_id: str | None = None,
         sort_by: str | None = None,
         desc: bool = False,
         include_done: bool = False,
         due_before: datetime | None = None,
     ) -> list[Task]:
         """Pull items from the tasks table."""
-        query = "SELECT json FROM tasks WHERE 1=1"
+        query = """
+            SELECT json_set(
+                json_set(t.json, '$.project', json(p.json)),
+                '$.label',
+                json(l.json)
+            )
+            FROM tasks t
+            LEFT JOIN projects p
+                ON t.json ->> 'project' = p.id
+            LEFT JOIN labels l
+                ON t.json ->> 'label' = l.id
+            WHERE 1=1
+        """
         params = []
         if not include_done:
-            query += " AND json ->> 'done' = FALSE"
+            query += " AND t.json ->> 'done' = FALSE"
         if due_before:
-            query += f" AND datetime(json ->> 'due') <= datetime(?)"
+            query += f" AND datetime(t.json ->> 'due') <= datetime(?)"
             params.append(due_before.isoformat())
+        if project_name:
+            # Case-insensitive search
+            project_name = project_name.lower()
+            query += " AND lower(p.json ->> 'name') = (?)"
+            params.append(project_name)
+        if project_id:
+            query += " AND p.id = (?)"
+            params.append(project_id)
         if sort_by:
             # Some very limited validation to avoid extremely easy sql injection.
             if sort_by not in Task.sortable_columns():
-                raise ValueError(f"Cannot sort on column {sort_by}")
+                raise InvalidSortError(f"Cannot sort on column {sort_by}")
             asc = "DESC" if desc else "ASC"
-            query += f" ORDER BY json ->> '{sort_by}' {asc} NULLS LAST"
+            query += f" ORDER BY t.json ->> '{sort_by}' {asc} NULLS LAST"
         with self.conn as conn:
             if params:
                 cursor = conn.execute(query, params)
             else:
                 cursor = conn.execute(query)
-            tasks = [Task.from_json(data) for (data,) in cursor.fetchall()]
+            tasks = [Task.from_json(task) for (task,) in cursor.fetchall()]
         return tasks
 
     def update_task(self, id: str, task: Task) -> None:
@@ -121,10 +159,47 @@ class UnstructuredSQLiteStore:
         return result.rowcount > 0
 
     def save_project(self, project: Project) -> str:
-        raise NotImplementedError
+        data = project.as_json()
+        with self.conn as conn:
+            conn.execute(
+                "INSERT INTO projects (id, json) VALUES (?, ?)", (project.id, data)
+            )
+        return project.id
 
     def get_project(self, id: str) -> Project:
-        raise NotImplementedError
+        query = "SELECT json FROM projects WHERE id = ?"
+        with self.conn as conn:
+            cursor = conn.execute(query, (id,))
+            row = cursor.fetchone()
+        if not row:
+            raise RecordNotFoundError(f"No project with id {id}")
+        return Project.from_json(row[0])
+
+    def get_project_by_name(self, name: str) -> Project:
+        query = "SELECT json FROM projects WHERE json ->> 'name' = ?"
+        with self.conn as conn:
+            cursor = conn.execute(query, (name,))
+            row = cursor.fetchone()
+        if not row:
+            raise RecordNotFoundError(f"No project with name {name}")
+        return Project.from_json(row[0])
+
+    def get_projects(
+        self,
+        sort_by: str | None = "name",
+        desc: bool = False,
+    ) -> list[Project]:
+        query = "SELECT json FROM projects WHERE 1=1"
+        if sort_by:
+            # Some very limited validation to avoid extremely easy sql injection.
+            if sort_by not in Project.sortable_columns():
+                raise InvalidSortError(f"Cannot sort on column {sort_by}")
+            asc = "DESC" if desc else "ASC"
+            query += f" ORDER BY json ->> '{sort_by}' {asc} NULLS LAST"
+        with self.conn as conn:
+            cursor = conn.execute(query)
+            projects = [Project.from_json(data) for (data,) in cursor.fetchall()]
+        return projects
 
     def update_project(self, id: str, project: Project) -> None:
         raise NotImplementedError

@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta
 
 import typer
+from rich.prompt import Prompt, IntPrompt
 
-from now_and_here.models.task import Task
 from .common import get_store
+from now_and_here.datastore.errors import RecordNotFoundError
+from now_and_here.models.task import Task
 from now_and_here.models.common import format_id
+from now_and_here.models.repeat_interval import try_parse
 from now_and_here.time import parse_time, format_time
 from now_and_here.console import console
 
@@ -18,6 +21,17 @@ task_app = typer.Typer(
 # We have to name this "list_" to avoid clobbering Python's built-in list function.
 @task_app.command(name="list")
 def list_(
+    project_name: str = typer.Option(
+        None,
+        "--project-name",
+        "-p",
+        help="Only show tasks in a specific project, by name.",
+    ),
+    project_id: str = typer.Option(
+        None,
+        "--project-id",
+        help="Only show tasks in a specific project, by id.",
+    ),
     sort: str = typer.Option("due", "--sort", help="Sort by a column."),
     desc: bool = typer.Option(False, "--desc", help="Sort in descending order."),
     include_done: bool = typer.Option(
@@ -27,9 +41,17 @@ def list_(
         False, "--id-only", help="Only show task IDs, not full details."
     ),
 ):
+    if project_id is not None:
+        project_id = project_id.replace("-", "")
     """List all tasks."""
     store = get_store()
-    tasks = store.get_tasks(sort_by=sort, desc=desc, include_done=include_done)
+    tasks = store.get_tasks(
+        sort_by=sort,
+        desc=desc,
+        project_name=project_name,
+        project_id=project_id,
+        include_done=include_done,
+    )
     if id_only:
         console.print("\n".join(format_id(task.id) for task in tasks))
     else:
@@ -43,9 +65,50 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
         raise typer.BadParameter(
             "Only interactive mode is supported for task creation."
         )
-    task = Task.from_prompt(console)
+    store = get_store()
+    name = Prompt.ask("Task name", console=console)
+    task = Task(name=name)  # type: ignore [call-arg]
+    task.description = Prompt.ask(
+        "Description", console=console, default=None, show_default=True
+    )
+    priority = IntPrompt.ask(
+        "Priority", choices=list("0123"), default=0, console=console
+    )
+    task.priority = priority
+    due = Prompt.ask(
+        "Due date \[blank for None]",
+        console=console,
+        default=None,
+        show_default=True,
+    )
+    if due:
+        task.due = parse_time(due, warn_on_past=True)
+    repeat = Prompt.ask(
+        "Repeat interval \[blank for None]",
+        console=console,
+        default=None,
+        show_default=True,
+    )
+    if repeat:
+        task.repeat = try_parse(repeat)
+        if task.repeat is None:
+            console.print(f"Could not parse repeat interval '{repeat}'")
+            raise typer.Exit(1)
+    in_project = Prompt.ask(
+        "Is this task part of a project? \\[y/N]",
+        console=console,
+        default=False,
+        show_default=True,
+    )
+    if in_project:
+        projects = {project.name: project for project in store.get_projects()}
+        project_name = Prompt.ask(
+            "Project:",
+            choices=list(projects.keys()),
+            console=console,
+        )
+        task.project = projects[project_name]
     with console.status("Saving..."):
-        store = get_store()
         store.save_task(task)
     console.print("[green]Task saved![/green]")
     console.print(f"ID: [cyan]{format_id(task.id)}[/cyan]")
@@ -77,16 +140,18 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
         )
     with console.status("Fetching task..."):
         store = get_store()
-        task = store.get_task(id)
+        try:
+            task = store.get_task(id)
+        except RecordNotFoundError:
+            console.print(f"[red]Error:[/red] Task [cyan]{id}[/cyan] not found")
+            raise typer.Exit(1)
     task.update_from_prompt(console)
     store.update_task(id, task)
     console.print(f"[green]Task [cyan]{id}[/cyan] updated![/green]")
 
 
 @task_app.command()
-def checkoff(
-    ids: list[str],
-):
+def checkoff(ids: list[str]):
     """Mark a task as done or not done."""
     store = get_store()
     for raw_id in ids:

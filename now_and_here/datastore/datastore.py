@@ -1,7 +1,9 @@
+from __future__ import annotations
 from datetime import datetime
-from typing import Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable, TYPE_CHECKING
 
-from now_and_here.models import Task, Project, Label
+if TYPE_CHECKING:
+    from now_and_here.models import Task, Project, Label
 
 
 @runtime_checkable
@@ -12,7 +14,9 @@ class DataStore(Protocol):
 
     def get_tasks(
         self,
-        sort_by: str | None = "due",
+        project_name: str | None = None,
+        project_id: str | None = None,
+        sort_by: str | None = None,
         desc: bool = False,
         include_done: bool = False,
         due_before: datetime | None = None,
@@ -38,6 +42,14 @@ class DataStore(Protocol):
     def save_project(self, project: Project) -> str: ...
 
     def get_project(self, id: str) -> Project: ...
+
+    def get_project_by_name(self, project_name: str) -> Project: ...
+
+    def get_projects(
+        self,
+        sort_by: str | None = "name",
+        desc: bool = False,
+    ) -> list[Project]: ...
 
     def update_project(self, id: str, project: Project) -> None: ...
 

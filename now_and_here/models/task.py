@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json
-from typing import Iterable
+from typing import Iterable, Self
 from datetime import datetime
 
 import typer
@@ -38,7 +38,7 @@ class Task:
     repeat: SkipValidation[RepeatInterval | None] = Field(None)  # type: ignore [misc]
 
     @classmethod
-    def as_rich_table(cls, tasks: Iterable[Task]) -> Table:
+    def as_rich_table(cls, tasks: Iterable[Self]) -> Table:
         table = Table(title="Tasks", leading=1)
         table.add_column("ID", justify="left", style="cyan", width=ID_LENGTH + 1)
         table.add_column("Done", justify="center", width=4)
@@ -46,41 +46,10 @@ class Task:
         table.add_column("Priority", justify="right", width=8)
         table.add_column("Due", justify="right", max_width=24)
         table.add_column("Repeat", justify="right", max_width=30)
+        table.add_column("Project", justify="right", max_width=30)
         for task in tasks:
             table.add_row(*task._as_rich_table_row())
         return table
-
-    @classmethod
-    def from_prompt(cls, console: Console) -> Task:
-        name = Prompt.ask("Task name", console=console)
-        task = Task(name=name)  # type: ignore [call-arg]
-        task.description = Prompt.ask(
-            "Description", console=console, default=None, show_default=True
-        )
-        priority = IntPrompt.ask(
-            "Priority", choices=list("0123"), default=0, console=console
-        )
-        task.priority = priority
-        due = Prompt.ask(
-            "Due date \[blank for None]",
-            console=console,
-            default=None,
-            show_default=True,
-        )
-        if due:
-            task.due = parse_time(due, warn_on_past=True)
-        repeat = Prompt.ask(
-            "Repeat interval \[blank for None]",
-            console=console,
-            default=None,
-            show_default=True,
-        )
-        if repeat:
-            task.repeat = try_parse(repeat)
-            if task.repeat is None:
-                console.print(f"Could not parse repeat interval '{repeat}'")
-                typer.Exit(1)
-        return task
 
     def update_from_prompt(self, console: Console) -> None:
         """Update the Task in-place from user input."""
@@ -144,7 +113,7 @@ class Task:
                     )
             console.print("\nUpdated task:")
 
-    def _as_rich_table_row(self) -> tuple[str, str, Text, Text, Text, str]:
+    def _as_rich_table_row(self) -> tuple[str, str, Text, Text, Text, str, Text | None]:
         desc = Text(self.name)
         if self.description:
             desc += Text(f"\n{self.description}", style="italic dim")
@@ -159,7 +128,12 @@ class Task:
         else:
             due = Text("None", style="dim")
         repeat = str(self.repeat) if self.repeat is not None else ""
-        return format_id(self.id), done, desc, priority, due, repeat
+        project: Text | None = None
+        if self.project:
+            project = Text(self.project.name + "\n") + Text(
+                f"({format_id(self.project.id)})", style="cyan"
+            )
+        return format_id(self.id), done, desc, priority, due, repeat, project
 
     def as_card(self) -> Panel:
         if self.due:
@@ -241,27 +215,34 @@ class Task:
         return ("due", "priority")
 
     @field_serializer("repeat")
-    def serialize(self, value: RepeatInterval | None) -> str | None:
+    def serialize_repeat(self, value: RepeatInterval | None) -> str | None:
         if value is None:
             return None
         return value.as_json()
 
+    @field_serializer("project")
+    def serialize_project(self, value: Project | None) -> str | None:
+        # Save the project just by its ID.
+        return value.id if value is not None else None
+
     @classmethod
-    def from_json(cls, data: str) -> Task:
+    def from_json(cls, data: str) -> Self:
+        """Build a Task instance from a JSON string."""
         values = json.loads(data)
-        # We need a custom deserialization approach for the repeat field because it's a protocol
+        # We need a custom deserialization approach for the repeat field because it's a
+        # protocol.
         if repeat := values.get("repeat"):
             parsed_repeat = parse_json(repeat)
             if values["repeat"] is None:
                 raise ValueError(f"Could not parse repeat interval '{repeat}'")
             values["repeat"] = parsed_repeat
-        return Task(**values)
+        return cls(**values)
 
-    def clone(self) -> Task:
+    def clone(self) -> Self:
         """Make a copy of this task with a new ID."""
         # Writing to/from json is kinda janky, but we know it works robustly since
         # that's how all tasks are stored on disk.
         as_json = self.as_json()
-        new_task = Task.from_json(as_json)
+        new_task = self.__class__.from_json(as_json)
         new_task.id = random_id()
         return new_task
