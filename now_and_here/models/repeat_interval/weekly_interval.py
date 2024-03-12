@@ -1,12 +1,13 @@
 from __future__ import annotations
 import functools
 import json
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 from typing import Self
 from enum import Enum
 import re
 
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, Field
+from dateutil.relativedelta import relativedelta
 
 
 @functools.total_ordering
@@ -26,19 +27,20 @@ class Weekday(Enum):
         return self.value < other.value
 
 
+DEFAULT_TIME = time(9, 0)
+DEFAULT_WEEKDAY = Weekday.MONDAY
+
+
 @dataclass
 class WeeklyInterval:
     weeks: int = 1
-    weekdays: set[Weekday] | None = None
-    at: time | None = None
+    weekdays: set[Weekday] = Field(default_factory=lambda: {DEFAULT_WEEKDAY})
+    at: time = DEFAULT_TIME
     # Unfortunately we have to override match_args so that this class conforms to the
     # RepeatInterval protocol.
     __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
-        at = self.at
-        if at is None:
-            at = current.time()
         current_weekday = Weekday(current.weekday())
         if self.weekdays is not None:
             weekdays = sorted(list(self.weekdays))
@@ -55,9 +57,9 @@ class WeeklyInterval:
         # week, that means doing nothing. If we repeat on a longer interval than that,
         # we need to skip over some weeks.
         if current_weekday >= weekdays[-1] and self.weeks > 1:
-            current = current + timedelta(weeks=self.weeks - 1)
+            current = current + relativedelta(weeks=self.weeks - 1)
         while True:
-            current = current + timedelta(days=1)
+            current = current + relativedelta(days=1)
             if Weekday(current.weekday()) in weekdays:
                 return current
 
@@ -109,8 +111,8 @@ class WeeklyInterval:
                     ]
                     weekdays = {Weekday[w.upper()] for w in weekday_names}
                 else:
-                    weekdays = None
-                at = None
+                    weekdays = {DEFAULT_WEEKDAY}
+                at = DEFAULT_TIME
                 if hours_match is not None:
                     minutes_match = match.group("minutes")
                     ampm_match = match.group("ampm")

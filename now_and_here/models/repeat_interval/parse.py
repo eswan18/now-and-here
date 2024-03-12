@@ -23,7 +23,7 @@ def parse_json(text: str) -> RepeatInterval:
         case "DailyInterval":
             return DailyInterval(days=data["days"], at=data["at"])
         case "WeeklyInterval":
-            weekday_strings: list[str] | None = data.get("weekdays")
+            weekday_strings: list[str] = data["weekdays"]
             if weekday_strings is not None:
                 weekdays = {Weekday[w.upper()] for w in weekday_strings}
             else:

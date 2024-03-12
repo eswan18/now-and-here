@@ -3,15 +3,28 @@ from datetime import datetime, time
 import pytest
 
 from now_and_here.models.repeat_interval import WeeklyInterval
-from now_and_here.models.repeat_interval.weekly_interval import Weekday
+from now_and_here.models.repeat_interval.weekly_interval import (
+    Weekday,
+    DEFAULT_WEEKDAY,
+    DEFAULT_TIME,
+)
 
 
 @pytest.mark.parametrize(
     "text,interval",
     [
-        ("every week", WeeklyInterval(weeks=1, at=None)),
-        ("every 1 week", WeeklyInterval(weeks=1, at=None)),
-        ("every 3 weeks", WeeklyInterval(weeks=3, at=None)),
+        (
+            "every week",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=DEFAULT_TIME),
+        ),
+        (
+            "every 1 week",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=DEFAULT_TIME),
+        ),
+        (
+            "every 3 weeks",
+            WeeklyInterval(weeks=3, weekdays={DEFAULT_WEEKDAY}, at=DEFAULT_TIME),
+        ),
     ],
 )
 def test_try_parse_just_week_interval_valid(text: str, interval: WeeklyInterval):
@@ -21,10 +34,22 @@ def test_try_parse_just_week_interval_valid(text: str, interval: WeeklyInterval)
 @pytest.mark.parametrize(
     "text,interval",
     [
-        ("every week at 3:00", WeeklyInterval(weeks=1, at=time(3, 0))),
-        ("3:00 every 4 weeks", WeeklyInterval(weeks=4, at=time(3, 0))),
-        ("every 2 weeks at 15:00", WeeklyInterval(weeks=2, at=time(15, 0))),
-        ("15:00 every 2 weeks", WeeklyInterval(weeks=2, at=time(15, 0))),
+        (
+            "every week at 3:00",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=time(3, 0)),
+        ),
+        (
+            "3:00 every 4 weeks",
+            WeeklyInterval(weeks=4, weekdays={DEFAULT_WEEKDAY}, at=time(3, 0)),
+        ),
+        (
+            "every 2 weeks at 15:00",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(15, 0)),
+        ),
+        (
+            "15:00 every 2 weeks",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(15, 0)),
+        ),
     ],
 )
 def test_try_parse_day_and_time_interval_valid(text: str, interval: WeeklyInterval):
@@ -34,16 +59,46 @@ def test_try_parse_day_and_time_interval_valid(text: str, interval: WeeklyInterv
 @pytest.mark.parametrize(
     "text,interval",
     [
-        ("every 2 weeks at 3:00", WeeklyInterval(weeks=2, at=time(3, 0))),
-        ("every 2 weeks at 3:00 am", WeeklyInterval(weeks=2, at=time(3, 0))),
-        ("every 2 weeks at 3:00am", WeeklyInterval(weeks=2, at=time(3, 0))),
-        ("every 2 weeks at 3:00 pm", WeeklyInterval(weeks=2, at=time(15, 0))),
-        ("every 2 weeks at 3:15", WeeklyInterval(weeks=2, at=time(3, 15))),
-        ("3:15 pm every 2 weeks", WeeklyInterval(weeks=2, at=time(15, 15))),
-        ("every week at 12:00 pm", WeeklyInterval(weeks=1, at=time(12, 0))),
-        ("every week at 12:00pm", WeeklyInterval(weeks=1, at=time(12, 0))),
-        ("every week at 12:00am", WeeklyInterval(weeks=1, at=time(0, 0))),
-        ("12:00 am every week", WeeklyInterval(weeks=1, at=time(0, 0))),
+        (
+            "every 2 weeks at 3:00",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(3, 0)),
+        ),
+        (
+            "every 2 weeks at 3:00 am",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(3, 0)),
+        ),
+        (
+            "every 2 weeks at 3:00am",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(3, 0)),
+        ),
+        (
+            "every 2 weeks at 3:00 pm",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(15, 0)),
+        ),
+        (
+            "every 2 weeks at 3:15",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(3, 15)),
+        ),
+        (
+            "3:15 pm every 2 weeks",
+            WeeklyInterval(weeks=2, weekdays={DEFAULT_WEEKDAY}, at=time(15, 15)),
+        ),
+        (
+            "every week at 12:00 pm",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=time(12, 0)),
+        ),
+        (
+            "every week at 12:00pm",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=time(12, 0)),
+        ),
+        (
+            "every week at 12:00am",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=time(0, 0)),
+        ),
+        (
+            "12:00 am every week",
+            WeeklyInterval(weeks=1, weekdays={DEFAULT_WEEKDAY}, at=time(0, 0)),
+        ),
     ],
 )
 def test_try_parse_am_pm_valid(text: str, interval: WeeklyInterval):
