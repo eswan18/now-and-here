@@ -128,12 +128,15 @@ class Task:
         else:
             due = Text("None", style="dim")
         repeat = str(self.repeat) if self.repeat is not None else ""
-        project: Text | None = None
         if self.project:
-            project = Text(self.project.name + "\n") + Text(
-                f"({format_id(self.project.id)})", style="cyan"
+            project_text = (
+                Text(self.project.name)
+                + "\n"
+                + Text(format_id(self.project.id), style="cyan italic")
             )
-        return format_id(self.id), done, desc, priority, due, repeat, project
+        else:
+            project_text = Text("")
+        return format_id(self.id), done, desc, priority, due, repeat, project_text
 
     def as_card(self) -> Panel:
         if self.due:

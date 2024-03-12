@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, time, timedelta
-from typing import Self, Any
+from typing import Self
 import re
 
 from pydantic.dataclasses import dataclass

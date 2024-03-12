@@ -41,9 +41,9 @@ def list_(
         False, "--id-only", help="Only show task IDs, not full details."
     ),
 ):
+    """List all tasks."""
     if project_id is not None:
         project_id = project_id.replace("-", "")
-    """List all tasks."""
     store = get_store()
     tasks = store.get_tasks(
         sort_by=sort,
@@ -97,10 +97,10 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
     in_project = Prompt.ask(
         "Is this task part of a project? \\[y/N]",
         console=console,
-        default=False,
+        default="N",
         show_default=True,
     )
-    if in_project:
+    if in_project.lower().startswith("y"):
         projects = {project.name: project for project in store.get_projects()}
         project_name = Prompt.ask(
             "Project:",

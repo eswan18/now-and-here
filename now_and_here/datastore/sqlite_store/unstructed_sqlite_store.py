@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 from datetime import datetime
-import json
+from zoneinfo import ZoneInfo
 
 from rich.console import Console
 
@@ -79,7 +79,7 @@ class UnstructuredSQLiteStore:
         if not include_done:
             query += " AND t.json ->> 'done' = FALSE"
         if due_before:
-            query += f" AND datetime(t.json ->> 'due') <= datetime(?)"
+            query += " AND datetime(t.json ->> 'due') <= datetime(?)"
             params.append(due_before.isoformat())
         if project_name:
             # Case-insensitive search
@@ -130,9 +130,15 @@ class UnstructuredSQLiteStore:
             #    3. Remove the repeat from the now-done task (the repeat lives on in the
             #       new task.)
             current_occurrence = task.due
-            if not current_occurrence:
+            if current_occurrence is None:
                 raise ValueError("Repeating task has no current due date")
-            next_occurrence = task.repeat.next(current_occurrence)
+            # We need to convert to local time before calculating the next occurrence
+            # since things like "every Tuesday" won't make sense if the current date is
+            # actually a Monday due to timezone offsets.
+            current_occurrence = current_occurrence.astimezone(ZoneInfo("local"))
+            next_occurrence = task.repeat.next(current_occurrence).astimezone(
+                ZoneInfo("UTC")
+            )
             new_task = task.clone()
             new_task.due = next_occurrence
 
@@ -189,20 +195,28 @@ class UnstructuredSQLiteStore:
         sort_by: str | None = "name",
         desc: bool = False,
     ) -> list[Project]:
-        query = "SELECT json FROM projects WHERE 1=1"
+        query = """
+            SELECT json_set(p.json, '$.parent', json(p2.json))
+            FROM projects p
+                LEFT JOIN projects p2
+                ON p.json ->> 'parent' = p2.id
+            WHERE 1=1
+        """
         if sort_by:
             # Some very limited validation to avoid extremely easy sql injection.
             if sort_by not in Project.sortable_columns():
                 raise InvalidSortError(f"Cannot sort on column {sort_by}")
             asc = "DESC" if desc else "ASC"
-            query += f" ORDER BY json ->> '{sort_by}' {asc} NULLS LAST"
+            query += f" ORDER BY p.json ->> '{sort_by}' {asc} NULLS LAST"
         with self.conn as conn:
             cursor = conn.execute(query)
             projects = [Project.from_json(data) for (data,) in cursor.fetchall()]
         return projects
 
     def update_project(self, id: str, project: Project) -> None:
-        raise NotImplementedError
+        data = project.as_json()
+        with self.conn as conn:
+            conn.execute("UPDATE projects SET json = (?) WHERE id = (?)", (data, id))
 
     def save_label(self, label: Label) -> str:
         raise NotImplementedError

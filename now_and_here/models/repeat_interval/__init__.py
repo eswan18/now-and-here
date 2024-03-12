@@ -7,6 +7,7 @@ from .parse import try_parse, parse_json
 __all__ = [
     "RepeatInterval",
     "DailyInterval",
-    "WeeklyInterval" "try_parse",
+    "WeeklyInterval",
+    "try_parse",
     "parse_json",
 ]
