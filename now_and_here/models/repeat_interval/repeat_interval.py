@@ -6,8 +6,8 @@ from pydantic.dataclasses import dataclass
 # Some intervals I need to support:
 # "Regular"
 # - [x] Every day
-# - [ ] Every week on certain weekdays (weekly on MTWTF but not Saturday or Sunday)
-# - [ ] Every week (weekly on tuesdays)
+# - [x] Every week on certain weekdays (weekly on MTWTF but not Saturday or Sunday)
+# - [x] Every week (weekly on tuesdays)
 # - [ ] Every month (monthly on the 3rd of the month)
 # - [ ] The last day of every month (this is a special case of the above)
 # - [ ] Every year (yearly on March 23rd)
@@ -15,7 +15,7 @@ from pydantic.dataclasses import dataclass
 # "Counting intervals"
 # - [ ] every 4 hours
 # - [x] every 3 days
-# - [ ] every 2 weeks
+# - [x] every 2 weeks
 # - [ ] every 3 months
 # - [ ] every 2 years
 
