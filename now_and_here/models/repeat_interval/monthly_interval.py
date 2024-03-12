@@ -1,9 +1,14 @@
 import json
+import calendar
 from datetime import datetime, time
 from typing import Self
 import re
 
 from pydantic.dataclasses import dataclass
+
+
+DEFAULT_DAY = 1
+DEFAULT_TIME = time(9, 0)
 
 
 def _make_ordinal(n):
@@ -27,24 +32,53 @@ def _make_ordinal(n):
 @dataclass
 class MonthlyInterval:
     months: int = 1
-    day: int | None = None
-    at: time | None = None
+    day: int = DEFAULT_DAY
+    at: time = DEFAULT_TIME
     # Unfortunately we have to override match_args so that this class conforms to the
     # RepeatInterval protocol.
     __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
-        raise NotImplementedError
+        # Get the number of days in the current month
+        if self.day > 0:
+            looking_for_day = self.day
+        else:
+            # Count backward from the end of the current month
+            _, days_in_month = calendar.monthrange(current.year, current.month)
+            looking_for_day = days_in_month + (self.day + 1)
+        looking_for_dt = datetime(current.year, current.month, looking_for_day)
+        looking_for_dt.replace(hour=self.at.hour, minute=self.at.minute)
+        if current <= looking_for_dt:
+            return looking_for_dt
+        else:
+            new_year, new_month = current.year, current.month
+            new_month += self.months
+            if new_month > 12:
+                new_year += new_month // 12
+                new_month = new_month % 12
+            if self.day > 0:
+                return datetime(
+                    new_year, new_month, self.day, self.at.hour, self.at.minute
+                )
+            else:
+                _, days_in_new_month = calendar.monthrange(new_year, new_month)
+                new_day = days_in_new_month + (self.day + 1)
+                return datetime(
+                    new_year, new_month, new_day, self.at.hour, self.at.minute
+                )
 
     def previous(self, current: datetime) -> datetime:
         raise NotImplementedError
 
     @classmethod
     def try_parse(cls, text: str) -> Self | None:
+        day = DEFAULT_DAY
+        at = DEFAULT_TIME
+
         month_pattern = r"(?:month|\s*(?P<months>\d+) months?)"
         at_pattern = r"(?P<hours>\d+)(?::(?P<minutes>\d+))?\s*(?P<ampm>am|pm)?"
         day_pattern = r"(?P<day>\d+)(?:st|nd|rd|th)"
-        day_of_month_pattern = fr"({day_pattern})?(?P<last>\s*last)?( day)?"
+        day_of_month_pattern = rf"({day_pattern})?(?P<last>\s*last)?( day)?"
         patterns = [
             # Strings like "every 3 months" or "every month at 3:00 PM"
             f"every {month_pattern}(?: at {at_pattern})?",
@@ -58,7 +92,6 @@ class MonthlyInterval:
             if match:
                 months_match = match.group("months")
                 months = int(months_match) if months_match is not None else 1
-                at = None
                 if match.group("hours") is not None:
                     hour = int(match.group("hours"))
                     minute = int(match.group("minutes") or "0")
@@ -72,12 +105,11 @@ class MonthlyInterval:
                     day = int(match.group("day"))
                     if match.group("last") is not None:
                         day = -day
-                    return cls(months=months, day=day, at=at)
                 elif match.groupdict().get("last") is not None:
                     # The word "day" may be ommitted in this case,
                     # e.g. "the last [day] of every month"
-                    return cls(months=months, day=-1, at=at)
-                return cls(months=months, at=at)
+                    day = -1
+                return cls(months=months, day=day, at=at)
         return None
 
     def as_json(self) -> str:

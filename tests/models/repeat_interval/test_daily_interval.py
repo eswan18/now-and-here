@@ -3,14 +3,15 @@ from datetime import time
 import pytest
 
 from now_and_here.models.repeat_interval import DailyInterval
+from now_and_here.models.repeat_interval.daily_interval import DEFAULT_TIME
 
 
 @pytest.mark.parametrize(
     "text,interval",
     [
-        ("every day", DailyInterval(days=1, at=None)),
-        ("every 1 day", DailyInterval(days=1, at=None)),
-        ("every 3 days", DailyInterval(days=3, at=None)),
+        ("every day", DailyInterval(days=1, at=DEFAULT_TIME)),
+        ("every 1 day", DailyInterval(days=1, at=DEFAULT_TIME)),
+        ("every 3 days", DailyInterval(days=3, at=DEFAULT_TIME)),
     ],
 )
 def test_try_parse_just_day_interval_valid(text: str, interval: DailyInterval):

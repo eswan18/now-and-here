@@ -6,24 +6,22 @@ import re
 from pydantic.dataclasses import dataclass
 
 
+DEFAULT_TIME = time(9, 0)
+
+
 @dataclass
 class DailyInterval:
     days: int = 1
-    at: time | None = None
+    at: time = DEFAULT_TIME
     # Unfortunately we have to override match_args so that this class conforms to the
     # RepeatInterval protocol.
     __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
-        if self.at is None:
-            return current + timedelta(days=self.days)
+        if current.time() > self.at:
+            return datetime.combine(current.date() + timedelta(days=self.days), self.at)
         else:
-            if current.time() > self.at:
-                return datetime.combine(
-                    current.date() + timedelta(days=self.days), self.at
-                )
-            else:
-                return datetime.combine(current.date(), self.at)
+            return datetime.combine(current.date(), self.at)
 
     def previous(self, current: datetime) -> datetime:
         if self.at is None:
@@ -51,7 +49,7 @@ class DailyInterval:
             if match:
                 days_match = match.group("days")
                 days = int(days_match) if days_match is not None else 1
-                at = None
+                at = DEFAULT_TIME
                 if match.group("hours") is not None:
                     hour = int(match.group("hours"))
                     minute = int(match.group("minutes") or "0")
