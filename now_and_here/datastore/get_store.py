@@ -2,7 +2,8 @@ from pathlib import Path
 
 import typer
 
-from now_and_here.datastore import UnstructuredSQLiteStore, DataStore
+from .datastore import DataStore
+from .sqlite_store.unstructed_sqlite_store import UnstructuredSQLiteStore
 from now_and_here.console import console
 
 

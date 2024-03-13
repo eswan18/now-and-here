@@ -1,0 +1,6 @@
+{% macro task_card(task) -%}
+    <div>
+        <h2>{{ task.name }} ({{ task.id }})</h2>
+        <p>{{ task.description }}</p>
+    </div>
+{%- endmacro %}

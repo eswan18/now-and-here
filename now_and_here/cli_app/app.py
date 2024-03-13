@@ -2,12 +2,13 @@ from pathlib import Path
 import logging
 
 import typer
+import uvicorn
 
 from now_and_here.datastore import UnstructuredSQLiteStore
 from .task import task_app
 from .project import project_app
 from .label import label_app
-from .common import STOREFILE
+from now_and_here.datastore.get_store import STOREFILE
 from now_and_here.console import console
 
 
@@ -49,3 +50,12 @@ def main(verbosity: int = typer.Option(0, "--verbose", "-v", count=True)):
         raise typer.Exit(1)
     package_logger = logging.getLogger("now_and_here")
     package_logger.setLevel(level)
+
+
+@app.command()
+def web():
+    """Start the web server."""
+    from now_and_here.fastapi_app import app
+
+    # Serve the app
+    uvicorn.run(app, port=8787)
