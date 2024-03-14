@@ -8,7 +8,7 @@ from now_and_here.datastore import UnstructuredSQLiteStore
 from .task import task_app
 from .project import project_app
 from .label import label_app
-from now_and_here.datastore.get_store import STOREFILE
+from now_and_here.config import get_config
 from now_and_here.console import console
 
 
@@ -28,13 +28,22 @@ app.add_typer(label_app, name="l")
 @app.command()
 def init():
     """Check if the store exists and create it if it doesn't."""
-    store_path = Path(STOREFILE)
-    if not UnstructuredSQLiteStore.exists(store_path):
-        with console.status("Creating store..."):
-            UnstructuredSQLiteStore.create_self(store_path)
-        console.print(f"Store created at {store_path}")
-    else:
-        console.print(f"Store already exists at {store_path}")
+    config = get_config()
+    store_path = Path(config.store_file_path)
+    match config.store_type:
+        case "unstructured_sqlite_store":
+            if not UnstructuredSQLiteStore.exists(store_path):
+                with console.status("Creating store..."):
+                    UnstructuredSQLiteStore.create_self(store_path)
+                console.print(
+                    f"[green]Success![/] Store created at [magenta]{store_path}[/]"
+                )
+            else:
+                console.print(
+                    f"[yellow]No action taken[/]: Store already exists at [magenta]{store_path}[/]"
+                )
+        case _:
+            raise ValueError(f"Unknown store type: {config.store_type}")
 
 
 @app.callback()
