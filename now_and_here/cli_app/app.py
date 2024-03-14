@@ -7,6 +7,7 @@ from now_and_here.datastore import UnstructuredSQLiteStore
 from .task import task_app
 from .project import project_app
 from .label import label_app
+from .config import config_app
 from now_and_here.config import get_config
 from now_and_here.console import console
 
@@ -18,6 +19,7 @@ app = typer.Typer(
 app.add_typer(task_app, name="task")
 app.add_typer(project_app, name="project")
 app.add_typer(label_app, name="label")
+app.add_typer(config_app, name="config")
 # Add "aliases" -- shorter versions of the command names.
 app.add_typer(task_app, name="t")
 app.add_typer(project_app, name="p")

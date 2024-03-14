@@ -8,7 +8,7 @@ from .default_config import default_config
 USER_CONFIG_PATH = Path("~/.now-and-here/config.toml").expanduser()
 
 
-def _get_user_config() -> PartialAppConfig:
+def get_user_config() -> PartialAppConfig:
     """Get the user's configuration."""
     if not USER_CONFIG_PATH.exists():
         return PartialAppConfig()
@@ -25,7 +25,7 @@ def get_config() -> AppConfig:
     """Get the configuration for the application."""
     # TODO: add support for pulling other partial configs from a file or even the
     # command line and merging them in.
-    config = default_config.merge(_get_user_config())
+    config = default_config.merge(get_user_config())
     if not config.is_complete():
         raise RuntimeError("Configuration is incomplete")
     return AppConfig.from_partial(config)
