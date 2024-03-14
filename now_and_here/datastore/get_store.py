@@ -4,7 +4,8 @@ import typer
 
 from now_and_here.config import get_config
 from now_and_here.console import console
-from now_and_here.datastore import DataStore, UnstructuredSQLiteStore
+from now_and_here.datastore.datastore import DataStore
+from now_and_here.datastore.sqlite_store import UnstructuredSQLiteStore
 
 
 def get_store() -> DataStore:
