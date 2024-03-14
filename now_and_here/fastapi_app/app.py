@@ -1,8 +1,9 @@
 import subprocess
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -27,7 +28,8 @@ async def lifespan(app: FastAPI):
                 "-i",
                 "now_and_here/fastapi_app/static/src/tw.css",
                 "-o",
-                "now_and_here/fastapi_app/static/css/main.css" "--minify",
+                "now_and_here/fastapi_app/static/css/main.css",
+                "--minify",
             ]
         )
         print("done")
@@ -48,7 +50,7 @@ def index(request: Request):
 
 
 @app.get("/task/{id}", response_class=HTMLResponse)
-def tasks(request: Request, id: str):
+def get_task(request: Request, id: str):
     store = get_store()
     try:
         task = store.get_task(id)
@@ -56,3 +58,28 @@ def tasks(request: Request, id: str):
     except RecordNotFoundError:
         return 404, "Task not found"
     return templates.TemplateResponse("task.html", {"request": request, "task": task})
+
+
+@app.post("/task/{id}")
+def post_task(id: str, done: Annotated[bool | None, Form()] = None):
+    print(done)
+    store = get_store()
+    try:
+        task = store.get_task(id)
+        print(task)
+    except RecordNotFoundError:
+        return 404, "Task not found"
+    return None
+
+
+@app.get("/project/{id}", response_class=HTMLResponse)
+def project(request: Request, id: str):
+    store = get_store()
+    try:
+        project = store.get_project(id)
+        tasks = store.get_tasks(project_id=id, include_done=True)
+    except RecordNotFoundError:
+        return 404, "Project not found"
+    return templates.TemplateResponse(
+        "project.html", {"request": request, "project": project, "tasks": tasks}
+    )
