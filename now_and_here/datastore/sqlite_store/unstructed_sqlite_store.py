@@ -21,6 +21,8 @@ class UnstructuredSQLiteStore:
 
     @classmethod
     def create_self(cls, path: Path):
+        if not path.parent.exists():
+            path.parent.mkdir(parents=True)
         create_db(path)
 
     def save_task(self, task: Task) -> str:
