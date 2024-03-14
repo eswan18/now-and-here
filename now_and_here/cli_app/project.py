@@ -2,11 +2,10 @@ import typer
 from rich.prompt import Prompt
 
 from now_and_here.console import console
-from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.datastore import get_store
+from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.models.common import format_id
 from now_and_here.models.project import Project
-
 
 project_app = typer.Typer(
     help="Manage projects.",

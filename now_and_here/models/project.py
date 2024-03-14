@@ -1,15 +1,16 @@
 from __future__ import annotations
+
 import json
 from typing import Iterable, Self
 
 from pydantic import RootModel, field_serializer
-from pydantic.dataclasses import dataclass, Field
-from rich.text import Text
+from pydantic.dataclasses import Field, dataclass
 from rich.console import Console, ConsoleOptions, RenderResult
-from rich.table import Table
 from rich.rule import Rule
+from rich.table import Table
+from rich.text import Text
 
-from .common import random_id, ID_LENGTH, format_id
+from .common import ID_LENGTH, format_id, random_id
 
 
 @dataclass

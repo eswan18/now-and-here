@@ -3,7 +3,6 @@ from string import ascii_lowercase
 
 from rich.text import Text
 
-
 ID_LENGTH = 6
 
 

@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 from datetime import datetime
-from typing import Protocol, runtime_checkable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from now_and_here.models import Task, Project, Label
+    from now_and_here.models import Label, Project, Task
 
 
 @runtime_checkable

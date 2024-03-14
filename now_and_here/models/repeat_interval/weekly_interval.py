@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 import functools
 import json
-from datetime import datetime, time
-from typing import Self
-from enum import Enum
 import re
+from datetime import datetime, time
+from enum import Enum
+from typing import Self
 
-from pydantic.dataclasses import dataclass, Field
 from dateutil.relativedelta import relativedelta
+from pydantic.dataclasses import Field, dataclass
 
 
 @functools.total_ordering

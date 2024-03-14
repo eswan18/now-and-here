@@ -2,7 +2,6 @@ import typer
 
 from now_and_here.config import get_user_config
 
-
 config_app = typer.Typer(
     help="Get and set configuration values.",
     no_args_is_help=True,
@@ -18,5 +17,7 @@ def get(key: str):
         case "store_file_path":
             typer.echo(user_config.store_file_path)
         case _:
-            typer.echo(f"Unknown key: {key}. Must be one of 'store_type' or 'store_file_path'")
+            typer.echo(
+                f"Unknown key: {key}. Must be one of 'store_type' or 'store_file_path'"
+            )
             raise typer.Exit(1)

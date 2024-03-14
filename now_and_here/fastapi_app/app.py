@@ -1,6 +1,6 @@
 import subprocess
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -9,7 +9,6 @@ from fastapi.templating import Jinja2Templates
 
 from now_and_here.datastore import get_store
 from now_and_here.datastore.errors import RecordNotFoundError
-
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"

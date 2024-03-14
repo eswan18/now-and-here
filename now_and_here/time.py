@@ -1,10 +1,11 @@
-import pytz
 from datetime import datetime, timedelta
 from typing import Callable
-from now_and_here.console import console
-from rich.text import Text
 
 import dateparser
+import pytz
+from rich.text import Text
+
+from now_and_here.console import console
 
 
 def relative_time(
