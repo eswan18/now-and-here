@@ -1,12 +1,13 @@
 import sqlite3
-from pathlib import Path
 from datetime import datetime
-from zoneinfo import ZoneInfo
+from pathlib import Path
 
 from rich.console import Console
+from zoneinfo import ZoneInfo
 
-from now_and_here.models import Task, Project, Label
-from now_and_here.datastore.errors import RecordNotFoundError, InvalidSortError
+from now_and_here.datastore.errors import InvalidSortError, RecordNotFoundError
+from now_and_here.models import Label, Project, Task
+
 from .create import create_db
 
 

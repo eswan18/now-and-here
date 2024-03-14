@@ -1,24 +1,26 @@
 from __future__ import annotations
+
 import json
-from typing import Iterable, Self
 from datetime import datetime
+from typing import Iterable, Self
 
 from pydantic import Field, RootModel, field_serializer
 from pydantic.dataclasses import dataclass
 from pydantic.functional_validators import SkipValidation
-from rich.text import Text
-from rich.table import Table
 from rich.console import Console, ConsoleOptions, RenderResult
-from rich.rule import Rule
-from rich.panel import Panel
 from rich.layout import Layout
 from rich.padding import Padding
+from rich.panel import Panel
+from rich.rule import Rule
+from rich.table import Table
+from rich.text import Text
 
-from .common import ID_LENGTH, random_id, format_id, format_priority
+from now_and_here.models.repeat_interval import RepeatInterval, parse_json
+from now_and_here.time import format_time, relative_time
+
+from .common import ID_LENGTH, format_id, format_priority, random_id
 from .label import Label
 from .project import Project
-from now_and_here.time import relative_time, format_time
-from now_and_here.models.repeat_interval import RepeatInterval, parse_json
 
 
 @dataclass

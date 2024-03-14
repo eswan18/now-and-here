@@ -1,10 +1,9 @@
 import json
+import re
 from datetime import datetime, time, timedelta
 from typing import Self
-import re
 
 from pydantic.dataclasses import dataclass
-
 
 DEFAULT_TIME = time(9, 0)
 

@@ -1,9 +1,9 @@
 from pathlib import Path
+
 import tomllib
 
 from .app_config import AppConfig, PartialAppConfig
 from .default_config import default_config
-
 
 USER_CONFIG_PATH = Path("~/.now-and-here/config.toml").expanduser()
 

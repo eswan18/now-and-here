@@ -4,9 +4,9 @@ import pytest
 
 from now_and_here.models.repeat_interval import WeeklyInterval
 from now_and_here.models.repeat_interval.weekly_interval import (
-    Weekday,
-    DEFAULT_WEEKDAY,
     DEFAULT_TIME,
+    DEFAULT_WEEKDAY,
+    Weekday,
 )
 
 

@@ -2,9 +2,9 @@ from pathlib import Path
 
 import typer
 
-from now_and_here.datastore import UnstructuredSQLiteStore, DataStore
-from now_and_here.console import console
 from now_and_here.config import get_config
+from now_and_here.console import console
+from now_and_here.datastore import DataStore, UnstructuredSQLiteStore
 
 
 def get_store() -> DataStore:

@@ -1,11 +1,10 @@
-import json
 import calendar
+import json
+import re
 from datetime import datetime, time
 from typing import Self
-import re
 
 from pydantic.dataclasses import dataclass
-
 
 DEFAULT_DAY = 1
 DEFAULT_TIME = time(9, 0)

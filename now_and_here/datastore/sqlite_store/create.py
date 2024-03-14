@@ -1,6 +1,6 @@
 import logging
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 TABLES = ["tasks", "projects", "labels"]
 logger = logging.getLogger(__name__)

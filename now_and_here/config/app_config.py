@@ -1,6 +1,7 @@
 from __future__ import annotations
-from typing import Literal
+
 from pathlib import Path
+from typing import Literal
 
 from pydantic.dataclasses import dataclass
 
@@ -35,9 +36,13 @@ class AppConfig:
     @classmethod
     def from_partial(cls, partial: PartialAppConfig) -> AppConfig:
         if partial.store_type is None:
-            raise ValueError("Cannot create AppConfig from partial config with no store_type")
+            raise ValueError(
+                "Cannot create AppConfig from partial config with no store_type"
+            )
         if partial.store_file_path is None:
-            raise ValueError("Cannot create AppConfig from partial config with no store_file_path")
+            raise ValueError(
+                "Cannot create AppConfig from partial config with no store_file_path"
+            )
         return cls(
             store_type=partial.store_type,
             store_file_path=partial.store_file_path,

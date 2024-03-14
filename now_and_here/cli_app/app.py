@@ -1,16 +1,16 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
 import typer
 
-from now_and_here.datastore import UnstructuredSQLiteStore
-from .task import task_app
-from .project import project_app
-from .label import label_app
-from .config import config_app
 from now_and_here.config import get_config
 from now_and_here.console import console
+from now_and_here.datastore import UnstructuredSQLiteStore
 
+from .config import config_app
+from .label import label_app
+from .project import project_app
+from .task import task_app
 
 app = typer.Typer(
     help="Locally-hosted task management system.",

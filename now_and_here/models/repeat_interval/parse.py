@@ -1,8 +1,8 @@
 import json
 
-from .repeat_interval import RepeatInterval
 from .daily_interval import DailyInterval
-from .weekly_interval import WeeklyInterval, Weekday
+from .repeat_interval import RepeatInterval
+from .weekly_interval import Weekday, WeeklyInterval
 
 
 def try_parse(text: str) -> RepeatInterval | None:

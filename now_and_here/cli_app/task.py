@@ -1,16 +1,16 @@
 from datetime import datetime, timedelta
 
 import typer
-from rich.prompt import Prompt, IntPrompt
+from rich.prompt import IntPrompt, Prompt
 
-from .common import get_store
+from now_and_here.console import console
 from now_and_here.datastore.errors import RecordNotFoundError
-from now_and_here.models.task import Task
 from now_and_here.models.common import format_id
 from now_and_here.models.repeat_interval import try_parse
-from now_and_here.time import parse_time, format_time
-from now_and_here.console import console
+from now_and_here.models.task import Task
+from now_and_here.time import format_time, parse_time
 
+from .common import get_store
 
 task_app = typer.Typer(
     help="Manage tasks.",

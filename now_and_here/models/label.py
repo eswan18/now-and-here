@@ -1,4 +1,4 @@
-from pydantic.dataclasses import dataclass, Field
+from pydantic.dataclasses import Field, dataclass
 
 from .common import random_id
 

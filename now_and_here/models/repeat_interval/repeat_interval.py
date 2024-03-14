@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Self, Protocol, runtime_checkable
+from typing import Protocol, Self, runtime_checkable
 
 from pydantic.dataclasses import dataclass
 
