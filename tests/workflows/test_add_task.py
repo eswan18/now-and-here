@@ -1,19 +1,20 @@
 import re
 
 from now_and_here.datastore import DataStore
+from now_and_here.models import Task
 
 from .nhrunner import NHRunner
 
 
 def test_add_task(temp_store: DataStore, nh: NHRunner):
-    # Add a task
+    """Add a single task and make sure it's in the db and is returned by `task list`"""
     args = ["task", "add", "-i"]
     input = (
         "\n".join(
             [
                 "test_task",  # name
                 "test_description",  # description
-                "0",  # priority
+                "2",  # priority
                 "",  # due date (none)
                 "",  # repeat (none)
                 "no",  # is this task part of a project?
@@ -35,7 +36,15 @@ def test_add_task(temp_store: DataStore, nh: NHRunner):
     # Make sure the task was added.
     id = match.group("id").replace("-", "")
     task = temp_store.get_task(id)
-    assert task.name == "test_task"
+    assert task == Task(
+        id=id,
+        name="test_task",
+        description="test_description",
+        priority=2,
+        due=None,
+        repeat=None,
+        project=None,
+    )
 
     # Fetch tasks by ID. There should be just one.
     result = nh.invoke(["task", "list", "--id-only"])
