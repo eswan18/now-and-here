@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import typer
 from rich.prompt import IntPrompt, Prompt
 
+from now_and_here import datastore
 from now_and_here.console import console
-from now_and_here.datastore import get_store
 from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.models.common import format_id
 from now_and_here.models.repeat_interval import try_parse
@@ -43,7 +43,7 @@ def list_(
     """List all tasks."""
     if project_id is not None:
         project_id = project_id.replace("-", "")
-    store = get_store()
+    store = datastore.get_store()
     tasks = store.get_tasks(
         sort_by=sort,
         desc=desc,
@@ -64,7 +64,7 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
         raise typer.BadParameter(
             "Only interactive mode is supported for task creation."
         )
-    store = get_store()
+    store = datastore.get_store()
     name = Prompt.ask("Task name", console=console)
     task = Task(name=name)  # type: ignore [call-arg]
     task.description = Prompt.ask(
@@ -116,7 +116,7 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
 @task_app.command()
 def delete(ids: list[str]):
     """Delete one or more tasks."""
-    store = get_store()
+    store = datastore.get_store()
     for raw_id in ids:
         # Since we display IDs with dashes in them but don't actually store dashes,
         # strip them from input.
@@ -138,7 +138,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
             "Only interactive mode is supported for task updating."
         )
     with console.status("Fetching task..."):
-        store = get_store()
+        store = datastore.get_store()
         try:
             task = store.get_task(id)
         except RecordNotFoundError:
@@ -208,7 +208,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
 @task_app.command()
 def checkoff(ids: list[str]):
     """Mark a task as done or not done."""
-    store = get_store()
+    store = datastore.get_store()
     for raw_id in ids:
         # Since we display IDs with dashes in them but don't actually store dashes, strip
         # them from input.
@@ -230,7 +230,7 @@ def uncheckoff(
     ids: list[str],
 ):
     """Mark a task as not done."""
-    store = get_store()
+    store = datastore.get_store()
     for raw_id in ids:
         # Since we display IDs with dashes in them but don't actually store dashes, strip
         # them from input.
@@ -267,6 +267,6 @@ def due(
         case _:
             before = parse_time(due_before)
     """List tasks that are currently due."""
-    store = get_store()
+    store = datastore.get_store()
     tasks = store.get_tasks(due_before=before, include_done=include_done)
     console.print(Task.as_rich_table(tasks))

@@ -51,7 +51,6 @@ class UnstructuredSQLiteStore:
             row = cursor.fetchone()
         if not row:
             raise RecordNotFoundError(f"No task with id {id}")
-        print(row[0])
         task = Task.from_json(row[0])
         return task
 
