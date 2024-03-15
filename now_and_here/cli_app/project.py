@@ -1,8 +1,8 @@
 import typer
 from rich.prompt import Prompt
 
+from now_and_here import datastore
 from now_and_here.console import console
-from now_and_here.datastore import get_store
 from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.models.common import format_id
 from now_and_here.models.project import Project
@@ -23,7 +23,7 @@ def list_(
     ),
 ):
     """List all projects."""
-    store = get_store()
+    store = datastore.get_store()
     projects = store.get_projects(sort_by=sort, desc=desc)
     if id_only:
         console.print("\n".join(format_id(project.id) for project in projects))
@@ -38,7 +38,7 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
         raise typer.BadParameter(
             "Only interactive mode is supported for project creation."
         )
-    store = get_store()
+    store = datastore.get_store()
     name = Prompt.ask("Project name", console=console)
     project = Project(name=name)  # type: ignore [call-arg]
     project.description = Prompt.ask(
@@ -75,7 +75,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
             "Only interactive mode is supported for project updating."
         )
     with console.status("Fetching project..."):
-        store = get_store()
+        store = datastore.get_store()
         try:
             project = store.get_project(id)
         except RecordNotFoundError:
@@ -85,7 +85,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
     while True:
         console.print(project)
         field_name = Prompt.ask(
-            "Update which field? \[or 'save' to confirm changes]",
+            "Update which field? \\[or 'save' to confirm changes]",
             console=console,
             choices=valid_fields,
         )

@@ -1,3 +1,4 @@
+import re
 from typing import IO, Any, Mapping, Sequence
 
 from typer import Typer
@@ -27,3 +28,10 @@ class NHRunner:
             color=color,
             **extra,
         )
+
+    @staticmethod
+    def remove_ansi_codes(s: str) -> str:
+        """Remove ansi escape codes from a string."""
+        # From https://stackoverflow.com/a/14693789/7191513
+        ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+        return ansi_escape.sub("", s)

@@ -27,14 +27,19 @@ def test_add_task(temp_store: DataStore, nh: NHRunner):
     )
     assert result.exit_code == 0
 
-    # Clean up the output (remove color codes, etc)
-    ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
-    output = ansi_escape.sub("", result.stdout)
+    output = nh.remove_ansi_codes(result.stdout)
     # Make there there is an ID in the output.
-    match = re.search(r"ID: (?P<id>[a-zA-Z0-9\-]+)", output)
+    match = re.search(r"ID:\s+(?P<id>[a-zA-Z0-9\-]+)", output)
     assert match is not None
 
     # Make sure the task was added.
     id = match.group("id").replace("-", "")
     task = temp_store.get_task(id)
     assert task.name == "test_task"
+
+    # Fetch tasks by ID. There should be just one.
+    result = nh.invoke(["task", "list", "--id-only"])
+    assert result.exit_code == 0
+    output = nh.remove_ansi_codes(result.stdout)
+    ids = [id.replace("-", "") for id in output.strip().split("\n")]
+    assert ids == [id]

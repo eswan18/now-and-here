@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from now_and_here.datastore import get_store
+from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -51,7 +51,7 @@ def index(request: Request):
 
 @app.get("/task/{id}", response_class=HTMLResponse)
 def get_task(request: Request, id: str):
-    store = get_store()
+    store = datastore.get_store()
     try:
         task = store.get_task(id)
         print(task)
@@ -63,7 +63,7 @@ def get_task(request: Request, id: str):
 @app.post("/task/{id}")
 def post_task(id: str, done: Annotated[bool | None, Form()] = None):
     print(done)
-    store = get_store()
+    store = datastore.get_store()
     try:
         task = store.get_task(id)
         print(task)
@@ -74,7 +74,7 @@ def post_task(id: str, done: Annotated[bool | None, Form()] = None):
 
 @app.get("/project/{id}", response_class=HTMLResponse)
 def project(request: Request, id: str):
-    store = get_store()
+    store = datastore.get_store()
     try:
         project = store.get_project(id)
         tasks = store.get_tasks(project_id=id, include_done=True)
