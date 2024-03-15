@@ -162,54 +162,89 @@ def test_try_parse_weekdays_valid(text: str, interval: WeeklyInterval):
 
 
 @pytest.mark.parametrize(
-    "interval,next",
+    "current,interval,next",
     [
-        (WeeklyInterval(weeks=1), datetime(2024, 1, 8, 15, 15)),
-        (WeeklyInterval(weeks=2), datetime(2024, 1, 15, 15, 15)),
-        (WeeklyInterval(weeks=3), datetime(2024, 1, 22, 15, 15)),
-        (WeeklyInterval(weeks=4), datetime(2024, 1, 29, 15, 15)),
         (
+            datetime(2024, 1, 1, 15, 15),
             WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY}),
-            datetime(2024, 1, 8, 15, 15),
+            datetime(2024, 1, 8, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
         (
-            WeeklyInterval(weeks=2, weekdays={Weekday.MONDAY}),
-            datetime(2024, 1, 15, 15, 15),
-        ),
-        (
-            WeeklyInterval(weeks=3, weekdays={Weekday.MONDAY}),
-            datetime(2024, 1, 22, 15, 15),
-        ),
-        (
-            WeeklyInterval(weeks=4, weekdays={Weekday.MONDAY}),
-            datetime(2024, 1, 29, 15, 15),
-        ),
-        (
-            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.TUESDAY}),
             datetime(2024, 1, 2, 15, 15),
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 8, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
         (
-            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.WEDNESDAY}),
-            datetime(2024, 1, 3, 15, 15),
-        ),
-        (
-            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.THURSDAY}),
             datetime(2024, 1, 4, 15, 15),
+            WeeklyInterval(weeks=1, weekdays={Weekday.TUESDAY}),
+            datetime(2024, 1, 9, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
         (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=2, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 15, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=3, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 22, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=4, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 29, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=1, weekdays={Weekday.TUESDAY}),
+            datetime(2024, 1, 2, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=2, weekdays={Weekday.THURSDAY}),
+            datetime(2024, 1, 4, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=3, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 22, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=4, weekdays={Weekday.SUNDAY}),
+            datetime(2024, 1, 7, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.TUESDAY}),
+            datetime(2024, 1, 2, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.WEDNESDAY}),
+            datetime(2024, 1, 3, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.THURSDAY}),
+            datetime(2024, 1, 4, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 1, 15, 15),
             WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.FRIDAY}),
-            datetime(2024, 1, 5, 15, 15),
+            datetime(2024, 1, 5, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
         (
+            datetime(2024, 1, 1, 15, 15),
             WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.SATURDAY}),
-            datetime(2024, 1, 6, 15, 15),
+            datetime(2024, 1, 6, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
         (
+            datetime(2024, 1, 1, 15, 15),
             WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.SUNDAY}),
-            datetime(2024, 1, 7, 15, 15),
+            datetime(2024, 1, 7, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
     ],
 )
-def test_next(interval, next):
-    current = datetime(2024, 1, 1, 15, 15)
+def test_next(current, interval, next):
     assert interval.next(current) == next

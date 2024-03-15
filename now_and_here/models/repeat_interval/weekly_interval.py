@@ -33,6 +33,19 @@ DEFAULT_WEEKDAY = Weekday.MONDAY
 
 
 @dataclass
+class Occurence:
+    weekday: Weekday
+    time: time
+
+    def __lt__(self, other: Occurence) -> bool:
+        if self.weekday < other.weekday:
+            return True
+        if self.weekday > other.weekday:
+            return False
+        return self.time < other.time
+
+
+@dataclass
 class WeeklyInterval:
     weeks: int = 1
     weekdays: set[Weekday] = Field(default_factory=lambda: {DEFAULT_WEEKDAY})
@@ -42,27 +55,35 @@ class WeeklyInterval:
     __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
+        current = current.replace(tzinfo=None)
         current_weekday = Weekday(current.weekday())
-        if self.weekdays is not None:
-            weekdays = sorted(list(self.weekdays))
+        repeat_weekdays = sorted(list(self.weekdays))
+        # This is a bit tricky. WeeklyIntervals occur can occur multiple times in a week
+        # and only "skip forward" after the final day.
+        final_occurence_of_week = Occurence(repeat_weekdays[-1], self.at)
+        current_as_occurence = Occurence(current_weekday, current.time())
+        if current_as_occurence > final_occurence_of_week:
+            # Go to the beginning of the following day and increment forward until we're
+            # at the beginning of the following week.
+            current += relativedelta(days=1)
+            current = current.replace(hour=0, minute=0)
+            while current.weekday() != 0:
+                current += relativedelta(days=1)
+            # Then skip forward the right number of weeks.
+            current += relativedelta(weeks=self.weeks - 1)
+            current_as_occurence = Occurence(Weekday(current.weekday()), current.time())
         else:
-            # Get the day of the week that the current date is on
-            weekdays = [current_weekday]
-        if current_weekday not in weekdays:
-            raise ValueError(
-                f"The current day of the week ({current.weekday()}) is not in the list "
-                f"of repeating weekdays ({weekdays})"
-            )
-        # If we're on the last repeating day of the week, we need to skip to the "next"
-        # valid week before searching for the next included weekday. If we repeat every
-        # week, that means doing nothing. If we repeat on a longer interval than that,
-        # we need to skip over some weeks.
-        if current_weekday >= weekdays[-1] and self.weeks > 1:
-            current = current + relativedelta(weeks=self.weeks - 1)
+            # If we don't need to skip to the next week, we still want to advance one
+            # day to avoid selecting the original date.
+            current += relativedelta(days=1)
+
+        # If we're not at the end of the week, skip to the next repeat time this week.
+        current = current.replace(hour=self.at.hour, minute=self.at.minute)
         while True:
-            current = current + relativedelta(days=1)
-            if Weekday(current.weekday()) in weekdays:
-                return current
+            if Weekday(current.weekday()) in repeat_weekdays:
+                break
+            current += relativedelta(days=1)
+        return current
 
     def previous(self, current: datetime) -> datetime:
         raise NotImplementedError

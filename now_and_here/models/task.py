@@ -181,9 +181,15 @@ class Task:
 
     def clone(self) -> Self:
         """Make a copy of this task with a new ID."""
-        # Writing to/from json is kinda janky, but we know it works robustly since
-        # that's how all tasks are stored on disk.
-        as_json = self.as_json()
-        new_task = self.__class__.from_json(as_json)
-        new_task.id = random_id()
-        return new_task
+        return self.__class__(
+            id=random_id(),
+            name=self.name,
+            description=self.description,
+            done=self.done,
+            parent=self.parent,
+            project=self.project,
+            labels=self.labels,
+            priority=self.priority,
+            due=self.due,
+            repeat=self.repeat,
+        )

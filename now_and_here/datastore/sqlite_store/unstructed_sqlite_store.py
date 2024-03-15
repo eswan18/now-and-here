@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from rich.console import Console
+from tzlocal import get_localzone
 from zoneinfo import ZoneInfo
 
 from now_and_here.datastore.errors import InvalidSortError, RecordNotFoundError
@@ -138,7 +139,7 @@ class UnstructuredSQLiteStore:
             # We need to convert to local time before calculating the next occurrence
             # since things like "every Tuesday" won't make sense if the current date is
             # actually a Monday due to timezone offsets.
-            current_occurrence = current_occurrence.astimezone(ZoneInfo("local"))
+            current_occurrence = current_occurrence.astimezone(get_localzone())
             next_occurrence = task.repeat.next(current_occurrence).astimezone(
                 ZoneInfo("UTC")
             )
