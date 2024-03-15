@@ -37,14 +37,14 @@ class UnstructuredSQLiteStore:
         query = """
             SELECT json_set(
                 json_set(t.json, '$.project', json(p.json)),
-                '$.label',
-                json(l.json)
+                '$.project.parent',
+                json(p2.json)
             )
             FROM tasks t
             LEFT JOIN projects p
                 ON t.json ->> 'project' = p.id
-            LEFT JOIN labels l
-                ON t.json ->> 'label' = l.id 
+            LEFT JOIN projects p2
+                ON p.json ->> 'parent' = p2.id
             WHERE t.id = (?)
             LIMIT 1
         """
@@ -53,6 +53,7 @@ class UnstructuredSQLiteStore:
             row = cursor.fetchone()
         if not row:
             raise RecordNotFoundError(f"No task with id {id}")
+        print(row[0])
         task = Task.from_json(row[0])
         return task
 
@@ -66,17 +67,19 @@ class UnstructuredSQLiteStore:
         due_before: datetime | None = None,
     ) -> list[Task]:
         """Pull items from the tasks table."""
+        # Known bug: projects that have two levels of parents
+        # (project -> parent -> parent) will break this.
         query = """
             SELECT json_set(
                 json_set(t.json, '$.project', json(p.json)),
-                '$.label',
-                json(l.json)
+                '$.project.parent',
+                json(p2.json)
             )
             FROM tasks t
             LEFT JOIN projects p
                 ON t.json ->> 'project' = p.id
-            LEFT JOIN labels l
-                ON t.json ->> 'label' = l.id
+            LEFT JOIN projects p2
+                ON p.json ->> 'parent' = p2.id
             WHERE 1=1
         """
         params = []
