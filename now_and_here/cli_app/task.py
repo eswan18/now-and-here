@@ -123,14 +123,25 @@ def get(id: str, fields: list[str] = typer.Option(None, "--field", "-f")):
         console.print(task)
         return
     to_print: list[Any] = []
+    valid_fields = ["name", "description", "priority", "project", "due", "repeat"]
     for field in fields:
+        if field not in valid_fields:
+            console.print(f"[red]Error:[/] Unknown field '{field}'")
+            valid_fields_str = "'" + "', '".join(valid_fields) + "'"
+            console.print(f"Must be one of {valid_fields_str}")
+            raise typer.Exit(1)
         match field:
             case "name":
                 to_print.append(task.name)
-            case "description":
+            case "description" | "desc":
                 to_print.append(task.description)
             case "priority":
                 to_print.append(task.priority)
+            case "project":
+                if task.project is None:
+                    to_print.append(None)
+                else:
+                    to_print.append(format_id(task.project.id))
             case "due":
                 if task.due is None:
                     to_print.append(None)
@@ -138,9 +149,6 @@ def get(id: str, fields: list[str] = typer.Option(None, "--field", "-f")):
                     to_print.append(format_time(task.due))
             case "repeat":
                 to_print.append(task.repeat)
-            case str(f):
-                console.print(f"[red]Error:[/] Unknown field '{f}'")
-                raise typer.Exit(1)
     for line in to_print:
         if line is None:
             console.print()

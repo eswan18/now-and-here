@@ -139,6 +139,14 @@ class Task:
             yield Text("Description: ") + Text("None", style="dim")
         yield Text("Priority: ") + format_priority(self.priority)
         yield Text(f"Done: {self.done}")
+        if self.project:
+            yield (
+                Text(f"Project: {self.project.name} (")
+                + Text(format_id(self.project.id), style="italic cyan")
+                + Text(")")
+            )
+        else:
+            yield Text("Project: ") + Text("None", style="dim")
         if self.due:
             yield Text(f"Due: {format_time(self.due)} ({relative_time(self.due)})")
         else:
