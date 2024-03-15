@@ -2,7 +2,6 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-from rich.console import Console
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfo
 
@@ -13,9 +12,8 @@ from .create import create_db
 
 
 class UnstructuredSQLiteStore:
-    def __init__(self, path: Path, console: Console):
+    def __init__(self, path: Path):
         self.conn = sqlite3.connect(path)
-        self.console = console
 
     @classmethod
     def exists(cls, path: Path) -> bool:
