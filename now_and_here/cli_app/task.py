@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Any
 
 import typer
 from rich.prompt import IntPrompt, Prompt
@@ -75,7 +76,7 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
     )
     task.priority = priority
     due = Prompt.ask(
-        "Due date \[blank for None]",
+        "Due date \\[blank for None]",
         console=console,
         default=None,
         show_default=True,
@@ -83,7 +84,7 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
     if due:
         task.due = parse_time(due, warn_on_past=True)
     repeat = Prompt.ask(
-        "Repeat interval \[blank for None]",
+        "Repeat interval \\[blank for None]",
         console=console,
         default=None,
         show_default=True,
@@ -111,6 +112,40 @@ def add(interactive: bool = typer.Option(False, "--interactive", "-i")):
         store.save_task(task)
     console.print("[green]Task saved![/green]")
     console.print(f"ID: [cyan]{format_id(task.id)}[/cyan]")
+
+
+@task_app.command()
+def get(id: str, fields: list[str] = typer.Option(None, "--field", "-f")):
+    store = datastore.get_store()
+    id = id.replace("-", "")
+    task = store.get_task(id)
+    if len(fields) == 0:
+        console.print(task)
+        return
+    to_print: list[Any] = []
+    for field in fields:
+        match field:
+            case "name":
+                to_print.append(task.name)
+            case "description":
+                to_print.append(task.description)
+            case "priority":
+                to_print.append(task.priority)
+            case "due":
+                if task.due is None:
+                    to_print.append(None)
+                else:
+                    to_print.append(format_time(task.due))
+            case "repeat":
+                to_print.append(task.repeat)
+            case str(f):
+                console.print(f"[red]Error:[/] Unknown field '{f}'")
+                raise typer.Exit(1)
+    for line in to_print:
+        if line is None:
+            console.print()
+        else:
+            console.print(line)
 
 
 @task_app.command()
@@ -148,7 +183,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
     while True:
         console.print(task)
         field_name = Prompt.ask(
-            "Update which field? \[or 'save' to confirm changes]",
+            "Update which field? \\[or 'save' to confirm changes]",
             console=console,
             choices=valid_fields,
         )
@@ -171,7 +206,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
                 )
             case "due":
                 due_str = Prompt.ask(
-                    "New value for due \[blank for None]",
+                    "New value for due \\[blank for None]",
                     console=console,
                     default=None,
                     show_default=True,
@@ -182,7 +217,7 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
                     task.due = None
             case "repeat":
                 repeat_str = Prompt.ask(
-                    "New value for repeat \[blank for None]",
+                    "New value for repeat \\[blank for None]",
                     console=console,
                     default=None,
                     show_default=True,
