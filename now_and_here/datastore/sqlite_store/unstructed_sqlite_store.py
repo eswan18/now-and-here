@@ -200,18 +200,34 @@ class UnstructuredSQLiteStore:
         desc: bool = False,
     ) -> list[Project]:
         query = """
-            SELECT json_set(p.json, '$.parent', json(p2.json))
-            FROM projects p
-                LEFT JOIN projects p2
-                ON p.json ->> 'parent' = p2.id
-            WHERE 1=1
+            WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
+                -- Initial query: Select all projects and their immediate parent ID
+                SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
+                FROM projects p
+                WHERE p.json ->> '$.parent' IS NOT NULL
+
+                UNION ALL
+
+                -- Recursive query: Get parent projects, linking through the parent_id
+                SELECT p.id, p.json, p.json ->> '$.parent'
+                FROM projects p
+                JOIN project_hierarchy ph ON p.id = ph.parent_id
+            )
+            SELECT 
+                json_set(
+                    ph.json,
+                    '$.parent',
+                    (SELECT json(ph2.json) FROM project_hierarchy ph2 WHERE ph.parent_id = ph2.id)
+                ) AS updated_json
+            FROM project_hierarchy ph
+            WHERE 1 = 1
         """
         if sort_by:
             # Some very limited validation to avoid extremely easy sql injection.
             if sort_by not in Project.sortable_columns():
                 raise InvalidSortError(f"Cannot sort on column {sort_by}")
             asc = "DESC" if desc else "ASC"
-            query += f" ORDER BY p.json ->> '{sort_by}' {asc} NULLS LAST"
+            query += f" ORDER BY ph.json ->> '{sort_by}' {asc} NULLS LAST"
         with self.conn as conn:
             cursor = conn.execute(query)
             projects = [Project.from_json(data) for (data,) in cursor.fetchall()]
