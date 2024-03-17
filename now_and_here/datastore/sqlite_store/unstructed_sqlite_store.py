@@ -10,6 +10,65 @@ from now_and_here.models import Label, Project, Task
 
 from .create import create_db
 
+TASKS_QUERY = """
+WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
+    -- Initial query: Select all projects and their immediate parent ID
+    SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
+    FROM projects p
+    WHERE p.json ->> '$.parent' IS NOT NULL
+
+    UNION ALL
+
+    -- Recursive query: Get parent projects, linking through the parent_id
+    SELECT p.id, p.json, p.json ->> '$.parent'
+    FROM projects p
+    JOIN project_hierarchy ph ON p.id = ph.parent_id
+)
+SELECT 
+    json_set(
+        t.json,
+        '$.project',
+        json(p.updated_json)
+    )
+FROM tasks t
+LEFT JOIN (
+    SELECT 
+        ph.id,
+        json_set(
+            ph.json,
+            '$.parent',
+            (SELECT json(ph2.json) FROM project_hierarchy ph2 WHERE ph.parent_id = ph2.id)
+        ) AS updated_json
+    FROM project_hierarchy ph
+) p
+ON t.json ->> 'project' = p.id
+WHERE 1=1
+"""
+
+PROJECTS_QUERY = """
+WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
+    -- Initial query: Select all projects and their immediate parent ID
+    SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
+    FROM projects p
+    WHERE p.json ->> '$.parent' IS NOT NULL
+
+    UNION ALL
+
+    -- Recursive query: Get parent projects, linking through the parent_id
+    SELECT p.id, p.json, p.json ->> '$.parent'
+    FROM projects p
+    JOIN project_hierarchy ph ON p.id = ph.parent_id
+)
+SELECT 
+    json_set(
+        ph.json,
+        '$.parent',
+        (SELECT json(ph2.json) FROM project_hierarchy ph2 WHERE ph.parent_id = ph2.id)
+    ) AS updated_json
+FROM project_hierarchy ph
+WHERE 1 = 1
+"""
+
 
 class UnstructuredSQLiteStore:
     def __init__(self, path: Path):
@@ -32,20 +91,8 @@ class UnstructuredSQLiteStore:
         return task.id
 
     def get_task(self, id: str) -> Task:
-        query = """
-            SELECT json_set(
-                json_set(t.json, '$.project', json(p.json)),
-                '$.project.parent',
-                json(p2.json)
-            )
-            FROM tasks t
-            LEFT JOIN projects p
-                ON t.json ->> 'project' = p.id
-            LEFT JOIN projects p2
-                ON p.json ->> 'parent' = p2.id
-            WHERE t.id = (?)
-            LIMIT 1
-        """
+        query = TASKS_QUERY
+        query += "\n AND t.id = (?) LIMIT 1"
         with self.conn as conn:
             cursor = conn.execute(query, (id,))
             row = cursor.fetchone()
@@ -64,21 +111,7 @@ class UnstructuredSQLiteStore:
         due_before: datetime | None = None,
     ) -> list[Task]:
         """Pull items from the tasks table."""
-        # Known bug: projects that have two levels of parents
-        # (project -> parent -> parent) will break this.
-        query = """
-            SELECT json_set(
-                json_set(t.json, '$.project', json(p.json)),
-                '$.project.parent',
-                json(p2.json)
-            )
-            FROM tasks t
-            LEFT JOIN projects p
-                ON t.json ->> 'project' = p.id
-            LEFT JOIN projects p2
-                ON p.json ->> 'parent' = p2.id
-            WHERE 1=1
-        """
+        query = TASKS_QUERY
         params = []
         if not include_done:
             query += " AND t.json ->> 'done' = FALSE"
@@ -88,7 +121,7 @@ class UnstructuredSQLiteStore:
         if project_name:
             # Case-insensitive search
             project_name = project_name.lower()
-            query += " AND lower(p.json ->> 'name') = (?)"
+            query += " AND lower(p.updated_json ->> 'name') = (?)"
             params.append(project_name)
         if project_id:
             query += " AND p.id = (?)"
@@ -177,7 +210,8 @@ class UnstructuredSQLiteStore:
         return project.id
 
     def get_project(self, id: str) -> Project:
-        query = "SELECT json FROM projects WHERE id = ?"
+        query = PROJECTS_QUERY
+        query += "AND ph.id = (?)"
         with self.conn as conn:
             cursor = conn.execute(query, (id,))
             row = cursor.fetchone()
@@ -186,7 +220,8 @@ class UnstructuredSQLiteStore:
         return Project.from_json(row[0])
 
     def get_project_by_name(self, name: str) -> Project:
-        query = "SELECT json FROM projects WHERE json ->> 'name' = ?"
+        query = PROJECTS_QUERY
+        query += "AND ph.json ->> 'name' = (?)"
         with self.conn as conn:
             cursor = conn.execute(query, (name,))
             row = cursor.fetchone()
@@ -199,29 +234,7 @@ class UnstructuredSQLiteStore:
         sort_by: str | None = "name",
         desc: bool = False,
     ) -> list[Project]:
-        query = """
-            WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
-                -- Initial query: Select all projects and their immediate parent ID
-                SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
-                FROM projects p
-                WHERE p.json ->> '$.parent' IS NOT NULL
-
-                UNION ALL
-
-                -- Recursive query: Get parent projects, linking through the parent_id
-                SELECT p.id, p.json, p.json ->> '$.parent'
-                FROM projects p
-                JOIN project_hierarchy ph ON p.id = ph.parent_id
-            )
-            SELECT 
-                json_set(
-                    ph.json,
-                    '$.parent',
-                    (SELECT json(ph2.json) FROM project_hierarchy ph2 WHERE ph.parent_id = ph2.id)
-                ) AS updated_json
-            FROM project_hierarchy ph
-            WHERE 1 = 1
-        """
+        query = PROJECTS_QUERY
         if sort_by:
             # Some very limited validation to avoid extremely easy sql injection.
             if sort_by not in Project.sortable_columns():
