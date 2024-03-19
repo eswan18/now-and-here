@@ -211,13 +211,23 @@ def test_try_parse_weekdays_valid(text: str, interval: WeeklyInterval):
         ),
         (
             datetime(2024, 1, 1, 15, 15),
+            WeeklyInterval(weeks=4, weekdays={Weekday.MONDAY}),
+            datetime(2024, 1, 29, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 1, 7, 15, 15),
             WeeklyInterval(weeks=4, weekdays={Weekday.SUNDAY}),
-            datetime(2024, 1, 7, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+            datetime(2024, 2, 4, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
         ),
         (
             datetime(2024, 1, 1, 15, 15),
             WeeklyInterval(weeks=1, weekdays={Weekday.MONDAY, Weekday.TUESDAY}),
             datetime(2024, 1, 2, DEFAULT_TIME.hour, DEFAULT_TIME.minute),
+        ),
+        (
+            datetime(2024, 3, 17, 13, 0),
+            WeeklyInterval(weeks=3, weekdays={Weekday.SUNDAY}, at=time(13, 0)),
+            datetime(2024, 4, 7, 13, 0),
         ),
         (
             datetime(2024, 1, 1, 15, 15),
