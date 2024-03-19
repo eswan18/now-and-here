@@ -32,17 +32,10 @@ DEFAULT_TIME = time(9, 0)
 DEFAULT_WEEKDAY = Weekday.MONDAY
 
 
-@dataclass
+@dataclass(order=True)
 class Occurence:
     weekday: Weekday
     time: time
-
-    def __lt__(self, other: Occurence) -> bool:
-        if self.weekday < other.weekday:
-            return True
-        if self.weekday > other.weekday:
-            return False
-        return self.time < other.time
 
 
 @dataclass
@@ -62,7 +55,7 @@ class WeeklyInterval:
         # and only "skip forward" after the final day.
         final_occurence_of_week = Occurence(repeat_weekdays[-1], self.at)
         current_as_occurence = Occurence(current_weekday, current.time())
-        if current_as_occurence > final_occurence_of_week:
+        if current_as_occurence >= final_occurence_of_week:
             # Go to the beginning of the following day and increment forward until we're
             # at the beginning of the following week.
             current += relativedelta(days=1)

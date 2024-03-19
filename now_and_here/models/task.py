@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from typing import Iterable, Self
 
-from pydantic import Field, RootModel, field_serializer
+from pydantic import AwareDatetime, Field, RootModel, field_serializer
 from pydantic.dataclasses import dataclass
 from pydantic.functional_validators import SkipValidation
 from rich.console import Console, ConsoleOptions, RenderResult
@@ -33,7 +32,7 @@ class Task:
     project: Project | None = Field(None)  # type: ignore [misc]
     labels: list[Label] = Field(default_factory=list)  # type: ignore [misc]
     priority: int = Field(default=0, ge=0, le=3)  # type: ignore [misc]
-    due: datetime | None = Field(None)  # type: ignore [misc]
+    due: AwareDatetime | None = Field(None)  # type: ignore [misc]
     # We can't validate this field because it's a protocol
     repeat: SkipValidation[RepeatInterval | None] = Field(None)  # type: ignore [misc]
 

@@ -153,7 +153,7 @@ def get(id: str, fields: list[str] = typer.Option(None, "--field", "-f")):
         if line is None:
             console.print()
         else:
-            console.print(line)
+            console.print(str(line))
 
 
 @task_app.command()
