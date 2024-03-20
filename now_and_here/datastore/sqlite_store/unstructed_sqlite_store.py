@@ -15,7 +15,6 @@ WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
     -- Initial query: Select all projects and their immediate parent ID
     SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
     FROM projects p
-    WHERE p.json ->> '$.parent' IS NOT NULL
 
     UNION ALL
 
@@ -23,6 +22,7 @@ WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
     SELECT p.id, p.json, p.json ->> '$.parent'
     FROM projects p
     JOIN project_hierarchy ph ON p.id = ph.parent_id
+    WHERE p.json ->> '$.parent' IS NOT NULL
 )
 SELECT 
     json_set(
@@ -46,25 +46,23 @@ WHERE 1=1
 """
 
 PROJECTS_QUERY = """
-WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
+WITH RECURSIVE project_hierarchy(id, json) AS (
     -- Initial query: Select all projects and their immediate parent ID
-    SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
+    SELECT p.id, p.json
     FROM projects p
-    WHERE p.json ->> '$.parent' IS NOT NULL
-
+    WHERE p.json ->> '$.parent' IS NULL
     UNION ALL
 
     -- Recursive query: Get parent projects, linking through the parent_id
-    SELECT p.id, p.json, p.json ->> '$.parent'
-    FROM projects p
-    JOIN project_hierarchy ph ON p.id = ph.parent_id
-)
-SELECT 
-    json_set(
-        ph.json,
+    SELECT p2.id, json_set(
+        p2.json,
         '$.parent',
-        (SELECT json(ph2.json) FROM project_hierarchy ph2 WHERE ph.parent_id = ph2.id)
-    ) AS updated_json
+        json(ph.json)
+    ) as json
+    FROM projects p2
+    JOIN project_hierarchy ph ON p2.json ->> '$.parent' = ph.id
+)
+SELECT json
 FROM project_hierarchy ph
 WHERE 1 = 1
 """
