@@ -10,58 +10,39 @@ from now_and_here.models import Label, Project, Task
 
 from .create import create_db
 
-TASKS_QUERY = """
-WITH RECURSIVE project_hierarchy(id, json, parent_id) AS (
-    -- Initial query: Select all projects and their immediate parent ID
-    SELECT p.id, p.json, p.json ->> '$.parent' AS parent_id
-    FROM projects p
+PROJECTS_HIERARCHY_CTE = """
+-- Initial query: Select all projects and their immediate parent ID
+SELECT p.id, p.json
+FROM projects p
+WHERE p.json ->> '$.parent' IS NULL
+UNION ALL
 
-    UNION ALL
+-- Recursive query: Get parent projects, linking through the parent_id
+SELECT p2.id, json_set(
+    p2.json,
+    '$.parent',
+    json(ph.json)
+) as json
+FROM projects p2
+JOIN project_hierarchy ph ON p2.json ->> '$.parent' = ph.id
+"""
 
-    -- Recursive query: Get parent projects, linking through the parent_id
-    SELECT p.id, p.json, p.json ->> '$.parent'
-    FROM projects p
-    JOIN project_hierarchy ph ON p.id = ph.parent_id
-    WHERE p.json ->> '$.parent' IS NOT NULL
-)
+TASKS_QUERY = f"""
+WITH RECURSIVE project_hierarchy(id, json) AS ({PROJECTS_HIERARCHY_CTE})
 SELECT 
     json_set(
         t.json,
         '$.project',
-        json(p.updated_json)
+        json(ph.json)
     )
 FROM tasks t
-LEFT JOIN (
-    SELECT 
-        ph.id,
-        json_set(
-            ph.json,
-            '$.parent',
-            (SELECT json(ph2.json) FROM project_hierarchy ph2 WHERE ph.parent_id = ph2.id)
-        ) AS updated_json
-    FROM project_hierarchy ph
-) p
-ON t.json ->> 'project' = p.id
+LEFT JOIN project_hierarchy ph
+    ON t.json ->> 'project' = ph.id
 WHERE 1=1
 """
 
-PROJECTS_QUERY = """
-WITH RECURSIVE project_hierarchy(id, json) AS (
-    -- Initial query: Select all projects and their immediate parent ID
-    SELECT p.id, p.json
-    FROM projects p
-    WHERE p.json ->> '$.parent' IS NULL
-    UNION ALL
-
-    -- Recursive query: Get parent projects, linking through the parent_id
-    SELECT p2.id, json_set(
-        p2.json,
-        '$.parent',
-        json(ph.json)
-    ) as json
-    FROM projects p2
-    JOIN project_hierarchy ph ON p2.json ->> '$.parent' = ph.id
-)
+PROJECTS_QUERY = f"""
+WITH RECURSIVE project_hierarchy(id, json) AS ({PROJECTS_HIERARCHY_CTE})
 SELECT json
 FROM project_hierarchy ph
 WHERE 1 = 1
@@ -119,7 +100,7 @@ class UnstructuredSQLiteStore:
         if project_name:
             # Case-insensitive search
             project_name = project_name.lower()
-            query += " AND lower(p.updated_json ->> 'name') = (?)"
+            query += " AND lower(ph.json ->> 'name') = (?)"
             params.append(project_name)
         if project_id:
             query += " AND p.id = (?)"
