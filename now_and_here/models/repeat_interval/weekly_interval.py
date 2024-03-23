@@ -11,6 +11,15 @@ from dateutil.relativedelta import relativedelta
 from pydantic.dataclasses import Field, dataclass
 
 
+def as_ordinal(n: int) -> str:
+    # From https://stackoverflow.com/a/20007730/7191513
+    if 11 <= (n % 100) <= 13:
+        suffix = "th"
+    else:
+        suffix = ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
+    return str(n) + suffix
+
+
 @functools.total_ordering
 class Weekday(Enum):
     MONDAY = 0
@@ -155,9 +164,25 @@ class WeeklyInterval:
         return json.dumps(data)
 
     def __str__(self) -> str:
-        s = f"every {self.weeks} weeks"
-        if self.weekdays:
-            s += " on " + ", ".join(str(w) for w in self.weekdays)
-        if self.at:
-            s += f" at {self.at.strftime('%H:%M')}"
-        return s
+        s = "every"
+        if len(self.weekdays) == 1:
+            if self.weeks == 1:
+                pass
+            elif self.weeks == 2:
+                s += " other"
+            else:
+                s += f" {as_ordinal(self.weeks)}"
+            s += " " + str(list(self.weekdays)[0])
+            return s
+        else:
+            if self.weeks == 1:
+                s += " week"
+            elif self.weeks == 2:
+                s += " other week"
+            else:
+                s += f" {self.weeks} weeks"
+            if self.weekdays:
+                s += " on " + ", ".join(str(w) for w in self.weekdays)
+            if self.at:
+                s += f" at {self.at.strftime('%H:%M')}"
+            return s
