@@ -5,7 +5,10 @@
     <div class="bg-slate-100 w-full">
       <h1 class="text-3xl font-bold">Now and Here</h1>
     </div>
-    {% block mainContent %}
-    {% endblock %}
+    {# Container for main content #}
+    <div class="w-full lg:w-[60rem] mx-auto">
+      {% block mainContent %}
+      {% endblock %}
+    </div>
   </div>
 {% endblock %}

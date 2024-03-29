@@ -2,6 +2,5 @@
 
 {% block mainContent %}
     {% from 'components/task.html' import task_card %}
-    Task id: {{ task.id }}
     {{ task_card(task) }}
 {% endblock %}

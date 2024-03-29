@@ -66,7 +66,7 @@ class UnstructuredSQLiteStore:
             query += " AND lower(ph.json ->> 'name') = (?)"
             params.append(project_name)
         if project_id:
-            query += " AND p.id = (?)"
+            query += " AND ph.id = (?)"
             params.append(project_id)
         if sort_by:
             # Some very limited validation to avoid extremely easy sql injection.

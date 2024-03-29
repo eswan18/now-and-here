@@ -73,13 +73,16 @@ def post_task(id: str, done: Annotated[bool | None, Form()] = None):
 
 
 @app.get("/project/{id}", response_class=HTMLResponse)
-def project(request: Request, id: str):
+def project(request: Request, id: str, sort_by: str = "due", desc: bool = False):
     store = datastore.get_store()
     try:
         project = store.get_project(id)
-        tasks = store.get_tasks(project_id=id, include_done=True)
+        tasks = store.get_tasks(
+            project_id=id, include_done=True, sort_by=sort_by, desc=desc
+        )
     except RecordNotFoundError:
         return 404, "Project not found"
     return templates.TemplateResponse(
-        "project.html", {"request": request, "project": project, "tasks": tasks}
+        "project.html",
+        {"request": request, "project": project, "tasks": tasks, "sort_by": sort_by},
     )
