@@ -1,0 +1,12 @@
+{% macro project_card(project) -%}
+{% from 'components/id_badge.html' import id_badge %}
+<div class="rounded overflow-hidden shadow-lg my-4 w-64 lg:w-80">
+    <div class="px-6 py-4 flex flex-col items-center">
+        <h3 class="font-bold text-xl inline-block my-2"><a href="/projects/{{ project.id }}">{{ project.name }}</a></h3>
+        <a href="/projects/{{ project.id }}">{{ id_badge(project.id) }}</a>
+        <p class="text-gray-500 text-base">
+            {{ project.description }}
+        </p>
+    </div>
+</div>
+{%- endmacro %}

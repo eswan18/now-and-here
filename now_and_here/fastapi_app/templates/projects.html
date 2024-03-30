@@ -1,0 +1,8 @@
+{% extends "/main.html" %}
+
+{% block mainContent %}
+    {% from 'components/project.html' import project_card %}
+    {% for project in projects %}
+        {{ project_card(project) }}
+    {% endfor %}
+{% endblock %}
