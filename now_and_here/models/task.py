@@ -200,3 +200,7 @@ class Task:
             due=self.due,
             repeat=self.repeat,
         )
+
+    @property
+    def relative_due_date(self) -> str | None:
+        return relative_time(self.due) if self.due else None
