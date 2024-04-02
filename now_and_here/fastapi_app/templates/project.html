@@ -6,20 +6,48 @@
         <h1 class="text-3xl inline-block mr-8">{{ project.name }}</h1>
         <p class="text-gray-700 text-base italic inline-block">{{ project.description }}</p>
     </div>
-    <p>
-    Sorted by 
-    {% if sort_by == "due" %}
-        <span class="font-bold">Due Date</span>
-        <a href="?sort_by=priority&desc=True" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-sm">
-            Sort by <span class="font-bold">Priority</span> instead
-        </a>
-    {% elif sort_by == "priority" %}
-        <span class="font-bold">Priority</span>
-        <a href="?sort_by=due" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-sm">
-            Sort by <span class="font-bold">Due Date</span> instead
-        </a>
-    {% endif %}
-    </p>
+    <div class="flex flex-col">
+        <h2 class="text-xl">Options</h2>
+        <form action="/projects/{{ project.id }}" method="get">
+            <div class="flex flex-col">
+                Sorted by 
+                <select name="sort_by" id="sort-by-select">
+                    <option {% if sort_by == "due" %} selected {% endif %} value="due">Due date</option>
+                    <option {% if sort_by == "priority" %} selected {% endif %} value="priority">Priority</option>
+                </select>
+
+                <select name="desc" id="sort-by-desc">
+                    {% if desc %}
+                        <option value="false">Ascending</option>
+                        <option selected value="true">Descending</option>
+                    {% else %}
+                        <option selected value="false">Ascending</option>
+                        <option value="true">Descending</option>
+                    {% endif %}
+                </select>
+
+                <div class="flex flex-row">
+                <label for="include_completed">Include completed tasks</label>
+                <input
+                    type="checkbox" name="include_done" id="include-completed-checkbox" value="true"
+                    {% if include_done %} checked {% endif %} >
+                </div>
+
+                <button type="submit">Go</button>
+            </div>
+        </form>
+        {% if sort_by == "due" %}
+            <span class="font-bold">Due Date</span>
+            <a href="?sort_by=priority&desc=True" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-sm">
+                Sort by <span class="font-bold">Priority</span> instead
+            </a>
+        {% elif sort_by == "priority" %}
+            <span class="font-bold">Priority</span>
+            <a href="?sort_by=due" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded text-sm">
+                Sort by <span class="font-bold">Due Date</span> instead
+            </a>
+        {% endif %}
+    </div>
     {% for task in tasks %}
         {{ task_card(task) }}
     {% endfor %}

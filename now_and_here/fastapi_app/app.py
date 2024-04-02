@@ -83,16 +83,16 @@ def projects(request: Request):
 
 
 @app.get("/projects/{id}", response_class=HTMLResponse)
-def project(request: Request, id: str, sort_by: str = "due", desc: bool = False):
+def project(request: Request, id: str, sort_by: str = "due", desc: bool = False, include_done: bool = False):
     store = datastore.get_store()
     try:
         project = store.get_project(id)
         tasks = store.get_tasks(
-            project_id=id, include_done=True, sort_by=sort_by, desc=desc
+            project_id=id, include_done=include_done, sort_by=sort_by, desc=desc,
         )
     except RecordNotFoundError:
         return 404, "Project not found"
     return templates.TemplateResponse(
         "project.html",
-        {"request": request, "project": project, "tasks": tasks, "sort_by": sort_by},
+        {"request": request, "project": project, "tasks": tasks, "sort_by": sort_by, "include_done": include_done, "desc": desc},
     )
