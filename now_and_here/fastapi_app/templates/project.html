@@ -2,10 +2,12 @@
 
 {% block mainContent %}
     {% from 'components/filterable_task_list.html' import filter_options, task_list %}
-    <div class="my-4">
-        <h1 class="text-3xl inline-block mr-8">{{ project.name }}</h1>
-        <p class="text-gray-700 text-base italic inline-block">{{ project.description }}</p>
+    <div class="flex flex-row flex-wrap justify-between w-full my-4">
+        <div>
+            <h1 class="text-3xl inline-block mr-8">{{ project.name }}</h1>
+            <p class="text-gray-700 text-base italic inline-block">{{ project.description }}</p>
+        </div>
+        {{ filter_options(sort_by, desc, include_done) }}
     </div>
-    {{ filter_options(sort_by, desc, include_done) }}
     {{ task_list(tasks) }}
 {% endblock %}
