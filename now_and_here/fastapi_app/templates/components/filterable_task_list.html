@@ -1,0 +1,41 @@
+{% macro filter_options(sort_by, desc, include_done) -%}
+
+<div class="flex flex-col">
+    <h2 class="text-xl">Options</h2>
+    <form method="get">
+        <div class="flex flex-col">
+            Sorted by 
+            <select name="sort_by" id="sort-by-select">
+                <option {% if sort_by == "due" %} selected {% endif %} value="due">Due date</option>
+                <option {% if sort_by == "priority" %} selected {% endif %} value="priority">Priority</option>
+            </select>
+
+            <select name="desc" id="sort-by-desc">
+                {% if desc %}
+                    <option value="false">Ascending</option>
+                    <option selected value="true">Descending</option>
+                {% else %}
+                    <option selected value="false">Ascending</option>
+                    <option value="true">Descending</option>
+                {% endif %}
+            </select>
+
+            <div class="flex flex-row">
+            <label for="include_completed">Include completed tasks</label>
+            <input
+                type="checkbox" name="include_done" id="include-completed-checkbox" value="true"
+                {% if include_done %} checked {% endif %} >
+            </div>
+
+            <button type="submit">Go</button>
+        </div>
+    </form>
+</div>
+{%- endmacro %}
+
+{% macro task_list(tasks) -%}
+{% from 'components/task.html' import task_card %}
+{% for task in tasks %}
+    {{ task_card(task) }}
+{% endfor %}
+{%- endmacro %}
