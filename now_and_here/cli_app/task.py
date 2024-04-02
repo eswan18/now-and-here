@@ -187,7 +187,16 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
         except RecordNotFoundError:
             console.print(f"[red]Error:[/red] Task [cyan]{id}[/cyan] not found")
             raise typer.Exit(1)
-    valid_fields = ["name", "description", "priority", "due", "save", "repeat", ""]
+    valid_fields = [
+        "name",
+        "description",
+        "priority",
+        "due",
+        "save",
+        "repeat",
+        "project",
+        "",
+    ]
     while True:
         console.print(task)
         field_name = Prompt.ask(
@@ -237,6 +246,14 @@ def update(id: str, interactive: bool = typer.Option(False, "--interactive", "-i
                         typer.Exit(1)
                 else:
                     task.repeat = None
+            case "project":
+                projects = {project.name: project for project in store.get_projects()}
+                project_name = Prompt.ask(
+                    "New value for project",
+                    choices=list(projects.keys()),
+                    console=console,
+                )
+                task.project = projects[project_name]
             case "save" | "":
                 break
             case _:
