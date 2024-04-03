@@ -1,11 +1,12 @@
 import os
 import subprocess
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -44,10 +45,10 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
-@app.get("/", response_class=RedirectResponse)
+@app.get("/", response_class=HTMLResponse)
 def index(request: Request):
     # Redirect to /projects
-    return RedirectResponse(url="/projects")
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/tasks/{id}", response_class=HTMLResponse)
@@ -106,6 +107,32 @@ def project(
         {
             "request": request,
             "project": project,
+            "tasks": tasks,
+            "sort_by": sort_by,
+            "include_done": include_done,
+            "desc": desc,
+        },
+    )
+
+
+@app.get("/task_views/today", response_class=HTMLResponse)
+def view_today(
+    request: Request,
+    sort_by: str = "due",
+    desc: bool = False,
+    include_done: bool = False,
+):
+    store = datastore.get_store()
+    end_of_today = datetime.now().replace(hour=23, minute=59, second=59)
+    tasks = store.get_tasks(
+        sort_by=sort_by, desc=desc, include_done=include_done, due_before=end_of_today
+    )
+    return templates.TemplateResponse(
+        "task_view.html",
+        {
+            "request": request,
+            "title": "Today",
+            "subtitle": "Tasks due by the end the day",
             "tasks": tasks,
             "sort_by": sort_by,
             "include_done": include_done,
