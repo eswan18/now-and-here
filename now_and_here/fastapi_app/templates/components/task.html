@@ -2,15 +2,15 @@
 {% from 'components/priority_badge.html' import priority_badge %}
 {% from 'components/id_badge.html' import id_badge %}
 {% from 'functions.html' import format_relative_datetime %}
-<div class="rounded my-4 p-4 flex flex-col items-center">
+<div class="rounded my-2 p-4 flex flex-col items-center">
     <div class="flex flex-row flex-wrap w-full justify-between pl-14">
-        <div class="font-semibold text-gray-500">
+        <div class="text-sm font-semibold text-gray-500">
             <a href="/projects/{{ task.project.id }}">{{ task.project.name }}</a>
         </div>
         <a href="/tasks/{{ task.id }}">{{ id_badge(task.id) }}</a>
     </div>
     <div class="flex flex-row items-center w-full border-b border-b-gray-200">
-        <label class="relative flex items-center py-3 pr-3 rounded-full cursor-pointer mx-2" htmlFor="green">
+        <label class="relative flex items-center py-2 pr-3 rounded-full cursor-pointer mx-2" htmlFor="green">
             <input type="checkbox" hx-post="/tasks/{{ task.id }}" hx-trigger="change"
                 hx-vals='js:{done: event.target.checked}'
                 class="before:content[''] peer relative h-6 w-6 cursor-pointer appearance-none rounded-md border border-green-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-green-gray-500 before:opacity-0 before:transition-opacity checked:border-green-500 checked:bg-green-500 checked:before:bg-green-500 hover:before:opacity-10"
@@ -26,26 +26,24 @@
             </span>
         </label>
         <div>
-            <h3 class="font-bold text-xl inline-block"><a href="/tasks/{{ task.id }}">{{ task.name }}</a></h3>
+            <h3 class="font-semibold text-lg inline-block"><a href="/tasks/{{ task.id }}">{{ task.name }}</a></h3>
         </div>
         <div class="ml-auto text-xs">
             {{ priority_badge(task.priority) }}
         </div>
     </div>
-    <div class="flex flex-row flex-wrap w-full justify-between pl-14 py-3">
+    <div class="flex flex-row flex-wrap w-full justify-between pl-14 py-2">
         <div class="text-gray-500 text-base">
             {% if task.description %}
             {{ task.description }}
             {% endif %}
         </div>
-        <div class="text-right">
+        <div class="flex flex-col items-end text-sm text-gray-400">
             {% if task.due %}
-            <p class="text-gray-500">Due
-                <span class="font-semibold text-gray-800">{{ task.relative_due_date }}</span><br>
-                {{ format_relative_datetime(task.due) }}
-            </p>
+            <div>Due <span class="font-semibold text-gray-800">{{ task.relative_due_date }}</span></div>
+            <div class="text-xs">{{ format_relative_datetime(task.due) }}</div>
             {% else %}
-            <p class="text-gray-400">No due date</p>
+            <div>No due date</div>
             {% endif %}
         </div>
     </div>
