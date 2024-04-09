@@ -7,10 +7,15 @@
         <div class="text-sm font-semibold text-gray-400">
             <a href="/projects/{{ task.project.id }}">{{ task.project.name }}</a>
         </div>
-        <a href="/tasks/{{ task.id }}">{{ id_badge(task.id) }}</a>
+        <!-- <a href="/tasks/{{ task.id }}">{{ id_badge(task.id) }}</a> -->
+        <div class="text-sm mx-4">
+            {% if task.due %}
+            <span class="text-gray-800">{{ task.relative_due_date }}</span>
+            {% endif %}
+        </div>
     </div>
-    <div class="flex flex-row justify-between items-end w-full border-b border-b-gray-200">
-        <div class="flex flex-row items-center justify-start gap-4 mb-1">
+    <div class="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">
+        <div class="flex flex-row items-center justify-start gap-4">
             <label class="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green"></label>
             <input type="checkbox" hx-post="/tasks/{{ task.id }}" hx-trigger="change"
                 hx-vals='js:{done: event.target.checked}'
@@ -35,10 +40,9 @@
         </div>
         <div class="flex flex-col w-36 justify-center items-end text-sm text-gray-400 mx-4">
             {% if task.due %}
-            <div>Due <span class="font-semibold text-gray-800">{{ task.relative_due_date }}</span></div>
-            <div class="text-xs">{{ format_relative_datetime(task.due) }}</div>
+            <div>{{ format_relative_datetime(task.due) }}</div>
             {% else %}
-            <div class="mb-2">No due date</div>
+            <div>No due date</div>
             {% endif %}
         </div>
     </div>
