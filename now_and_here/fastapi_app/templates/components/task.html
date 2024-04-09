@@ -2,15 +2,15 @@
 {% from 'components/priority_badge.html' import priority_badge %}
 {% from 'components/id_badge.html' import id_badge %}
 {% from 'functions.html' import format_relative_datetime %}
-<div class="rounded my-4 px-4 flex flex-col items-center">
+<div class="rounded my-6 px-4 flex flex-col items-center">
     <div class="flex flex-row flex-wrap w-full justify-between pl-14 pr-2">
-        <div class="text-sm font-semibold text-gray-500">
+        <div class="text-sm font-semibold text-gray-400">
             <a href="/projects/{{ task.project.id }}">{{ task.project.name }}</a>
         </div>
         <a href="/tasks/{{ task.id }}">{{ id_badge(task.id) }}</a>
     </div>
     <div class="flex flex-row justify-between items-end w-full border-b border-b-gray-200">
-        <div class="flex flex-row items-center justify-start gap-4 mb-2">
+        <div class="flex flex-row items-center justify-start gap-4 mb-1">
             <label class="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green"></label>
             <input type="checkbox" hx-post="/tasks/{{ task.id }}" hx-trigger="change"
                 hx-vals='js:{done: event.target.checked}'
@@ -42,8 +42,8 @@
             {% endif %}
         </div>
     </div>
-    <div class="flex flex-row flex-wrap w-full justify-between pl-14 pt-2">
-        <div class="text-gray-500 text-base">
+    <div class="flex flex-row flex-wrap w-full justify-between pl-14 pt-1">
+        <div class="text-gray-400 text-sm">
             {% if task.description %}
             {{ task.description }}
             {% endif %}

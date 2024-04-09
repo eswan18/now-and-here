@@ -1,33 +1,36 @@
 {% macro filter_options(sort_by, desc, include_done) -%}
 
 <form method="get">
-    <div class="flex flex-col items-center px-4 w-80">
-        <h2 class="text-xl mb-4">Filter Options</h2>
-        <div class="flex flex-row gap-2 w-full">
-            Sort by
-            <select name="sort_by" id="sort-by-select">
-                <option {% if sort_by == "due" %} selected {% endif %} value="due">Due date</option>
-                <option {% if sort_by == "priority" %} selected {% endif %} value="priority">Priority</option>
+    <div class="flex flex-col items-end px-4 w-80">
+        <div class="flex flex-row justify-end items-center gap-2">
+            <label for="sort-by-select" class="block text-base text-gray-500">Sorted by</label>
+            <select name="sort_by" id="sort-by-select" class="block w-auto px-0 text-base bg-transparent appearance-none text-gray-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+                <option {% if sort_by=="due" %} selected {% endif %} value="due">Due date</option>
+                <option {% if sort_by=="priority" %} selected {% endif %} value="priority">Priority</option>
             </select>
-            <select name="desc" id="sort-by-desc">
+            <select name="desc" id="sort-by-desc" class="block px-0 text-base bg-transparent appearance-none text-gray-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
                 {% if desc %}
-                    <option value="false">Ascending</option>
-                    <option selected value="true">Descending</option>
+                <option value="false">Asc</option>
+                <option selected value="true">Desc</option>
                 {% else %}
-                    <option selected value="false">Ascending</option>
-                    <option value="true">Descending</option>
+                <option selected value="false">Asc</option>
+                <option value="true">Desc</option>
                 {% endif %}
             </select>
         </div>
-
-        <div class="flex flex-row gap-2 w-full">
-            <label for="include_completed">Include completed tasks</label>
-            <input
-                type="checkbox" name="include_done" id="include-completed-checkbox" value="true"
-                {% if include_done %} checked {% endif %} >
+        <div class="flex flex-row justify-end items-center gap-2">
+            <label for="showing" class="block text-base text-gray-500">Showing</label>
+            <select name="include_done" id="showing" class="block w-auto px-0 text-base bg-transparent appearance-none text-gray-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+                {% if include_done %}
+                <option selected value="true">All</option>
+                <option value="false">Incomplete</option>
+                {% else %}
+                <option value="true">All</option>
+                <option selected value="false">Incomplete</option>
+                {% endif %}
+            </select>
         </div>
-
-        <button class="rounded-md bg-blue-500 text-gray-100 font-semibold px-2 py-1 mt-2" type="submit">Go</button>
+        <button class="rounded-md text-blue-500 font-semibold" type="submit">Update</button>
     </div>
 </form>
 {%- endmacro %}
@@ -35,6 +38,6 @@
 {% macro task_list(tasks) -%}
 {% from 'components/task.html' import task_card %}
 {% for task in tasks %}
-    {{ task_card(task) }}
+{{ task_card(task) }}
 {% endfor %}
 {%- endmacro %}
