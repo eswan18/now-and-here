@@ -17,6 +17,7 @@ class DataStore(Protocol):
         self,
         project_name: str | None = None,
         project_id: str | None = None,
+        include_child_projects: bool = False,
         sort_by: str | None = None,
         desc: bool = False,
         include_done: bool = False,

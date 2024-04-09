@@ -47,12 +47,18 @@ class UnstructuredSQLiteStore:
         self,
         project_name: str | None = None,
         project_id: str | None = None,
+        include_child_projects: bool = False,
         sort_by: str | None = None,
         desc: bool = False,
         include_done: bool = False,
         due_before: datetime | None = None,
     ) -> list[Task]:
         """Pull items from the tasks table."""
+        # Sanity validations:
+        if project_name and project_id:
+            raise ValueError("Cannot filter by both project name and project id")
+        if not (project_name or project_id) and include_child_projects:
+            raise ValueError("Cannot include child projects without a project filter")
         query = TASKS_QUERY
         params = []
         if not include_done:
