@@ -7,7 +7,6 @@
         <div class="text-sm font-semibold text-gray-400">
             <a href="/projects/{{ task.project.id }}">{{ task.project.name }}</a>
         </div>
-        <!-- <a href="/tasks/{{ task.id }}">{{ id_badge(task.id) }}</a> -->
         <div class="text-sm mx-4">
             {% if task.due %}
             <span class="text-gray-800">{{ task.relative_due_date }}</span>
@@ -38,7 +37,7 @@
                 {{ priority_badge(task.priority) }}
             </div>
         </div>
-        <div class="flex flex-col w-36 justify-center items-end text-sm text-gray-400 mx-4">
+        <div class="flex flex-col w-36 justify-center items-end text-sm text-gray-400 mx-4 text-right">
             {% if task.due %}
             <div>{{ format_relative_datetime(task.due) }}</div>
             {% else %}
