@@ -1,12 +1,11 @@
 {% macro priority_badge(priority) -%}
 {% set colors = [
-    "bg-red-700 text-gray-100",
-    "bg-orange-400 text-gray-700",
-    "bg-yellow-300 text-gray-700",
-    "bg-blue-200 text-gray-700",
-    "bg-gray-200 text-gray-700"
+    "bg-red-200 text-red-900",
+    "bg-orange-200 text-orange-900",
+    "bg-yellow-200 text-yellow-900",
+    "bg-blue-200 text-blue-900",
 ][3-priority] %}
-<div class="inline-block w-20 {{ colors }} rounded-full px-2 py-1 text-xs font-semibold flex flex-row items-center justify-center">
+<div class="inline-block w-20 {{ colors }} tracking-wide rounded-full px-2 py-1 text-xs flex flex-row items-center justify-center">
     Priority {{ priority }}
 </div>
 {%- endmacro %}

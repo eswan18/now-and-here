@@ -1,13 +1,17 @@
 {% extends "/main.html" %}
 
+{% block headerContent %}
+<div class="flex flex-row flex-wrap w-full gap-4 justify-start items-end px-4 lg:px-8">
+    <h1 class="text-2xl inline-block">{{ project.name }}</h1><p class="text-orange-200 text-lg inline-block">{{ project.description }}</p>
+</div>
+{% endblock %}
+
 {% block mainContent %}
     {% from 'components/filterable_task_list.html' import filter_options, task_list %}
-    <div class="flex flex-row flex-wrap justify-between w-full px-4 lg:px-8">
-        <div class="flex flex-col justify-start items-start">
-            <h1 class="text-2xl inline-block mr-8">{{ project.name }}</h1>
-            <p class="text-gray-600 text-lg inline-block">{{ project.description }}</p>
-        </div>
+    <div class="w-full mt-4 -translate-y-6 lg:-translate-y-8 bg-white rounded-md py-1 px-4 lg:px-8 shadow-sm shadow-orange-800 ">
         {{ filter_options(sort_by, desc, include_done) }}
     </div>
-    {{ task_list(tasks) }}
+    <div class="-translate-y-6">
+        {{ task_list(tasks) }}
+    </div>
 {% endblock %}

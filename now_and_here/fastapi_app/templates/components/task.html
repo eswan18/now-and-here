@@ -2,14 +2,14 @@
 {% from 'components/priority_badge.html' import priority_badge %}
 {% from 'components/id_badge.html' import id_badge %}
 {% from 'functions.html' import format_relative_datetime %}
-<div class="rounded my-6 px-4 flex flex-col items-center">
+<div class="rounded my-2 p-4 flex flex-col items-center bg-white shadow-sm">
     <div class="flex flex-row flex-wrap w-full justify-between pl-14 pr-2">
-        <div class="text-sm font-semibold text-gray-400">
+        <div class="text-sm font-semibold text-orange-700">
             <a href="/projects/{{ task.project.id }}">{{ task.project.name }}</a>
         </div>
         <div class="text-sm mx-4">
             {% if task.due %}
-            <span class="text-gray-800">{{ task.relative_due_date }}</span>
+            <span class="text-orange-800">{{ task.relative_due_date }}</span>
             {% endif %}
         </div>
     </div>

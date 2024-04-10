@@ -1,26 +1,26 @@
 {% macro filter_options(sort_by, desc, include_done) -%}
 
-<form method="get">
-    <div class="flex flex-col items-end px-4 w-80">
-        <div class="flex flex-row justify-end items-center gap-2">
-            <label for="sort-by-select" class="block text-base text-gray-500">Sorted by</label>
-            <select name="sort_by" id="sort-by-select" class="block w-auto px-0 text-base bg-transparent appearance-none text-gray-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+<form method="get" class="m-0">
+    <div class="flex flex-row justify-start items-end gap-8 lg:gap-12 py-1">
+        <div class="flex flex-row justify-start items-end gap-2">
+            <label for="sort-by-select" class="block text-sm text-gray-500">Sorted by</label>
+            <select name="sort_by" id="sort-by-select" class="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 text-right">
                 <option {% if sort_by=="due" %} selected {% endif %} value="due">Due date</option>
                 <option {% if sort_by=="priority" %} selected {% endif %} value="priority">Priority</option>
             </select>
-            <select name="desc" id="sort-by-desc" class="block px-0 text-base bg-transparent appearance-none text-gray-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+            <select name="desc" id="sort-by-desc" class="block px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
                 {% if desc %}
-                <option value="false">Asc</option>
-                <option selected value="true">Desc</option>
+                <option value="false">↑</option>
+                <option selected value="true">↓</option>
                 {% else %}
-                <option selected value="false">Asc</option>
-                <option value="true">Desc</option>
+                <option selected value="false">↑</option>
+                <option value="true">↓</option>
                 {% endif %}
             </select>
         </div>
         <div class="flex flex-row justify-end items-center gap-2">
-            <label for="showing" class="block text-base text-gray-500">Showing</label>
-            <select name="include_done" id="showing" class="block w-auto px-0 text-base bg-transparent appearance-none text-gray-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+            <label for="showing" class="block text-sm text-gray-500">Showing</label>
+            <select name="include_done" id="showing" class="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
                 {% if include_done %}
                 <option selected value="true">All</option>
                 <option value="false">Incomplete</option>
@@ -30,7 +30,7 @@
                 {% endif %}
             </select>
         </div>
-        <button class="rounded-md text-blue-500 font-semibold" type="submit">Update</button>
+        <button class="px-2 py-0.5 rounded-md bg-orange-800 text-orange-100 text-xs font-semibold" type="submit">Update →</button>
     </div>
 </form>
 {%- endmacro %}
