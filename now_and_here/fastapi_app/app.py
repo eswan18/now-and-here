@@ -41,8 +41,8 @@ def get_tasks(
     return tasks
 
 
-@app.get("/api/tasks/{id}", response_class=HTMLResponse)
-def get_task(request: Request, id: str):
+@app.get("/api/tasks/{id}")
+def get_task(request: Request, id: str) -> Task:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
