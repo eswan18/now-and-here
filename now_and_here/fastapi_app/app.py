@@ -1,6 +1,4 @@
 import os
-import subprocess
-from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated
@@ -12,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
+from now_and_here.models import Task
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 UI_DIR = Path(__file__).parent / "ui"
@@ -23,6 +22,23 @@ app = FastAPI()
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 ui_templates = Jinja2Templates(directory=UI_DIR)
 app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
+
+
+@app.get("/api/tasks")
+def get_tasks(
+    project_id: str,
+    sort_by: str = "due",
+    desc: bool = False,
+    include_done: bool = False,
+) -> list[Task]:
+    store = datastore.get_store()
+    tasks = store.get_tasks(
+        project_id=project_id,
+        include_done=include_done,
+        sort_by=sort_by,
+        desc=desc,
+    )
+    return tasks
 
 
 @app.get("/api/tasks/{id}", response_class=HTMLResponse)
@@ -117,4 +133,4 @@ def view_today(
 
 @app.get("/{rest_of_path:path}", response_class=templates.TemplateResponse)
 async def react_app(req: Request, rest_of_path: str):
-    return ui_templates.TemplateResponse('index.html', { 'request': req })
+    return ui_templates.TemplateResponse("index.html", {"request": req})

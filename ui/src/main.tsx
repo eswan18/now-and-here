@@ -8,6 +8,7 @@ import './index.css'
 import Root from "./routes/root";
 import ErrorPage from "./error-page";
 import Contact from "./routes/contact";
+import Project from "./routes/project";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
         path: "contacts/:contactId",
         element: <Contact />,
       },
+      {
+        path: "projects/:projectId",
+        element: <Project />,
+      }
     ],
   },
 ]);

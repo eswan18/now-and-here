@@ -14,7 +14,7 @@ export default function Root() {
       </div>
       <div className="w-full h-16 lg:h-28 lg:py-4 bg-orange-800">
         <div className="lg:max-w-[60rem] mx-auto p-4 lg:p-8 text-orange-50" id="headerContainer">
-          <Outlet />
+        title
         </div>
       </div>
       <div className="w-full">

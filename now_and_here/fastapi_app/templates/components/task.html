@@ -15,7 +15,7 @@
     </div>
     <div class="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">
         <div class="flex flex-row items-center justify-start gap-4">
-            <label class="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green"></label>
+            <label class="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green">
             <input type="checkbox" hx-post="/tasks/{{ task.id }}" hx-trigger="change"
                 hx-vals='js:{done: event.target.checked}'
                 class="before:content[''] peer relative h-6 w-6 cursor-pointer appearance-none rounded-md border border-green-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-green-gray-500 before:opacity-0 before:transition-opacity checked:border-green-500 checked:bg-green-500 checked:before:bg-green-500 hover:before:opacity-10"
