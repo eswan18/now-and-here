@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
-from now_and_here.models import Task
+from now_and_here.models.task import FETask, Task
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 UI_DIR = Path(__file__).parent / "ui"
@@ -30,7 +30,7 @@ def get_tasks(
     sort_by: str = "due",
     desc: bool = False,
     include_done: bool = False,
-) -> list[Task]:
+) -> list[FETask]:
     store = datastore.get_store()
     tasks = store.get_tasks(
         project_id=project_id,
@@ -38,7 +38,7 @@ def get_tasks(
         sort_by=sort_by,
         desc=desc,
     )
-    return tasks
+    return [FETask.from_task(t) for t in tasks]
 
 
 @app.get("/api/tasks/{id}")

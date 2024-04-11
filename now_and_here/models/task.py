@@ -204,3 +204,27 @@ class Task:
     @property
     def relative_due_date(self) -> str | None:
         return relative_time(self.due) if self.due else None
+
+
+class FETask(Task):
+    """A task that serializes appropriately for the front end."""
+
+    @field_serializer("project")
+    def serialize_project(self, value: Project | None) -> Project | None:
+        # Send back the whole project (unlike above, where we serialize just the ID)
+        return value
+
+    @classmethod
+    def from_task(cls, task: Task) -> Self:
+        return cls(
+            id=task.id,
+            name=task.name,
+            description=task.description,
+            done=task.done,
+            parent=task.parent,
+            project=task.project,
+            labels=task.labels,
+            priority=task.priority,
+            due=task.due,
+            repeat=task.repeat,
+        )
