@@ -14,44 +14,18 @@ from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
-STATIC_DIR = Path(__file__).parent / "static"
+UI_DIR = Path(__file__).parent / "ui"
+STATIC_DIR = UI_DIR / "static"
 
 NH_BUILD_TW = os.getenv("NH_BUILD_TW") in ("1", "True", "true")
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Context manager for FastAPI app. It will run all code before `yield`
-    on app startup, and will run code after `yield` on app shutdown.
-    """
-    if NH_BUILD_TW:
-        print("Running tailwindcss...")
-        subprocess.run(
-            [
-                "tailwindcss",
-                "-i",
-                STATIC_DIR / "src" / "tw.css",
-                "-o",
-                STATIC_DIR / "css" / "main.css",
-                "--minify",
-            ]
-        )
-        print("done")
-    yield
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
+ui_templates = Jinja2Templates(directory=UI_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
-@app.get("/", response_class=HTMLResponse)
-def index(request: Request):
-    # Redirect to /projects
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/tasks/{id}", response_class=HTMLResponse)
+@app.get("/api/tasks/{id}", response_class=HTMLResponse)
 def get_task(request: Request, id: str):
     store = datastore.get_store()
     try:
@@ -62,7 +36,7 @@ def get_task(request: Request, id: str):
     return templates.TemplateResponse("task.html", {"request": request, "task": task})
 
 
-@app.post("/tasks/{id}")
+@app.post("/api/tasks/{id}")
 def post_task(id: str, done: Annotated[bool | None, Form()] = None):
     print(done)
     store = datastore.get_store()
@@ -74,7 +48,7 @@ def post_task(id: str, done: Annotated[bool | None, Form()] = None):
     return None
 
 
-@app.get("/projects", response_class=HTMLResponse)
+@app.get("/api/projects", response_class=HTMLResponse)
 def projects(request: Request):
     store = datastore.get_store()
     projects = store.get_projects()
@@ -83,7 +57,7 @@ def projects(request: Request):
     )
 
 
-@app.get("/projects/{id}", response_class=HTMLResponse)
+@app.get("/api/projects/{id}", response_class=HTMLResponse)
 def project(
     request: Request,
     id: str,
@@ -115,7 +89,7 @@ def project(
     )
 
 
-@app.get("/task_views/today", response_class=HTMLResponse)
+@app.get("/api/task_views/today", response_class=HTMLResponse)
 def view_today(
     request: Request,
     sort_by: str = "due",
@@ -139,3 +113,8 @@ def view_today(
             "desc": desc,
         },
     )
+
+
+@app.get("/{rest_of_path:path}", response_class=templates.TemplateResponse)
+async def react_app(req: Request, rest_of_path: str):
+    return ui_templates.TemplateResponse('index.html', { 'request': req })
