@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 export default function Root() {
   return (
     <>
-      <div id="sidebar">
+      <div id="sidebar" className="bg-red-500">
         <h1>React Router Contacts</h1>
         <div>
           <form id="search-form" role="search">
