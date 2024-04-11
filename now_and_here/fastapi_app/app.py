@@ -15,14 +15,14 @@ from now_and_here.datastore.errors import RecordNotFoundError
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 UI_DIR = Path(__file__).parent / "ui"
-STATIC_DIR = UI_DIR / "static"
+ASSETS_DIR = UI_DIR / "assets"
 
 NH_BUILD_TW = os.getenv("NH_BUILD_TW") in ("1", "True", "true")
 
 app = FastAPI()
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 ui_templates = Jinja2Templates(directory=UI_DIR)
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
 
 
 @app.get("/api/tasks/{id}", response_class=HTMLResponse)
