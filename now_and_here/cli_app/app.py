@@ -64,9 +64,9 @@ def main(verbosity: int = typer.Option(0, "--verbose", "-v", count=True)):
 
 
 @app.command()
-def web():
+def web(port: int = 8787):
     """Start the web server."""
     from now_and_here.fastapi_app import app
 
     # Serve the app
-    uvicorn.run(app, port=8787)
+    uvicorn.run(app, port=port)
