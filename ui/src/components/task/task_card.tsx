@@ -7,7 +7,7 @@ export default function TaskCard({ task }: { task: Task }) {
             <div className="rounded my-2 p-4 flex flex-col items-center bg-white shadow-sm">
                 <div className="flex flex-row flex-wrap w-full justify-between pl-14 pr-2">
                     <div className="text-sm font-semibold text-orange-700">
-                        <a href="/projects/{{ task.project.id }}">{task.project.name}</a>
+                        <a href={`/projects/${task.project.id}`}>{task.project.name}</a>
                     </div>
                     <div className="text-sm mx-4">
                         {task.due ? <span className="text-orange-800">{task.relative_due_date}</span> : null}
