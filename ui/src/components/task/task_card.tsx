@@ -1,4 +1,5 @@
 import { Task } from "../../types/task";
+import PriorityBadge from "./priority_badge";
 
 export default function TaskCard({ task }: { task: Task }) {
     return (
@@ -32,7 +33,7 @@ export default function TaskCard({ task }: { task: Task }) {
                             <h3 className="font-semibold text-lg inline-block"><a href="/tasks/{{ task.id }}">{task.name}</a></h3>
                         </div>
                         <div className="text-xs">
-                            { /*priority_badge(task.priority) */}
+                            <PriorityBadge priority={ task.priority } />
                         </div>
                     </div>
                     <div className="flex flex-col justify-center items-end text-sm text-gray-400 mr-4 text-right">

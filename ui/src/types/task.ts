@@ -7,6 +7,6 @@ export type Task = {
     due: string | null;
     relative_due_date: string | null;
     done: boolean;
-    priority: string;
+    priority: number;
     project: Project;
 }
