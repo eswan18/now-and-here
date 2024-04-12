@@ -32,15 +32,12 @@ def get_tasks(
     include_done: bool = False,
 ) -> list[FETask]:
     store = datastore.get_store()
-    print(desc)
-    print(sort_by)
     tasks = store.get_tasks(
         project_id=project_id,
         include_done=include_done,
         sort_by=sort_by,
         desc=desc,
     )
-    print([t.priority for t in tasks])
     return [FETask.from_task(t) for t in tasks]
 
 
@@ -49,7 +46,6 @@ def get_task(request: Request, id: str) -> Task:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
-        print(task)
     except RecordNotFoundError:
         return 404, "Task not found"
     return templates.TemplateResponse("task.html", {"request": request, "task": task})
@@ -57,14 +53,12 @@ def get_task(request: Request, id: str) -> Task:
 
 @app.post("/api/tasks/{id}")
 def post_task(id: str, done: Annotated[bool | None, Form()] = None):
-    print(done)
     store = datastore.get_store()
     try:
         task = store.get_task(id)
-        print(task)
     except RecordNotFoundError:
         return 404, "Task not found"
-    return None
+    return task
 
 
 @app.get("/api/projects", response_class=HTMLResponse)
