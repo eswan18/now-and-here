@@ -8,7 +8,7 @@ export type TaskFilter = {
 
 export default function TaskFilterPanel({ filter, setFilter }: { filter: TaskFilter, setFilter: Dispatch<SetStateAction<TaskFilter>> }) {
   const SortBySelect = () => <select
-    name="sort_by" id="sort-by-select"
+    name="sort_by"
     // @ts-ignore
     onChange={(e) => setFilter({ ...filter, sortBy: e.target.value })}
     className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 text-right">
@@ -16,11 +16,18 @@ export default function TaskFilterPanel({ filter, setFilter }: { filter: TaskFil
     <option selected={filter.sortBy == "priority"} value="priority">Priority</option>
   </select>
   const DescSelect = () => <select
-    name="desc" id="sort-by-desc"
+    name="desc"
     onChange={(e) => setFilter({ ...filter, desc: e.target.value == "true" })}
     className="block px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
     <option selected={!filter.desc} value="false">↑</option>
     <option selected={filter.desc} value="true">↓</option>
+  </select>
+  const IncludeDoneSelect = () => <select
+    name="include_done"
+    onChange={(e) => setFilter({ ...filter, includeDone: e.target.value == "true" })}
+    className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+    <option selected={filter.includeDone} value="true">All</option>
+    <option selected={!filter.includeDone} value="false">Incomplete</option>
   </select>
   return (
     <div className="flex flex-row justify-start items-end gap-8 lg:gap-12 py-1">
@@ -31,10 +38,7 @@ export default function TaskFilterPanel({ filter, setFilter }: { filter: TaskFil
       </div>
       <div className="flex flex-row justify-end items-center gap-2">
         <label htmlFor="showing" className="block text-sm text-gray-500">Showing</label>
-        <select name="include_done" id="showing" className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-          <option selected={filter.includeDone} value="true">All</option>
-          <option selected={!filter.includeDone} value="false">Incomplete</option>
-        </select>
+        <IncludeDoneSelect />
       </div>
     </div >
   )
