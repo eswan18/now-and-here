@@ -32,12 +32,15 @@ def get_tasks(
     include_done: bool = False,
 ) -> list[FETask]:
     store = datastore.get_store()
+    print(desc)
+    print(sort_by)
     tasks = store.get_tasks(
         project_id=project_id,
         include_done=include_done,
         sort_by=sort_by,
         desc=desc,
     )
+    print([t.priority for t in tasks])
     return [FETask.from_task(t) for t in tasks]
 
 

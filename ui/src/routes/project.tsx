@@ -14,8 +14,9 @@ export default function Project() {
     // @ts-ignore
     includeDone: searchParams.includeDone == "true",
   });
-  console.log(filter);
   useEffect(() => {
+    console.log("updating")
+    console.log(filter)
     const url = new URL('http://localhost:8888/api/tasks');
     url.searchParams.set('project_id', 'nvlrhe');
     url.searchParams.set('sort_by', filter.sortBy);
@@ -26,7 +27,6 @@ export default function Project() {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
         setTasks(data);
       });
   }, [filter]);
