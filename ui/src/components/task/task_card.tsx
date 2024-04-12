@@ -1,3 +1,4 @@
+import { nice_date } from "../../functions/time";
 import { Task } from "../../types/task";
 import PriorityBadge from "./priority_badge";
 
@@ -14,7 +15,7 @@ export default function TaskCard({ task }: { task: Task }) {
                     </div>
                 </div>
                 <div className="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">
-                    <div className="flex flex-row items-center justify-start gap-4">
+                    <div className="flex flex-row items-center justify-start gap-4 pl-4">
                         <label className="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green">
                             <input type="checkbox" id="task-{{ task.id }}" checked={ task.done }
                                 className="before:content[''] peer relative h-6 w-6 cursor-pointer appearance-none rounded-md border border-green-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-green-gray-500 before:opacity-0 before:transition-opacity checked:border-green-500 checked:bg-green-500 checked:before:bg-green-500 hover:before:opacity-10"
@@ -37,7 +38,7 @@ export default function TaskCard({ task }: { task: Task }) {
                         </div>
                     </div>
                     <div className="flex flex-col justify-center items-end text-sm text-gray-400 mr-4 text-right">
-                        <div>{ task.due || "No due date" }</div>
+                        <div>{ task.due ? nice_date(task.due) : "No due date" }</div>
                     </div>
                 </div>
                 <div className="flex flex-row flex-wrap w-full justify-between pl-14 pt-1">
