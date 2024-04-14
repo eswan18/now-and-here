@@ -1,4 +1,4 @@
-import {FC} from 'react';
+import { FC } from 'react';
 
 export interface TaskFilter {
   sortBy: string;
