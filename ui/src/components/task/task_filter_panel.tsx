@@ -22,16 +22,22 @@ const SortBySelect: FC<{ currentSortBy: string; onSortChange: (value: string) =>
   </select>
 );
 
-const DescSelect: FC<{ currentDesc: boolean; onDescChange: (value: boolean) => void }> = ({ currentDesc, onDescChange }) => (
-  <select
-    name="desc"
-    value={currentDesc.toString()}
-    onChange={(e) => onDescChange(e.target.value === 'true')}
-    className="block px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-    <option value="false">↑</option>
-    <option value="true">↓</option>
-  </select>
-);
+interface ToggleSortOrderProps {
+  desc: boolean;
+  onToggle: (newValue: boolean) => void;
+}
+
+const ToggleSortOrder: React.FC<ToggleSortOrderProps> = ({ desc, onToggle }) => {
+  return (
+    <div onClick={() => onToggle(!desc)} className="cursor-pointer block px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
+      {desc ? (
+        <span>↑</span>
+      ) : (
+        <span>↓</span>
+      )}
+    </div>
+  );
+};
 
 const IncludeDoneSelect: FC<{ includeDone: boolean; onIncludeChange: (value: boolean) => void }> = ({ includeDone, onIncludeChange }) => (
   <select
@@ -50,7 +56,7 @@ export default function TaskFilterPanel({ filter, onFilterChange }: TaskFilterPa
       <div className="flex flex-row justify-start items-end gap-2">
         <label htmlFor="sort-by-select" className="block text-sm text-gray-500">Sorted by</label>
         <SortBySelect currentSortBy={filter.sortBy} onSortChange={(value) => onFilterChange('sortBy', value)} />
-        <DescSelect currentDesc={filter.desc} onDescChange={(value) => onFilterChange('desc', value)} />
+        <ToggleSortOrder desc={filter.desc} onToggle={(value) => { onFilterChange('desc', value) }} />
       </div>
       <div className="flex flex-row justify-end items-center gap-2">
         <label htmlFor="showing" className="block text-sm text-gray-500">Showing</label>
