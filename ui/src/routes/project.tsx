@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import TaskCardList from "../components/task/task_card_list"
 import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
 import { useSearchParams } from "react-router-dom";
+import { useTitle } from "../contexts/TitleContext";
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
@@ -32,6 +33,7 @@ function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
 
 export default function Project() {
   const [filter, setFilter] = useFilter();
+  const { setPageTitle, setHeaderTitle } = useTitle();
   // Handle changes to any filter
   const handleFilterChange = (filterName: keyof TaskFilter, value: boolean | string) => {
     const updatedFilters = {
@@ -58,6 +60,10 @@ export default function Project() {
       });
   // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter)]);
+  useEffect(() => {
+    setPageTitle(`Project: nvlrhe`);
+    setHeaderTitle(`nvlrhe`);
+  })
   return (
     <>
       <div className="w-full mt-4 -translate-y-6 lg:-translate-y-8 bg-white rounded-md py-1 px-4 lg:px-8 shadow-sm shadow-orange-800 ">

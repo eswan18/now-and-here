@@ -1,6 +1,14 @@
+import { useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
+import { useTitle } from "../contexts/TitleContext";
 
 export default function Root() {
+  const { pageTitle, headerTitle } = useTitle();
+
+  useEffect(() => {
+    document.title = pageTitle;  // This will update the browser tab title
+  }, [pageTitle]);
+
   return (
     <div className="flex flex-col justify-start w-full min-h-screen bg-gray-50">
       <div className="w-full px-4 h-10">
@@ -14,7 +22,7 @@ export default function Root() {
       </div>
       <div className="w-full h-16 lg:h-28 lg:py-4 bg-orange-800">
         <div className="lg:max-w-[60rem] mx-auto p-4 lg:p-8 text-orange-50" id="headerContainer">
-        title
+          {headerTitle}
         </div>
       </div>
       <div className="w-full">

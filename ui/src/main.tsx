@@ -9,6 +9,7 @@ import Root from "./routes/root";
 import ErrorPage from "./error-page";
 import Contact from "./routes/contact";
 import Project from "./routes/project";
+import { TitleProvider } from './contexts/TitleContext';
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <TitleProvider>
+      <RouterProvider router={router} />
+    </TitleProvider>
   </React.StrictMode>,
 )
