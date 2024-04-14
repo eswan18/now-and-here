@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import TaskCardList from "../components/task/task_card_list"
 import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useTitle } from "../contexts/TitleContext";
 
 const defaultFilter: TaskFilter = {
@@ -9,6 +9,10 @@ const defaultFilter: TaskFilter = {
   desc: false,
   includeDone: false,
 };
+
+function isDefined<T>(arg: T | undefined): arg is T {
+  return arg !== undefined;
+}
 
 function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +37,13 @@ function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
 
 export default function Project() {
   const [filter, setFilter] = useFilter();
+  const { projectId } = useParams<{ projectId: string }>();
   const { setPageTitle, setHeaderTitle } = useTitle();
+
+  if (!isDefined(projectId)) {
+    return <div>No project ID provided</div>;
+  }
+
   // Handle changes to any filter
   const handleFilterChange = (filterName: keyof TaskFilter, value: boolean | string) => {
     const updatedFilters = {
@@ -47,7 +57,7 @@ export default function Project() {
   useEffect(() => {
     // First, update the URL.
     const url = new URL('http://localhost:8888/api/tasks');
-    url.searchParams.set('project_id', 'nvlrhe');
+    url.searchParams.set('project_id', projectId);
     url.searchParams.set('sort_by', filter.sortBy);
     url.searchParams.set('desc', filter.desc ? "true" : "false");
     url.searchParams.set('include_done', filter.includeDone ? "true" : "false");
@@ -59,10 +69,10 @@ export default function Project() {
         setTasks(data);
       });
   // Stringifying the filter prevents us from hitting a re-render loop.
-  }, [JSON.stringify(filter)]);
+  }, [JSON.stringify(filter), projectId]);
   useEffect(() => {
-    setPageTitle(`Project: nvlrhe`);
-    setHeaderTitle(`nvlrhe`);
+    setPageTitle(`Project: ${ projectId }`);
+    setHeaderTitle(projectId);
   })
   return (
     <>
