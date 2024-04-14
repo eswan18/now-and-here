@@ -1,48 +1,61 @@
-export type TaskFilter = {
-  sortBy: string,
-  desc: boolean,
-  includeDone: boolean,
+import {FC} from 'react';
+
+export interface TaskFilter {
+  sortBy: string;
+  desc: boolean;
+  includeDone: boolean;
 };
 
-export type TaskFilterPanelParams = {
+export interface TaskFilterPanelParams {
   filter: TaskFilter;
-  onValueChange: (key: string, value: any) => void;
+  onFilterChange: (filterName: keyof TaskFilter, value: boolean | string) => void;
 };
 
-export default function TaskFilterPanel({ filter, onValueChange }: TaskFilterPanelParams) {
-  const SortBySelect = () => <select
+const SortBySelect: FC<{ currentSortBy: string; onSortChange: (value: string) => void }> = ({ currentSortBy, onSortChange }) => (
+  <select
     name="sort_by"
-    // @ts-ignore
-    onChange={(e) => onValueChange('sort_by', e.target.value )}
+    value={currentSortBy}
+    onChange={(e) => onSortChange(e.target.value)}
     className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 text-right">
-    <option selected={filter.sortBy == "due"} value="due">Due date</option>
-    <option selected={filter.sortBy == "priority"} value="priority">Priority</option>
+    <option value="due">Due date</option>
+    <option value="priority">Priority</option>
   </select>
-  const DescSelect = () => <select
+);
+
+const DescSelect: FC<{ currentDesc: boolean; onDescChange: (value: boolean) => void }> = ({ currentDesc, onDescChange }) => (
+  <select
     name="desc"
-    onChange={(e) => onValueChange('desc', e.target.value )}
+    value={currentDesc.toString()}
+    onChange={(e) => onDescChange(e.target.value === 'true')}
     className="block px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-    <option selected={!filter.desc} value="false">↑</option>
-    <option selected={filter.desc} value="true">↓</option>
+    <option value="false">↑</option>
+    <option value="true">↓</option>
   </select>
-  const IncludeDoneSelect = () => <select
+);
+
+const IncludeDoneSelect: FC<{ includeDone: boolean; onIncludeChange: (value: boolean) => void }> = ({ includeDone, onIncludeChange }) => (
+  <select
     name="include_done"
-    onChange={(e) => onValueChange('include_done', e.target.value )}
+    value={includeDone.toString()}
+    onChange={(e) => onIncludeChange(e.target.value === 'true')}
     className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-    <option selected={filter.includeDone} value="true">All</option>
-    <option selected={!filter.includeDone} value="false">Incomplete</option>
+    <option value="true">All</option>
+    <option value="false">Incomplete</option>
   </select>
+);
+
+export default function TaskFilterPanel({ filter, onFilterChange }: TaskFilterPanelParams) {
   return (
     <div className="flex flex-row justify-start items-end gap-8 lg:gap-12 py-1">
       <div className="flex flex-row justify-start items-end gap-2">
         <label htmlFor="sort-by-select" className="block text-sm text-gray-500">Sorted by</label>
-        <SortBySelect />
-        <DescSelect />
+        <SortBySelect currentSortBy={filter.sortBy} onSortChange={(value) => onFilterChange('sortBy', value)} />
+        <DescSelect currentDesc={filter.desc} onDescChange={(value) => onFilterChange('desc', value)} />
       </div>
       <div className="flex flex-row justify-end items-center gap-2">
         <label htmlFor="showing" className="block text-sm text-gray-500">Showing</label>
-        <IncludeDoneSelect />
+        <IncludeDoneSelect includeDone={filter.includeDone} onIncludeChange={(value) => onFilterChange('includeDone', value)} />
       </div>
-    </div >
-  )
+    </div>
+  );
 }
