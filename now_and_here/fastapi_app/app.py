@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.models.task import FETask, Task
+from now_and_here.models import Project
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 UI_DIR = Path(__file__).parent / "ui"
@@ -41,16 +42,6 @@ def get_tasks(
     return [FETask.from_task(t) for t in tasks]
 
 
-@app.get("/api/tasks/{id}")
-def get_task(request: Request, id: str) -> Task:
-    store = datastore.get_store()
-    try:
-        task = store.get_task(id)
-    except RecordNotFoundError:
-        return 404, "Task not found"
-    return templates.TemplateResponse("task.html", {"request": request, "task": task})
-
-
 @app.post("/api/tasks/{id}")
 def post_task(id: str, done: Annotated[bool | None, Form()] = None):
     store = datastore.get_store()
@@ -61,45 +52,14 @@ def post_task(id: str, done: Annotated[bool | None, Form()] = None):
     return task
 
 
-@app.get("/api/projects", response_class=HTMLResponse)
-def projects(request: Request):
-    store = datastore.get_store()
-    projects = store.get_projects()
-    return templates.TemplateResponse(
-        "projects.html", {"request": request, "projects": projects}
-    )
-
-
-@app.get("/api/projects/{id}", response_class=HTMLResponse)
-def project(
-    request: Request,
-    id: str,
-    sort_by: str = "due",
-    desc: bool = False,
-    include_done: bool = False,
-):
+@app.get("/api/projects/{id}")
+def get_project_by_id(id: str) -> Project:
     store = datastore.get_store()
     try:
         project = store.get_project(id)
-        tasks = store.get_tasks(
-            project_id=id,
-            include_done=include_done,
-            sort_by=sort_by,
-            desc=desc,
-        )
     except RecordNotFoundError:
         return 404, "Project not found"
-    return templates.TemplateResponse(
-        "project.html",
-        {
-            "request": request,
-            "project": project,
-            "tasks": tasks,
-            "sort_by": sort_by,
-            "include_done": include_done,
-            "desc": desc,
-        },
-    )
+    return project
 
 
 @app.get("/api/task_views/today", response_class=HTMLResponse)

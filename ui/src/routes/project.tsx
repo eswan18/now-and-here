@@ -39,6 +39,7 @@ export default function Project() {
   const [filter, setFilter] = useFilter();
   const { projectId } = useParams<{ projectId: string }>();
   const { setPageTitle, setHeaderTitle } = useTitle();
+  const [ projectName, setProjectName ] = useState('');
 
   if (!isDefined(projectId)) {
     return <div>No project ID provided</div>;
@@ -71,9 +72,20 @@ export default function Project() {
   // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
   useEffect(() => {
-    setPageTitle(`Project: ${ projectId }`);
-    setHeaderTitle(projectId);
-  })
+    const url = new URL(`http://localhost:8888/api/projects/${ projectId }`);
+    fetch(url)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setProjectName(data.name);
+      });
+  }, [])
+  useEffect(() => {
+    setPageTitle(`Project: ${ projectName }`);
+    setHeaderTitle(projectName);
+  }, [projectName]);
+
   return (
     <>
       <div className="w-full mt-4 -translate-y-6 lg:-translate-y-8 bg-white rounded-md py-1 px-4 lg:px-8 shadow-sm shadow-orange-800 ">
