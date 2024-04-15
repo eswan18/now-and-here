@@ -13,16 +13,16 @@ import { TitleProvider } from './contexts/TitleContext';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/app",
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "contacts/:contactId",
+        path: "/app/contacts:contactId",
         element: <Contact />,
       },
       {
-        path: "projects/:projectId",
+        path: "/app/projects/:projectId",
         element: <Project />,
       }
     ],
