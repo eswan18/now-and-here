@@ -3,6 +3,7 @@ import TaskCardList from "../components/task/task_card_list"
 import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTitle } from "../contexts/TitleContext";
+import { Task } from "../types/task";
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
@@ -49,6 +50,24 @@ export default function Project() {
   if (!isDefined(projectId)) {
     return <div>No project ID provided</div>;
   }
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  // Checkoff or un-checkoff a task.
+  const handleCompletionToggle = async (taskId: string, completed: boolean) => {
+    const url = completed ? `/api/checkoff_task/${taskId}` : `/api/uncheckoff_task/${taskId}`;
+    const response = await fetch(url, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update task');
+    }
+    // Update tasks state
+    setTasks(currentTasks =>
+      currentTasks.map(task =>
+        task.id === taskId ? { ...task, done: completed } : task
+      )
+    );
+  };
 
   // Handle changes to any filter
   const handleFilterChange = (filterName: keyof TaskFilter, value: boolean | string) => {
@@ -59,7 +78,6 @@ export default function Project() {
     setFilter(updatedFilters as TaskFilter);
   };
 
-  const [tasks, setTasks] = useState([]);
   useEffect(() => {
     // First, update the URL.
     const suffix = 'api/tasks'
@@ -75,7 +93,7 @@ export default function Project() {
       .then((data) => {
         setTasks(data);
       });
-  // Stringifying the filter prevents us from hitting a re-render loop.
+    // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
   useEffect(() => {
     const suffix = `api/projects/${ projectId }`;
@@ -89,7 +107,7 @@ export default function Project() {
       });
   }, [])
   useEffect(() => {
-    setPageTitle(`Project: ${ projectName }`);
+    setPageTitle(`Project: ${projectName}`);
     setHeaderTitle(projectName);
   }, [projectName]);
 
@@ -99,7 +117,7 @@ export default function Project() {
         <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       </div>
       <div className="-translate-y-6">
-        <TaskCardList tasks={tasks} />
+        <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle}/>
       </div>
     </>
   )

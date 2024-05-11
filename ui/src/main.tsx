@@ -7,7 +7,6 @@ import {
 import './index.css'
 import Root from "./routes/root";
 import ErrorPage from "./error-page";
-import Contact from "./routes/contact";
 import Projects from "./routes/projects";
 import Project from "./routes/project";
 import { TitleProvider } from './contexts/TitleContext';
@@ -23,11 +22,7 @@ const router = createBrowserRouter([
         element: <Projects />,
       },
       {
-        path: "contacts/:contactId",
-        element: <Contact />,
-      },
-      {
-        path: "projects/:projectId",
+        path: "/projects/:projectId",
         element: <Project />,
       },
     ],
