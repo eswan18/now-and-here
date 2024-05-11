@@ -36,6 +36,29 @@ def post_task(id: str, done: Annotated[bool | None, Form()] = None):
         return 404, "Task not found"
     return task
 
+@api_router.post("/checkoff_task/{id}")
+def checkoff_task(id: str):
+    store = datastore.get_store()
+    try:
+        task = store.get_task(id)
+    except RecordNotFoundError:
+        return 404, "Task not found"
+    task.done = True
+    store.checkoff_task(task.id)
+    return task
+
+
+@api_router.post("/uncheckoff_task/{id}")
+def uncheckoff_task(id: str):
+    store = datastore.get_store()
+    try:
+        task = store.get_task(id)
+    except RecordNotFoundError:
+        return 404, "Task not found"
+    task.done = True
+    store.uncheckoff_task(task.id)
+    return task
+
 
 @api_router.get("/projects/{id}")
 def get_project_by_id(id: str) -> Project:

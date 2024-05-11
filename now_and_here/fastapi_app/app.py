@@ -11,8 +11,6 @@ TEMPLATE_DIR = Path(__file__).parent / "templates"
 UI_DIR = Path(__file__).parent / "ui"
 ASSETS_DIR = UI_DIR / "assets"
 
-NH_BUILD_TW = os.getenv("NH_BUILD_TW") in ("1", "True", "true")
-
 app = FastAPI()
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 ui_templates = Jinja2Templates(directory=UI_DIR)
