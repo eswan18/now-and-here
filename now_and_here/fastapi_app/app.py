@@ -52,6 +52,13 @@ def post_task(id: str, done: Annotated[bool | None, Form()] = None):
     return task
 
 
+@app.get("/api/projects")
+def get_projects() -> list[Project]:
+    store = datastore.get_store()
+    projects = store.get_projects()
+    return projects
+
+
 @app.get("/api/projects/{id}")
 def get_project_by_id(id: str) -> Project:
     store = datastore.get_store()
