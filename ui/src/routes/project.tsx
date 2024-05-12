@@ -117,6 +117,9 @@ export default function Project() {
     url.searchParams.set('include_done', filter.includeDone ? "true" : "false");
     fetch(url)
       .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch tasks: ${res.statusText}`);
+        }
         return res.json();
       })
       .then((data) => {
@@ -124,6 +127,7 @@ export default function Project() {
       });
     // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
+
   useEffect(() => {
     const suffix = `api/projects/${projectId}`;
     const url = new URL(suffix, base_url);
