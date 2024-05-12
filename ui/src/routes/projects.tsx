@@ -30,6 +30,5 @@ export default function Projects() {
 }
 
 function ProjectList({ projects }: { projects: Project[] }) {
-  console.log(projects);
   return <ProjectCardList projects={ projects }/>
 }

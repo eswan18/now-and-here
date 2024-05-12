@@ -17,7 +17,7 @@ app.include_router(api_router)
 ui_templates = Jinja2Templates(directory=UI_DIR)
 
 
-@app.get("/{rest_of_path:path}", response_class=ui_templates.TemplateResponse)
-async def react_app(req: Request, rest_of_path: str):
+@app.get("/{_rest_of_path:path}")
+async def react_app(req: Request, _rest_of_path: str):
     """Route all other paths to the React app."""
     return ui_templates.TemplateResponse("index.html", {"request": req})

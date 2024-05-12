@@ -15,6 +15,10 @@ from .common import ID_LENGTH, format_id, random_id
 
 @dataclass
 class Project:
+    """
+    A project is a collection of tasks.
+    """
+
     id: str = Field(default_factory=random_id)
     name: str = Field(..., min_length=1, max_length=100)  # type: ignore [misc]
     description: str | None = Field(None)  # type: ignore [misc]
@@ -82,7 +86,7 @@ class Project:
             yield Text("Parent: ")
 
     @field_serializer("parent")
-    def serialize_parent(self, value: Project | None) -> str | None:
+    def serialize_parent(self, value: Project | None) -> str | Project | None:
         # Save the parent project just by its ID.
         return value.id if value is not None else None
 
@@ -94,3 +98,30 @@ class Project:
         new_project = self.__class__.from_json(as_json)
         new_project.id = random_id()
         return new_project
+
+
+class FEProject(Project):
+    """
+    A Project that serializes its parent project in its entirety.
+
+    Regular projects serialize their parent project as just the parent's ID.
+    """
+
+    @field_serializer("parent")
+    def serialize_parent(self, value: Project | None) -> Project | None:
+        # Serialize the parent in its entirety.
+        if value is None:
+            return None
+        # Converting to an FEProject ensures that parent projects also have their
+        # respective parents serialized correctly.
+        as_fe_project = FEProject.from_project(value)
+        return as_fe_project
+
+    @classmethod
+    def from_project(cls, project: Project) -> Self:
+        return cls(
+            id=project.id,
+            name=project.name,
+            description=project.description,
+            parent=project.parent,
+        )

@@ -1,10 +1,11 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Form
+from fastapi.exceptions import HTTPException
 
 from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
-from now_and_here.models import Project
+from now_and_here.models import FEProject
 from now_and_here.models.task import FETask
 
 api_router = APIRouter(prefix="/api")
@@ -28,51 +29,52 @@ def get_tasks(
 
 
 @api_router.post("/checkoff_task/{id}")
-def checkoff_task(id: str):
+def checkoff_task(id: str) -> FETask:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
     except RecordNotFoundError:
-        return 404, "Task not found"
+        raise HTTPException(status_code=404, detail="Task not found")
     task.done = True
     store.checkoff_task(task.id)
-    return task
+    return FETask.from_task(task)
 
 
 @api_router.post("/uncheckoff_task/{id}")
-def uncheckoff_task(id: str):
+def uncheckoff_task(id: str) -> FETask:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
     except RecordNotFoundError:
-        return 404, "Task not found"
+        raise HTTPException(status_code=404, detail="Task not found")
     task.done = True
     store.uncheckoff_task(task.id)
-    return task
+    return FETask.from_task(task)
 
 
 @api_router.get("/projects/{id}")
-def get_project_by_id(id: str) -> Project:
+def get_project_by_id(id: str) -> FEProject:
     store = datastore.get_store()
     try:
         project = store.get_project(id)
     except RecordNotFoundError:
-        return 404, "Project not found"
-    return project
+        raise HTTPException(status_code=404, detail="Project not found")
+    return FEProject.from_project(project)
 
 
 @api_router.post("/tasks/{id}")
-def post_task(id: str, done: Annotated[bool | None, Form()] = None):
+def post_task(id: str, done: Annotated[bool | None, Form()] = None) -> FETask:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
     except RecordNotFoundError:
-        return 404, "Task not found"
-    return task
+        raise HTTPException(status_code=404, detail="Task not found")
+    return FETask.from_task(task)
 
 
 @api_router.get("/projects")
-def get_projects() -> list[Project]:
+def get_projects() -> list[FEProject]:
     store = datastore.get_store()
     projects = store.get_projects()
-    return projects
+    projects_with_parents = [FEProject.from_project(p) for p in projects]
+    return projects_with_parents
