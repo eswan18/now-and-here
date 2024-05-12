@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import TaskCardList from "../components/task/task_card_list"
 import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -40,7 +40,8 @@ export default function Project() {
   const [filter, setFilter] = useFilter();
   const { projectId } = useParams<{ projectId: string }>();
   const { setPageTitle, setHeaderTitle } = useTitle();
-  const [ projectName, setProjectName ] = useState('');
+  const [projectName, setProjectName] = useState('');
+  const timeoutRefs = useRef<{ [key: string]: number }>({}); // Map of task IDs to timeout IDs
   const base_url = new URL(window.location.origin);
   // Remove the final slash if there is one.
   if (base_url.pathname.endsWith('/')) {
@@ -67,6 +68,20 @@ export default function Project() {
         task.id === taskId ? { ...task, done: completed } : task
       )
     );
+    // Clear any existing timeout for this task ID. This prevents a task that's rapidly
+    // completed and then uncompleted from disappearing anyway.
+    if (timeoutRefs.current[taskId]) {
+      clearTimeout(timeoutRefs.current[taskId]);
+      delete timeoutRefs.current[taskId];
+    }
+    // If the task is now completed but we're supposed to show incomplete only tasks,
+    // wait a few seconds and then remove it from the list.
+    if (!filter.includeDone && completed) {
+      timeoutRefs.current[taskId] = setTimeout(() => {
+        setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
+        delete timeoutRefs.current[taskId];
+      }, 3000);
+    }
   };
 
   // Handle changes to any filter
@@ -96,7 +111,7 @@ export default function Project() {
     // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
   useEffect(() => {
-    const suffix = `api/projects/${ projectId }`;
+    const suffix = `api/projects/${projectId}`;
     const url = new URL(suffix, base_url);
     fetch(url)
       .then((res) => {
@@ -117,7 +132,7 @@ export default function Project() {
         <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       </div>
       <div className="-translate-y-6">
-        <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle}/>
+        <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle} />
       </div>
     </>
   )
