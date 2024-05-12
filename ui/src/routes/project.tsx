@@ -4,6 +4,7 @@ import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_pane
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTitle } from "../contexts/TitleContext";
 import { Task } from "../types/task";
+import { toast } from 'react-toastify';
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
@@ -82,6 +83,7 @@ export default function Project() {
         delete timeoutRefs.current[taskId];
       }, 3000);
     }
+    toast.error(`Task ${completed ? 'completed' : 'uncompleted'}`);
   };
 
   // Handle changes to any filter
