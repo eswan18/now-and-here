@@ -10,6 +10,8 @@ import ErrorPage from "./error-page";
 import Projects from "./routes/projects";
 import Project from "./routes/project";
 import { TitleProvider } from './contexts/TitleContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const router = createBrowserRouter([
   {
@@ -34,5 +36,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <TitleProvider>
       <RouterProvider router={router} />
     </TitleProvider>
+    <ToastContainer />
   </React.StrictMode>,
 )
