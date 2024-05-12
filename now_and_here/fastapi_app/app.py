@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -7,19 +6,18 @@ from fastapi.templating import Jinja2Templates
 
 from .api import api_router
 
-TEMPLATE_DIR = Path(__file__).parent / "templates"
 UI_DIR = Path(__file__).parent / "ui"
 ASSETS_DIR = UI_DIR / "assets"
 
 app = FastAPI()
-templates = Jinja2Templates(directory=TEMPLATE_DIR)
-ui_templates = Jinja2Templates(directory=UI_DIR)
-app.mount("/assets", StaticFiles(directory=ASSETS_DIR, html=True), name="assets")
+app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
 app.include_router(api_router)
+# Important: this *must* be placed after the `include_router` call for the catchall
+# route (below) to work.
+ui_templates = Jinja2Templates(directory=UI_DIR)
 
 
-@app.get("/app/{rest_of_path:path}", response_class=templates.TemplateResponse)
-async def react_app(req: Request, rest_of_path: str):
+@app.get("/{_rest_of_path:path}")
+async def react_app(req: Request, _rest_of_path: str):
     """Route all other paths to the React app."""
-    # Strip the "/app" from the request path before sending it onward.
     return ui_templates.TemplateResponse("index.html", {"request": req})

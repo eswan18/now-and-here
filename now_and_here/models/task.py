@@ -169,7 +169,7 @@ class Task:
         return value.as_json()
 
     @field_serializer("project")
-    def serialize_project(self, value: Project | None) -> str | None:
+    def serialize_project(self, value: Project | None) -> str | Project | None:
         # Save the project just by its ID.
         return value.id if value is not None else None
 

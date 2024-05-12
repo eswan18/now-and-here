@@ -40,7 +40,12 @@ export default function Project() {
   const [filter, setFilter] = useFilter();
   const { projectId } = useParams<{ projectId: string }>();
   const { setPageTitle, setHeaderTitle } = useTitle();
-  const [projectName, setProjectName] = useState('');
+  const [ projectName, setProjectName ] = useState('');
+  const base_url = new URL(window.location.origin);
+  // Remove the final slash if there is one.
+  if (base_url.pathname.endsWith('/')) {
+    base_url.pathname = base_url.pathname.slice(0, -1);
+  }
 
   if (!isDefined(projectId)) {
     return <div>No project ID provided</div>;
@@ -75,7 +80,8 @@ export default function Project() {
 
   useEffect(() => {
     // First, update the URL.
-    const url = new URL('http://localhost:8888/api/tasks');
+    const suffix = 'api/tasks'
+    const url = new URL(suffix, base_url);
     url.searchParams.set('project_id', projectId);
     url.searchParams.set('sort_by', filter.sortBy);
     url.searchParams.set('desc', filter.desc ? "true" : "false");
@@ -90,7 +96,8 @@ export default function Project() {
     // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
   useEffect(() => {
-    const url = new URL(`http://localhost:8888/api/projects/${projectId}`);
+    const suffix = `api/projects/${ projectId }`;
+    const url = new URL(suffix, base_url);
     fetch(url)
       .then((res) => {
         return res.json();
