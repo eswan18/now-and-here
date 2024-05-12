@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTitle } from "../contexts/TitleContext";
 
-import { Project } from '../types/project';
+import { Project, ProjectWithChildren } from '../types/project';
 import ProjectCardList from '../components/project/project_card_list';
 
 export default function Projects() {
@@ -26,9 +26,29 @@ export default function Projects() {
         setProjects(data);
       });
   }, []);
-  return <ProjectList projects={ projects }/>
+
+  const projectTree = projectsAsTreeOfChildren(projects);
+  return <ProjectCardList projects={projectTree} />
 }
 
-function ProjectList({ projects }: { projects: Project[] }) {
-  return <ProjectCardList projects={ projects }/>
+function projectsAsTreeOfChildren(projects: Project[]): ProjectWithChildren[] {
+  // Build a hash table of projects by ID.
+  const projectsById: Map<string, ProjectWithChildren> = new Map();
+  projects.forEach((project) => {
+    projectsById.set(project.id, { ...project, children: [] });
+  })
+  // Get a list of IDs in the map.
+  const projectIds = Array.from(projectsById.keys());
+  projectIds.forEach((projectId) => {
+    const project = projectsById.get(projectId)!;
+    const parentId = project.parent?.id;
+    // Check if parent ID is defined. If so, add the project to the parent's children.
+    if (parentId) {
+      projectsById.get(parentId)!.children.push(project);
+      projectsById.delete(project.id);
+    }
+  })
+
+  // Return the projects that have no parent - all the other projects are now children of those.
+  return Array.from(projectsById.values());
 }
