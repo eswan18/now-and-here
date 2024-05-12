@@ -57,33 +57,45 @@ export default function Project() {
   // Checkoff or un-checkoff a task.
   const handleCompletionToggle = async (taskId: string, completed: boolean) => {
     const url = completed ? `/api/checkoff_task/${taskId}` : `/api/uncheckoff_task/${taskId}`;
-    const response = await fetch(url, {
+
+    const promise = fetch(url, {
       method: 'POST',
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update task');
-    }
-    // Update tasks state
-    setTasks(currentTasks =>
-      currentTasks.map(task =>
-        task.id === taskId ? { ...task, done: completed } : task
-      )
-    );
-    // Clear any existing timeout for this task ID. This prevents a task that's rapidly
-    // completed and then uncompleted from disappearing anyway.
-    if (timeoutRefs.current[taskId]) {
-      clearTimeout(timeoutRefs.current[taskId]);
-      delete timeoutRefs.current[taskId];
-    }
-    // If the task is now completed but we're supposed to show incomplete only tasks,
-    // wait a few seconds and then remove it from the list.
-    if (!filter.includeDone && completed) {
-      timeoutRefs.current[taskId] = setTimeout(() => {
-        setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
+    }).then((res) => {
+      if (!res.ok) {
+        throw new Error(`Failed to update task status: ${res.statusText}`);
+      }
+      // Update tasks state
+      setTasks(currentTasks =>
+        currentTasks.map(task =>
+          task.id === taskId ? { ...task, done: completed } : task
+        )
+      );
+
+      // Clear any existing timeout for this task ID. This prevents a task that's rapidly
+      // completed and then uncompleted from disappearing anyway.
+      if (timeoutRefs.current[taskId]) {
+        clearTimeout(timeoutRefs.current[taskId]);
         delete timeoutRefs.current[taskId];
-      }, 3000);
-    }
-    toast.error(`Task ${completed ? 'completed' : 'uncompleted'}`);
+      }
+
+      // If the task is now completed but we're supposed to show incomplete only tasks,
+      // wait a few seconds and then remove it from the list.
+      if (!filter.includeDone && completed) {
+        timeoutRefs.current[taskId] = setTimeout(() => {
+          setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
+          delete timeoutRefs.current[taskId];
+        }, 3000);
+      }
+    })
+
+    toast.promise(
+      promise,
+      {
+        pending: 'Updating task status...',
+        success: completed ? 'Task completed!' : 'Task marked incomplete!',
+        error: 'Failed to update task.'
+      }
+    );
   };
 
   // Handle changes to any filter
