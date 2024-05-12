@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import TaskCardList from "../components/task/task_card_list"
+import CreateNewTaskCard from "../components/task/create_new_task_card";
 import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useTitle } from "../contexts/TitleContext";
@@ -151,6 +152,7 @@ export default function Project() {
       </div>
       <div className="-translate-y-6">
         <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle} />
+        <CreateNewTaskCard projectName={projectName} />
       </div>
     </>
   )
