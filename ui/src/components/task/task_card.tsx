@@ -22,7 +22,7 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
                 <div className="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">
                     <div className="flex flex-row items-center justify-start gap-4 pl-4">
                         <label className="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green">
-                            <input type="checkbox" id="task-{{ task.id }}"
+                            <input type="checkbox"
                                 checked={task.done} onChange={() => onToggleCompletion(task.id, !task.done)}
                                 className="before:content[''] peer relative h-6 w-6 cursor-pointer appearance-none rounded-md border border-green-gray-200 transition-all before:absolute before:top-2/4 before:left-2/4 before:block before:h-12 before:w-12 before:-translate-y-2/4 before:-translate-x-2/4 before:rounded-full before:bg-green-gray-500 before:opacity-0 before:transition-opacity checked:border-green-500 checked:bg-green-500 checked:before:bg-green-500 hover:before:opacity-10"
                             />
@@ -37,7 +37,7 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
                             </span>
                         </label>
                         <div>
-                            <h3 className="font-semibold text-lg inline-block"><a href="/tasks/{{ task.id }}">{task.name}</a></h3>
+                            <h3 className="font-semibold text-lg inline-block"><a href={`/tasks/${task.id}`}>{task.name}</a></h3>
                         </div>
                         <div className="text-xs">
                             <PriorityBadge priority={ task.priority } />
