@@ -13,10 +13,10 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
             <div className="rounded my-2 p-4 flex flex-col items-center bg-white shadow-sm">
                 <div className="flex flex-row flex-wrap w-full justify-between pl-14 pr-2">
                     <div className="text-sm font-semibold text-orange-700">
-                        <a href={`/projects/${task.project.id}`}>{task.project.name}</a>
+                        {task.project && <a href={`/projects/${task.project.id}`}>{task.project.name}</a>}
                     </div>
                     <div className="text-sm mx-4">
-                        {task.due ? <span className="text-orange-800">{task.relative_due_date}</span> : null}
+                        {task.due ? <span className="text-orange-800">{task.due.toString()}</span> : null}
                     </div>
                 </div>
                 <div className="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">

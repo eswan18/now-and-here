@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import TaskCardList from "../components/task/task_card_list"
-import CreateNewTaskCard from "../components/task/create_new_task_card";
-import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useTitle } from "../contexts/TitleContext";
-import { Task } from "../types/task";
 import { toast } from 'react-toastify';
+import TaskCardList from "@/components/task/task_card_list"
+import CreateTaskCard from "@/components/task/create_task_card";
+import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel";
+import { useTitle } from "@/contexts/TitleContext";
+import { Task } from "@/types/task";
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
@@ -43,7 +43,9 @@ export default function Project() {
   const { projectId } = useParams<{ projectId: string }>();
   const { setPageTitle, setHeaderTitle } = useTitle();
   const [projectName, setProjectName] = useState('');
-  const timeoutRefs = useRef<{ [key: string]: number }>({}); // Map of task IDs to timeout IDs
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout }>({}); // Map of task IDs to timeout IDs
+
   const base_url = new URL(window.location.origin);
   // Remove the final slash if there is one.
   if (base_url.pathname.endsWith('/')) {
@@ -53,7 +55,45 @@ export default function Project() {
   if (!isDefined(projectId)) {
     return <div>No project ID provided</div>;
   }
-  const [tasks, setTasks] = useState<Task[]>([]);
+
+  // Fetch the tasks for this project.
+  useEffect(() => {
+    // First, update the URL.
+    const suffix = 'api/tasks'
+    const url = new URL(suffix, base_url);
+    url.searchParams.set('project_id', projectId);
+    url.searchParams.set('sort_by', filter.sortBy);
+    url.searchParams.set('desc', filter.desc ? "true" : "false");
+    url.searchParams.set('include_done', filter.includeDone ? "true" : "false");
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch tasks: ${res.statusText}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setTasks(data);
+      });
+    // Stringifying the filter prevents us from hitting a re-render loop.
+  }, [JSON.stringify(filter), projectId]);
+
+  // Fetch the project name.
+  useEffect(() => {
+    const suffix = `api/projects/${projectId}`;
+    const url = new URL(suffix, base_url);
+    fetch(url)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setProjectName(data.name);
+      });
+  }, [])
+  useEffect(() => {
+    setPageTitle(`Project: ${projectName}`);
+    setHeaderTitle(projectName);
+  }, [projectName]);
 
   // Checkoff or un-checkoff a task.
   const handleCompletionToggle = async (taskId: string, completed: boolean) => {
@@ -108,42 +148,9 @@ export default function Project() {
     setFilter(updatedFilters as TaskFilter);
   };
 
-  useEffect(() => {
-    // First, update the URL.
-    const suffix = 'api/tasks'
-    const url = new URL(suffix, base_url);
-    url.searchParams.set('project_id', projectId);
-    url.searchParams.set('sort_by', filter.sortBy);
-    url.searchParams.set('desc', filter.desc ? "true" : "false");
-    url.searchParams.set('include_done', filter.includeDone ? "true" : "false");
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch tasks: ${res.statusText}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setTasks(data);
-      });
-    // Stringifying the filter prevents us from hitting a re-render loop.
-  }, [JSON.stringify(filter), projectId]);
-
-  useEffect(() => {
-    const suffix = `api/projects/${projectId}`;
-    const url = new URL(suffix, base_url);
-    fetch(url)
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setProjectName(data.name);
-      });
-  }, [])
-  useEffect(() => {
-    setPageTitle(`Project: ${projectName}`);
-    setHeaderTitle(projectName);
-  }, [projectName]);
+  const handleAddTask = async (task: Task) => {
+    setTasks([...tasks, task]);
+  }
 
   return (
     <>
@@ -152,7 +159,7 @@ export default function Project() {
       </div>
       <div className="-translate-y-6">
         <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle} />
-        <CreateNewTaskCard projectName={projectName} />
+        <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
       </div>
     </>
   )
