@@ -7,6 +7,7 @@ import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel
 import { useTitle } from "@/contexts/TitleContext";
 import { Task } from "@/types/task";
 import { getTasks } from "@/apiServices/task";
+import { getProject } from "@/apiServices/project";
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
@@ -43,7 +44,6 @@ export default function Project() {
   const [filter, setFilter] = useFilter();
   const { projectId } = useParams<{ projectId: string }>();
   const { setPageTitle, setHeaderTitle } = useTitle();
-  const [projectName, setProjectName] = useState('');
   const [tasks, setTasks] = useState<Task[]>([]);
   const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout }>({}); // Map of task IDs to timeout IDs
 
@@ -70,20 +70,15 @@ export default function Project() {
 
   // Fetch the project name.
   useEffect(() => {
-    const suffix = `api/projects/${projectId}`;
-    const url = new URL(suffix, base_url);
-    fetch(url)
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setProjectName(data.name);
-      });
+    getProject(projectId).then((data) => {
+      const projectName = data.name;
+      setPageTitle(`Project: ${projectName}`);
+      setHeaderTitle(projectName);
+    }).catch((err) => {
+      console.error(err);
+      toast.error('Failed to fetch project name');
+    })
   }, [])
-  useEffect(() => {
-    setPageTitle(`Project: ${projectName}`);
-    setHeaderTitle(projectName);
-  }, [projectName]);
 
   // Checkoff or un-checkoff a task.
   const handleCompletionToggle = async (taskId: string, completed: boolean) => {
