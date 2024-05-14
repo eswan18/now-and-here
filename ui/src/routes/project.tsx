@@ -116,8 +116,9 @@ export default function Project() {
       {
         pending: 'Updating task status...',
         success: completed ? 'Task completed!' : 'Task marked incomplete!',
-        error: 'Failed to update task.'
-      }
+        error: 'Failed to update task.',
+      },
+      {autoClose: 3000},
     );
   };
 
