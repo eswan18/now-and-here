@@ -6,6 +6,7 @@ import CreateTaskCard from "@/components/task/create_task_card";
 import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel";
 import { useTitle } from "@/contexts/TitleContext";
 import { Task } from "@/types/task";
+import { getTasks } from "@/apiServices/task";
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
@@ -58,23 +59,12 @@ export default function Project() {
 
   // Fetch the tasks for this project.
   useEffect(() => {
-    // First, update the URL.
-    const suffix = 'api/tasks'
-    const url = new URL(suffix, base_url);
-    url.searchParams.set('project_id', projectId);
-    url.searchParams.set('sort_by', filter.sortBy);
-    url.searchParams.set('desc', filter.desc ? "true" : "false");
-    url.searchParams.set('include_done', filter.includeDone ? "true" : "false");
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Failed to fetch tasks: ${res.statusText}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setTasks(data);
-      });
+    getTasks({ projectId, sortBy: filter.sortBy, desc: filter.desc, includeDone: filter.includeDone }).then((data) => {
+      setTasks(data);
+    }).catch((err) => {
+      console.error(err);
+      toast.error('Failed to fetch tasks');
+    })
     // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
 
