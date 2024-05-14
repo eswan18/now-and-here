@@ -19,8 +19,8 @@ export type NewTask = {
     name: string;
     description: string | null;
     done: boolean;
-    parentId: string | null;
-    projectId: string | null;
+    parent_id: string | null;
+    project_id: string | null;
     labels: string[];
     priority: number;
     due: Date | null;

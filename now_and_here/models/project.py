@@ -12,6 +12,8 @@ from rich.text import Text
 
 from .common import ID_LENGTH, format_id, random_id
 
+# mypy: disable-error-code="misc"
+
 
 @dataclass
 class Project:
@@ -20,9 +22,9 @@ class Project:
     """
 
     id: str = Field(default_factory=random_id)
-    name: str = Field(..., min_length=1, max_length=100)  # type: ignore [misc]
-    description: str | None = Field(None)  # type: ignore [misc]
-    parent: Project | None = Field(None)  # type: ignore [misc]
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str | None = Field(None)
+    parent: Project | None = Field(None)
 
     @classmethod
     def sortable_columns(cls) -> list[str]:

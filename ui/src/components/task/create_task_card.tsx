@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { Pencil } from 'lucide-react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import CreateTaskDialog from './create_task_dialog/create_task_dialog';
@@ -12,7 +13,19 @@ interface TaskCardProps {
 
 export default function CreateTaskCard({ taskDefaults, onAddTask }: TaskCardProps) {
   const handleCreateTask = (task: NewTask) => {
-    createTask(task).then((task) => { onAddTask(task) })
+    console.log('here creating task')
+    toast.promise(
+      createTask(task).then((task) => { onAddTask(task) }),
+      {
+        pending: 'Creating task...',
+        success: 'Task created!',
+        error: {
+          render({data}: {data: {message?: string}}){
+            return `Failed to create tasks: ${data.message}`
+          }
+        },
+      }
+    )
   };
   return (
     <>

@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { NewTask } from "@/types/task";
+import PriorityBadge from "../priority_badge";
 
 export interface TaskDefaults {
   name?: string;
@@ -45,23 +46,23 @@ const CreateTaskFormSchema = z.object({
   }),
   priority: z.coerce.number({
     required_error: "Tasks must have a priority",
-  }).gte(1).lte(4),
+  }).gte(0).lte(3),
 })
 
 export default function CreateTaskForm({ onCreateTask, defaults }: CreateTaskFormProps) {
   const form = useForm<z.infer<typeof CreateTaskFormSchema>>({
     resolver: zodResolver(CreateTaskFormSchema),
-    defaultValues: { priority: 1, ...defaults },
+    defaultValues: { priority: 0, ...defaults },
   })
   function onSubmit(data: z.infer<typeof CreateTaskFormSchema>) {
     const task: NewTask = {
       name: data.name,
       description: data.description || null,
-      projectId: data.projectId,
+      project_id: data.projectId,
       priority: data.priority,
       due: null,
       done: false,
-      parentId: null,
+      parent_id: null,
       labels: [],
       repeat: null,
     }
@@ -111,10 +112,10 @@ export default function CreateTaskForm({ onCreateTask, defaults }: CreateTaskFor
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="0"><PriorityBadge priority={0} /></SelectItem>
+                <SelectItem value="1"><PriorityBadge priority={1} /></SelectItem>
+                <SelectItem value="2"><PriorityBadge priority={2} /></SelectItem>
+                <SelectItem value="3"><PriorityBadge priority={3} /></SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />

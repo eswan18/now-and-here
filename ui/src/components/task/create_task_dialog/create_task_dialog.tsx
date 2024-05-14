@@ -3,7 +3,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter
 } from "@/components/ui/dialog";
 import CreateTaskForm, { TaskDefaults } from "./create_task_form";
 import { NewTask } from '@/types/task';
@@ -26,9 +25,6 @@ export default function CreateTaskModal({ onCreateTask, defaults }: CreateTaskMo
         </DialogDescription>
       </DialogHeader>
       <CreateTaskForm onCreateTask={onCreateTask} defaults={defaults} />
-      <DialogFooter>
-        { /*<Button type="submit">Save changes</Button> */}
-      </DialogFooter>
     </DialogContent>
   )
 }
