@@ -6,7 +6,7 @@ import CreateTaskCard from "@/components/task/create_task_card";
 import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel";
 import { useTitle } from "@/contexts/TitleContext";
 import { Task } from "@/types/task";
-import { getTasks } from "@/apiServices/task";
+import { completeTask, getTasks, uncompleteTask } from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
 
 const defaultFilter: TaskFilter = {
@@ -57,7 +57,7 @@ export default function Project() {
     return <div>No project ID provided</div>;
   }
 
-  // Fetch the tasks for this project.
+  // Fetch tasks based on the current filters.
   useEffect(() => {
     getTasks({ projectId, sortBy: filter.sortBy, desc: filter.desc, includeDone: filter.includeDone }).then((data) => {
       setTasks(data);
@@ -68,7 +68,7 @@ export default function Project() {
     // Stringifying the filter prevents us from hitting a re-render loop.
   }, [JSON.stringify(filter), projectId]);
 
-  // Fetch the project name.
+  // Fetch the project name and set the page title.
   useEffect(() => {
     getProject(projectId).then((data) => {
       const projectName = data.name;
@@ -82,29 +82,23 @@ export default function Project() {
 
   // Checkoff or un-checkoff a task.
   const handleCompletionToggle = async (taskId: string, completed: boolean) => {
-    const url = completed ? `/api/checkoff_task/${taskId}` : `/api/uncheckoff_task/${taskId}`;
+    // Clear any existing timeout for this task ID. This prevents a task that's rapidly
+    // completed and then uncompleted from disappearing anyway.
+    if (timeoutRefs.current[taskId]) {
+      clearTimeout(timeoutRefs.current[taskId]);
+      delete timeoutRefs.current[taskId];
+    }
 
-    const promise = fetch(url, {
-      method: 'POST',
-    }).then((res) => {
-      if (!res.ok) {
-        throw new Error(`Failed to update task status: ${res.statusText}`);
-      }
-      // Update tasks state
+    // Save the task status change.
+    const callApi = completed ? completeTask : uncompleteTask;
+    const promise = callApi(taskId).then(() => {
+      // Update the impacted task.
       setTasks(currentTasks =>
         currentTasks.map(task =>
           task.id === taskId ? { ...task, done: completed } : task
         )
       );
-
-      // Clear any existing timeout for this task ID. This prevents a task that's rapidly
-      // completed and then uncompleted from disappearing anyway.
-      if (timeoutRefs.current[taskId]) {
-        clearTimeout(timeoutRefs.current[taskId]);
-        delete timeoutRefs.current[taskId];
-      }
-
-      // If the task is now completed but we're supposed to show incomplete only tasks,
+      // If the task is now completed and we're showing only incomplete only tasks,
       // wait a few seconds and then remove it from the list.
       if (!filter.includeDone && completed) {
         timeoutRefs.current[taskId] = setTimeout(() => {
@@ -112,6 +106,9 @@ export default function Project() {
           delete timeoutRefs.current[taskId];
         }, 3000);
       }
+    }).catch((err) => {
+      console.error(err);
+      toast.error('Failed to update task status');
     })
 
     toast.promise(

@@ -47,3 +47,37 @@ export function getTasks({ projectId, sortBy, desc, includeDone }: { projectId: 
       return res.json();
     });
 }
+
+export function completeTask(taskId: string): Promise<Task> {
+  return fetch(`/api/checkoff_task/${taskId}`, {
+    method: 'POST',
+  }).then((res) => {
+    if (!res.ok) {
+      let errorMsg = res.statusText;
+      const data = res.json();
+      const errorDetail = extractErrorDetail(data);
+      if (errorDetail) {
+        errorMsg += `\n\n"${errorDetail}"`;
+      }
+      throw new Error(errorMsg);
+    }
+    return res.json();
+  });
+}
+
+export function uncompleteTask(taskId: string): Promise<Task> {
+  return fetch(`/api/uncheckoff_task/${taskId}`, {
+    method: 'POST',
+  }).then((res) => {
+    if (!res.ok) {
+      let errorMsg = res.statusText;
+      const data = res.json();
+      const errorDetail = extractErrorDetail(data);
+      if (errorDetail) {
+        errorMsg += `\n\n"${errorDetail}"`;
+      }
+      throw new Error(errorMsg);
+    }
+    return res.json();
+  });
+}
