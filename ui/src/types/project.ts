@@ -8,3 +8,8 @@ export interface Project {
 export interface ProjectWithChildren extends Project {
   children: ProjectWithChildren[];
 }
+
+export interface ProjectTree {
+  project: Project;
+  children: ProjectTree[];
+}
