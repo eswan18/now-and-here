@@ -10,10 +10,10 @@ import { NewTask } from '@/types/task';
 
 interface CreateTaskModalProps {
   onCreateTask: (task: NewTask) => void; // Function to call when a new task is created
-  defaults?: TaskDefaults;
+  defaults?: TaskDefaults; // Default values for the task
 }
 
-export default function CreateTaskModal({ onCreateTask, defaults }: CreateTaskModalProps) {
+export default function CreateTaskDialog({ onCreateTask, defaults }: CreateTaskModalProps) {
   return (
     <DialogContent>
       <DialogHeader>

@@ -68,7 +68,6 @@ export default function CreateTaskForm({ onCreateTask, defaults }: CreateTaskFor
     }
     onCreateTask(task);
   }
-  console.log('rendering');
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">

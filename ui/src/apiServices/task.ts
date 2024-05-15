@@ -1,9 +1,8 @@
 import { NewTask, Task } from '@/types/task';
 import { extractErrorDetail } from '@/apiServices/common';
 
-export function createTask(task: NewTask): Promise<Task> {
-  console.debug('Creating task:', task)
-  const promise = fetch('/api/tasks', {
+export async function createTask(task: NewTask): Promise<Task> {
+  return await fetch('/api/tasks', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -21,16 +20,15 @@ export function createTask(task: NewTask): Promise<Task> {
     }
     return res.json();
   });
-  return promise;
 }
 
-export function getTasks({ projectId, sortBy, desc, includeDone }: { projectId: string, sortBy: string, desc: boolean, includeDone: boolean }): Promise<Task[]> {
+export async function getTasks({ projectId, sortBy, desc, includeDone }: { projectId: string, sortBy: string, desc: boolean, includeDone: boolean }): Promise<Task[]> {
   const url = new URL('/api/tasks', window.location.origin);
   url.searchParams.set('project_id', projectId);
   url.searchParams.set('sort_by', sortBy);
   url.searchParams.set('desc', desc ? "true" : "false");
   url.searchParams.set('include_done', includeDone ? "true" : "false");
-  return fetch(url, {
+  return await fetch(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   })
@@ -48,8 +46,8 @@ export function getTasks({ projectId, sortBy, desc, includeDone }: { projectId: 
     });
 }
 
-export function completeTask(taskId: string): Promise<Task> {
-  return fetch(`/api/checkoff_task/${taskId}`, {
+export async function completeTask(taskId: string): Promise<Task> {
+  return await fetch(`/api/checkoff_task/${taskId}`, {
     method: 'POST',
   }).then((res) => {
     if (!res.ok) {
@@ -65,8 +63,8 @@ export function completeTask(taskId: string): Promise<Task> {
   });
 }
 
-export function uncompleteTask(taskId: string): Promise<Task> {
-  return fetch(`/api/uncheckoff_task/${taskId}`, {
+export async function uncompleteTask(taskId: string): Promise<Task> {
+  return await fetch(`/api/uncheckoff_task/${taskId}`, {
     method: 'POST',
   }).then((res) => {
     if (!res.ok) {

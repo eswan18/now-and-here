@@ -1,12 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify';
 import TaskCardList from "@/components/task/task_card_list"
 import CreateTaskCard from "@/components/task/create_task_card";
 import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel";
 import { useTitle } from "@/contexts/TitleContext";
-import { Task } from "@/types/task";
-import { completeTask, getTasks, uncompleteTask } from "@/apiServices/task";
+import { NewTask } from "@/types/task";
+import { completeTask, getTasks, createTask, uncompleteTask } from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
 
 const defaultFilter: TaskFilter = {
@@ -14,10 +15,6 @@ const defaultFilter: TaskFilter = {
   desc: false,
   includeDone: false,
 };
-
-function isDefined<T>(arg: T | undefined): arg is T {
-  return arg !== undefined;
-}
 
 function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,43 +39,35 @@ function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
 
 export default function Project() {
   const [filter, setFilter] = useFilter();
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId } = useParams<{ projectId: string }>() as { projectId: string };
   const { setPageTitle, setHeaderTitle } = useTitle();
-  const [tasks, setTasks] = useState<Task[]>([]);
   const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout }>({}); // Map of task IDs to timeout IDs
+  const queryClient = useQueryClient();
+  const tasksQuery = useQuery({
+    queryKey: ['tasks', projectId, filter],
+    queryFn: () => getTasks({
+      projectId: projectId as string,
+      sortBy: filter.sortBy,
+      desc: filter.desc,
+      includeDone: filter.includeDone,
+    }),
+  })
+  const projectQuery = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => getProject(projectId),
+  })
+  const addTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({ queryKey: ['tasks', projectId, filter] })
+    }
+  });
 
-  const base_url = new URL(window.location.origin);
-  // Remove the final slash if there is one.
-  if (base_url.pathname.endsWith('/')) {
-    base_url.pathname = base_url.pathname.slice(0, -1);
+  if (projectQuery.isSuccess) {
+    const projectName = projectQuery.data.name;
+    setPageTitle(`Project: ${projectName}`);
+    setHeaderTitle(projectName);
   }
-
-  if (!isDefined(projectId)) {
-    return <div>No project ID provided</div>;
-  }
-
-  // Fetch tasks based on the current filters.
-  useEffect(() => {
-    getTasks({ projectId, sortBy: filter.sortBy, desc: filter.desc, includeDone: filter.includeDone }).then((data) => {
-      setTasks(data);
-    }).catch((err) => {
-      console.error(err);
-      toast.error('Failed to fetch tasks');
-    })
-    // Stringifying the filter prevents us from hitting a re-render loop.
-  }, [JSON.stringify(filter), projectId]);
-
-  // Fetch the project name and set the page title.
-  useEffect(() => {
-    getProject(projectId).then((data) => {
-      const projectName = data.name;
-      setPageTitle(`Project: ${projectName}`);
-      setHeaderTitle(projectName);
-    }).catch((err) => {
-      console.error(err);
-      toast.error('Failed to fetch project name');
-    })
-  }, [])
 
   // Checkoff or un-checkoff a task.
   const handleCompletionToggle = async (taskId: string, completed: boolean) => {
@@ -93,19 +82,19 @@ export default function Project() {
     const callApi = completed ? completeTask : uncompleteTask;
     const promise = callApi(taskId).then(() => {
       // Update the impacted task.
-      setTasks(currentTasks =>
+      /*setTasks(currentTasks =>
         currentTasks.map(task =>
           task.id === taskId ? { ...task, done: completed } : task
         )
-      );
+      );*/
       // If the task is now completed and we're showing only incomplete only tasks,
       // wait a few seconds and then remove it from the list.
-      if (!filter.includeDone && completed) {
+      /*if (!filter.includeDone && completed) {
         timeoutRefs.current[taskId] = setTimeout(() => {
           setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
           delete timeoutRefs.current[taskId];
         }, 3000);
-      }
+      }*/
     }).catch((err) => {
       console.error(err);
       toast.error('Failed to update task status');
@@ -131,8 +120,8 @@ export default function Project() {
     setFilter(updatedFilters as TaskFilter);
   };
 
-  const handleAddTask = async (task: Task) => {
-    setTasks([...tasks, task]);
+  const handleAddTask = async (newTask: NewTask) => {
+    addTaskMutation.mutate(newTask)
   }
 
   return (
@@ -141,7 +130,7 @@ export default function Project() {
         <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       </div>
       <div className="-translate-y-6">
-        <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle} />
+        <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletionToggle} />
         <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
       </div>
     </>

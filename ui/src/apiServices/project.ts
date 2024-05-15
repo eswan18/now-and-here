@@ -1,9 +1,9 @@
 import { Project, ProjectTree } from '@/types/project';
 import { extractErrorDetail } from '@/apiServices/common';
 
-export function getProject(projectId: string): Promise<Project> {
+export async function getProject(projectId: string): Promise<Project> {
   const url = new URL(`/api/projects/${projectId}`, window.location.origin);
-  return fetch(url, {
+  return await fetch(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   })
@@ -21,9 +21,9 @@ export function getProject(projectId: string): Promise<Project> {
     });
 }
 
-export function getProjects(): Promise<Project[]> {
+export async function getProjects(): Promise<Project[]> {
   const url = new URL('/api/projects', window.location.origin);
-  return fetch(url, {
+  return await fetch(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
   })
@@ -41,26 +41,26 @@ export function getProjects(): Promise<Project[]> {
     });
 }
 
-export function getProjectsAsTrees(): Promise<ProjectTree[]> {
-  return getProjects().then((projects) => {
-    // Build a hash table of projects by ID.
-    const projectsById: Map<string, ProjectTree> = new Map();
-    projects.forEach((project) => {
-      projectsById.set(project.id, {project, children: []});
-    })
+export async function getProjectsAsTrees(): Promise<ProjectTree[]> {
+  const projects = await getProjects();
 
-    // Get a list of IDs in the map.
-    const projectIds = Array.from(projectsById.keys());
-    projectIds.forEach((projectId) => {
-      const node = projectsById.get(projectId)!;
-      const parentId = node.project.parent?.id;
-      // Check if parent ID is defined. If so, add the project to the parent's children.
-      if (parentId) {
-        projectsById.get(parentId)!.children.push(node);
-      }
-    })
-
-    const roots = Array.from(projectsById.values()).filter((node) => !node.project.parent);
-    return roots;
+  // Build a hash table of projects by ID.
+  const projectsById: Map<string, ProjectTree> = new Map();
+  projects.forEach((project) => {
+    projectsById.set(project.id, { project, children: [] });
   })
+
+  // Get a list of IDs in the map.
+  const projectIds = Array.from(projectsById.keys());
+  projectIds.forEach((projectId) => {
+    const node = projectsById.get(projectId)!;
+    const parentId = node.project.parent?.id;
+    // Check if parent ID is defined. If so, add the project to the parent's children.
+    if (parentId) {
+      projectsById.get(parentId)!.children.push(node);
+    }
+  })
+
+  const roots = Array.from(projectsById.values()).filter((node) => !node.project.parent);
+  return roots;
 }
