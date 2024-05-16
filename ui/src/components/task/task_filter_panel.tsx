@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Select, SelectValue, SelectItem, SelectTrigger, SelectContent } from '@/components/ui/select';
 import { Form, FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
 import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 
@@ -31,15 +32,14 @@ export default function TaskFilterPanel({ filter, onFilterChange }: TaskFilterPa
   return (
     <Form {...form}>
       <form>
-        <div className="flex flex-row justify-start items-end gap-8 lg:gap-12 py-1">
-          { /* <ToggleSortOrder desc={filter.desc} onToggle={(value) => { onFilterChange('desc', value) }} /> */}
+        <div className="flex flex-row justify-start items-center py-1">
           <FormField control={form.control} name="sortBy" render={({ field }) => (
-            <FormItem className='flex flex-row items-center gap-2 space-y-0'>
-              <FormLabel className='font-normal min-w-16 text-right'>Sorted by</FormLabel>
+            <FormItem className='flex flex-row items-center gap-2 space-y-0 mr-3 w-[9.5rem]'>
+              <FormLabel className='font-normal text-gray-400 min-w-16 text-right'>Sorted by</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="..."/>
+                  <SelectTrigger className='border-0 px-0 h-6 w-auto'>
+                    <SelectValue placeholder="..." />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -51,35 +51,28 @@ export default function TaskFilterPanel({ filter, onFilterChange }: TaskFilterPa
             </FormItem>
           )}
           />
-          <FormField control={form.control} name="desc" render={({ field }) => (
-            <FormItem className='flex flex-row items-center gap-2 space-y-0'>
-              <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+          <FormField control={form.control} name="desc"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2 space-y-0 mr-10">
+                <FormLabel className="font-normal text-gray-400">Descending</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="..."/>
-                  </SelectTrigger>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="false">Ascending</SelectItem>
-                  <SelectItem value="true">Descending</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
+              </FormItem>
+            )}
           />
           <FormField control={form.control} name="includeDone" render={({ field }) => (
             <FormItem className='flex flex-row items-center gap-2 space-y-0'>
-              <FormLabel className='font-normal min-w-16 text-right'>Showing</FormLabel>
+              <FormLabel className='font-normal text-gray-400 min-w-16 text-right'>Showing</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="..."/>
+                  <SelectTrigger className='border-0 px-0 h-6'>
+                    <SelectValue placeholder="..." />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="false">Incomplete</SelectItem>
-                  <SelectItem value="true">All</SelectItem>
+                  <SelectItem value="false">Incomplete Tasks</SelectItem>
+                  <SelectItem value="true">All Tasks</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

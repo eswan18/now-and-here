@@ -1,5 +1,12 @@
-import { nice_date } from "../../functions/time";
-import { Task } from "../../types/task";
+import { Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import { relativeTimeString } from "@/lib/time";
+import { Task } from "@/types/task";
 import PriorityBadge from "./priority_badge";
 
 interface TaskCardProps {
@@ -15,8 +22,8 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
                     <div className="text-sm font-semibold text-orange-700">
                         {task.project && <a href={`/projects/${task.project.id}`}>{task.project.name}</a>}
                     </div>
-                    <div className="text-sm mx-4">
-                        {task.due ? <span className="text-orange-800">{task.due.toString()}</span> : null}
+                    <div className="">
+                        { /* fill this in later -- maybe labels go here? */}
                     </div>
                 </div>
                 <div className="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">
@@ -40,12 +47,27 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
                             <h3 className="font-semibold text-lg inline-block"><a href={`/tasks/${task.id}`}>{task.name}</a></h3>
                         </div>
                         <div className="text-xs">
-                            <PriorityBadge priority={ task.priority } />
+                            <PriorityBadge priority={task.priority} />
                         </div>
                     </div>
-                    <div className="flex flex-col justify-center items-end text-sm text-gray-400 mr-4 text-right">
-                        <div>{ task.due ? nice_date(task.due) : "No due date" }</div>
-                    </div>
+                    {task.due
+                        ? <HoverCard>
+                            <HoverCardTrigger>
+                                <Badge variant="outline" className="flex flex-row items-center text-orange-800">
+
+                                    <Clock size={16} className="inline-block mr-1" />
+                                    <p>{relativeTimeString(new Date(task.due))}</p>
+                                </Badge>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-48">
+                                <div className="flex flex-col items-center">
+                                    <p className="text-xs text-gray-400">Due:</p>
+                                    <p className="text-sm text-gray-800">{new Date(task.due).toLocaleString()}</p>
+                                </div>
+                            </HoverCardContent>
+                        </HoverCard>
+                        : <p className="text-gray-400 text-sm mr-2">No due date</p>
+                    }
                 </div>
                 <div className="flex flex-row flex-wrap w-full justify-between pl-14 pt-1">
                     <div className="text-gray-400 text-sm">
