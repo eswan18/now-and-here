@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify';
@@ -46,7 +45,6 @@ export default function Project() {
   const [filter, setFilter] = useFilter();
   const { projectId } = useParams<{ projectId: string }>() as { projectId: string };
   const { setPageTitle, setHeaderTitle } = useTitle();
-  const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout }>({}); // Map of task IDs to timeout IDs
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
     queryKey: ['tasks', projectId, filter],
@@ -74,47 +72,21 @@ export default function Project() {
     setHeaderTitle(projectName);
   }
 
-  // Checkoff or un-checkoff a task.
-  const handleCompletionToggle = async (taskId: string, completed: boolean) => {
-    // Clear any existing timeout for this task ID. This prevents a task that's rapidly
-    // completed and then uncompleted from disappearing anyway.
-    if (timeoutRefs.current[taskId]) {
-      clearTimeout(timeoutRefs.current[taskId]);
-      delete timeoutRefs.current[taskId];
+  const completeTaskMutation = useMutation({
+    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
+      if (completed) {
+        return completeTask(taskId);
+      } else {
+        return uncompleteTask(taskId);
+      }
+    },
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({ queryKey: ['tasks', projectId, filter] })
     }
-
-    // Save the task status change.
-    const callApi = completed ? completeTask : uncompleteTask;
-    const promise = callApi(taskId).then(() => {
-      // Update the impacted task.
-      /*setTasks(currentTasks =>
-        currentTasks.map(task =>
-          task.id === taskId ? { ...task, done: completed } : task
-        )
-      );*/
-      // If the task is now completed and we're showing only incomplete only tasks,
-      // wait a few seconds and then remove it from the list.
-      /*if (!filter.includeDone && completed) {
-        timeoutRefs.current[taskId] = setTimeout(() => {
-          setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
-          delete timeoutRefs.current[taskId];
-        }, 3000);
-      }*/
-    }).catch((err) => {
-      console.error(err);
-      toast.error('Failed to update task status');
-    })
-
-    toast.promise(
-      promise,
-      {
-        pending: 'Updating task status...',
-        success: completed ? 'Task completed!' : 'Task marked incomplete!',
-        error: 'Failed to update task.',
-      },
-      {autoClose: 3000},
-    );
-  };
+  })
+  const handleCompletion = async (taskId: string, completed: boolean) => {
+    completeTaskMutation.mutate({taskId, completed});
+  }
 
   // Handle changes to any filter
   const handleFilterChange = (filter: z.infer<typeof TaskFilterSchema>) => {
@@ -131,7 +103,7 @@ export default function Project() {
         <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       </div>
       <div className="-translate-y-6">
-        <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletionToggle} />
+        <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletion} />
         <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
       </div>
     </>
