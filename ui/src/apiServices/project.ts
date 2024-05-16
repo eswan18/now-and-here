@@ -41,9 +41,7 @@ export async function getProjects(): Promise<Project[]> {
     });
 }
 
-export async function getProjectsAsTrees(): Promise<ProjectTree[]> {
-  const projects = await getProjects();
-
+export function projectsAsTrees(projects: Project[]): ProjectTree[] {
   // Build a hash table of projects by ID.
   const projectsById: Map<string, ProjectTree> = new Map();
   projects.forEach((project) => {

@@ -53,7 +53,7 @@ export default function Project() {
     }),
   })
   const projectQuery = useQuery({
-    queryKey: ['project', projectId],
+    queryKey: ['projects', projectId],
     queryFn: () => getProject(projectId),
   })
   const addTaskMutation = useMutation({

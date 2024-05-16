@@ -1,12 +1,15 @@
 import { forwardRef } from "react";
 import { useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { useTitle } from "../contexts/TitleContext";
-import { cn } from "@/lib/utils"
+import { useQuery } from '@tanstack/react-query';
+
 import {
   NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink,
   navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu";
+import { getProjects } from "@/apiServices/project";
+import { useTitle } from "@/contexts/TitleContext";
+import { cn } from "@/lib/utils"
 
 export default function Root() {
   const { pageTitle, headerTitle } = useTitle();
@@ -35,9 +38,10 @@ export default function Root() {
 
 function NavBar() {
   // Todo: fetch projects and views from the server
-  const projects = [
-    { name: "Career", id: "kdtnfc" },
-  ]
+  const projectsQuery = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => getProjects(),
+  })
   const views = [
     { name: "Today", id: "today" }
   ]
@@ -49,9 +53,13 @@ function NavBar() {
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Projects</NavigationMenuTrigger>
-              <NavigationMenuContent className="max-w-40 lg:max-w-48">
-                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                  {projects.map((project) => (
+              <NavigationMenuContent className="max-w-40 lg:max-w-60">
+                <ul className="grid w-48 gap-3 p-4">
+                  <ListItem
+                    title="All projects"
+                    href="/projects"
+                  />
+                  {projectsQuery.isSuccess && projectsQuery.data.map((project) => (
                     <ListItem
                       key={project.id}
                       title={project.name}
@@ -67,7 +75,11 @@ function NavBar() {
             <NavigationMenuItem>
               <NavigationMenuTrigger>Views</NavigationMenuTrigger>
               <NavigationMenuContent className="max-w-40 lg:max-w-48">
-                <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+                <ul className="grid w-48 gap-3 p-4">
+                  <ListItem
+                    title="All views"
+                    href="/views"
+                  />
                   {views.map((view) => (
                     <ListItem
                       key={view.id}
