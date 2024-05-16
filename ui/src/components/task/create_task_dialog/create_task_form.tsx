@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useQuery } from "@tanstack/react-query";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { getProjects } from "@/apiServices/project";
 import { NewTask } from "@/types/task";
 import PriorityBadge from "../priority_badge";
 
@@ -41,15 +43,17 @@ const CreateTaskFormSchema = z.object({
       required_error: "Tasks must have a name",
     }),
   description: z.string().optional(),
-  projectId: z.string({
-    required_error: "Tasks must have a project ID",
-  }),
+  projectId: z.string().optional().nullable().transform((val) => val === "null" ? null : val),
   priority: z.coerce.number({
     required_error: "Tasks must have a priority",
   }).gte(0).lte(3),
 })
 
 export default function CreateTaskForm({ onCreateTask, defaults }: CreateTaskFormProps) {
+  const projectsQuery = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => getProjects(),
+  });
   const form = useForm<z.infer<typeof CreateTaskFormSchema>>({
     resolver: zodResolver(CreateTaskFormSchema),
     defaultValues: { priority: 0, ...defaults },
@@ -58,7 +62,7 @@ export default function CreateTaskForm({ onCreateTask, defaults }: CreateTaskFor
     const task: NewTask = {
       name: data.name,
       description: data.description || null,
-      project_id: data.projectId,
+      project_id: data.projectId || null,
       priority: data.priority,
       due: null,
       done: false,
@@ -93,10 +97,22 @@ export default function CreateTaskForm({ onCreateTask, defaults }: CreateTaskFor
         />
         <FormField control={form.control} name="projectId" render={({ field }) => (
           <FormItem>
-            <FormLabel>Project ID</FormLabel>
-            <FormControl>
-              <Input {...field} />
-            </FormControl>
+            <FormLabel>Project</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value?.toString() || "null"}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Project" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="null">None</SelectItem>
+                {projectsQuery.isLoading && "Loading..."}
+                {projectsQuery.isError && "Error loading projects"}
+                {projectsQuery.isSuccess && projectsQuery.data.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         )}
