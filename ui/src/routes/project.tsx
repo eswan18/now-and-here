@@ -4,29 +4,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify';
 import TaskCardList from "@/components/task/task_card_list"
 import CreateTaskCard from "@/components/task/create_task_card";
-import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel";
+import TaskFilterPanel, { TaskFilterSchema } from "@/components/task/task_filter_panel";
 import { useTitle } from "@/contexts/TitleContext";
 import { NewTask } from "@/types/task";
 import { completeTask, getTasks, createTask, uncompleteTask } from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
+import { z } from "zod";
 
-const defaultFilter: TaskFilter = {
+const defaultFilter: z.infer<typeof TaskFilterSchema> = {
   sortBy: "due",
   desc: false,
   includeDone: false,
 };
 
-function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
+function useFilter(): [z.infer<typeof TaskFilterSchema>, (newFilters: z.infer<typeof TaskFilterSchema>) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  let sortBy = searchParams.get('sortBy') as "due" | "priority" | null;
+  if (sortBy && !['due', 'priority'].includes(sortBy)) {
+    toast.error('Invalid sortBy parameter in URL');
+    sortBy = null;
+  }
   const filter = {
-    sortBy: searchParams.get('sortBy') || defaultFilter.sortBy,
+    sortBy: sortBy || defaultFilter.sortBy,
     desc: searchParams.get('desc') === 'true' ? true : defaultFilter.desc,
     includeDone: searchParams.get('includeDone') === 'true' ? true : defaultFilter.includeDone,
   };
-
   // Function to update the filter and URL
-  const setFilter = (newFilter: TaskFilter) => {
+  const setFilter = (newFilter: z.infer<typeof TaskFilterSchema>) => {
     setSearchParams({
       ...newFilter,
       desc: newFilter.desc.toString(), // ensure boolean is converted to string
@@ -112,13 +117,9 @@ export default function Project() {
   };
 
   // Handle changes to any filter
-  const handleFilterChange = (filterName: keyof TaskFilter, value: boolean | string) => {
-    const updatedFilters = {
-      ...filter,
-      [filterName]: value,
-    };
-    setFilter(updatedFilters as TaskFilter);
-  };
+  const handleFilterChange = (filter: z.infer<typeof TaskFilterSchema>) => {
+    setFilter(filter)
+  }
 
   const handleAddTask = async (newTask: NewTask) => {
     addTaskMutation.mutate(newTask)
