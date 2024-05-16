@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Iterable, Self
+from typing import TYPE_CHECKING, Iterable, Self
 
 from pydantic import AwareDatetime, Field, RootModel, field_serializer
 from pydantic.dataclasses import dataclass
@@ -14,6 +14,8 @@ from rich.rule import Rule
 from rich.table import Table
 from rich.text import Text
 
+if TYPE_CHECKING:
+    from now_and_here.datastore import DataStore
 from now_and_here.models.repeat_interval import RepeatInterval, parse_json
 from now_and_here.time import format_time, relative_time
 
@@ -21,20 +23,22 @@ from .common import ID_LENGTH, format_id, format_priority, random_id
 from .label import Label
 from .project import Project
 
+# mypy: disable-error-code="misc"
+
 
 @dataclass
 class Task:
     id: str = Field(default_factory=random_id)
-    name: str = Field(..., min_length=1, max_length=100)  # type: ignore [misc]
-    description: str | None = Field(None)  # type: ignore [misc]
-    done: bool = Field(False)  # type: ignore [misc]
-    parent: Task | None = Field(None)  # type: ignore [misc]
-    project: Project | None = Field(None)  # type: ignore [misc]
-    labels: list[Label] = Field(default_factory=list)  # type: ignore [misc]
-    priority: int = Field(default=0, ge=0, le=3)  # type: ignore [misc]
-    due: AwareDatetime | None = Field(None)  # type: ignore [misc]
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str | None = Field(None)
+    done: bool = Field(False)
+    parent: Task | None = Field(None)
+    project: Project | None = Field(None)
+    labels: list[Label] = Field(default_factory=list)
+    priority: int = Field(default=0, ge=0, le=3)
+    due: AwareDatetime | None = Field(None)
     # We can't validate this field because it's a protocol
-    repeat: SkipValidation[RepeatInterval | None] = Field(None)  # type: ignore [misc]
+    repeat: SkipValidation[RepeatInterval | None] = Field(None)
 
     @classmethod
     def as_rich_table(cls, tasks: Iterable[Self]) -> Table:
@@ -168,6 +172,11 @@ class Task:
             return None
         return value.as_json()
 
+    @field_serializer("parent")
+    def serialize_parent(self, value: Task | None) -> str | Task | None:
+        # Save the parent just by its ID.
+        return value.id if value is not None else None
+
     @field_serializer("project")
     def serialize_project(self, value: Project | None) -> str | Project | None:
         # Save the project just by its ID.
@@ -206,8 +215,13 @@ class Task:
         return relative_time(self.due) if self.due else None
 
 
-class FETask(Task):
+class FETaskOut(Task):
     """A task that serializes appropriately for the front end."""
+
+    @field_serializer("parent")
+    def serialize_parent(self, value: Task | None) -> Task | None:
+        # Send back the whole parent (unlike above, where we serialize just the ID)
+        return value
 
     @field_serializer("project")
     def serialize_project(self, value: Project | None) -> Project | None:
@@ -227,4 +241,33 @@ class FETask(Task):
             priority=task.priority,
             due=task.due,
             repeat=task.repeat,
+        )
+
+
+@dataclass
+class FENewTaskIn(Task):
+    """A task received from the front end."""
+
+    id: str | None = Field(None)  # type: ignore [assignment]
+    parent_id: str | None = Field(None)
+    project_id: str | None = Field(None)
+
+    def to_task(self, store: DataStore) -> Task:
+        project = self.project
+        if project is None and self.project_id is not None:
+            project = store.get_project(self.project_id)
+        parent = self.parent
+        if parent is None and self.parent_id is not None:
+            parent = store.get_task(self.parent_id)
+        return Task(
+            id=self.id or random_id(),
+            name=self.name,
+            description=self.description,
+            done=self.done,
+            parent=parent,
+            project=project,
+            labels=self.labels,
+            priority=self.priority,
+            due=self.due,
+            repeat=self.repeat,
         )

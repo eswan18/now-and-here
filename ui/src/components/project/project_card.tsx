@@ -1,16 +1,19 @@
-import { Project } from "../../types/project";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Project } from "@/types/project";
 
 export default function ProjectCard({ project }: { project: Project }) {
   return (
-    <>
-      <div className="rounded my-2 p-4 flex flex-col items-center bg-white shadow-sm">
-        <div className="flex flex-row justify-start items-end w-full px-4 gap-4">
-          <h3 className="font-semibold text-lg leading-none"><a href={`/projects/${project.id}`}>{project.name}</a></h3>
-          <div className="text-base text-gray-400 leading-none">
-            {project.description}
-          </div>
-        </div>
-      </div>
-    </>
+    <Card className="my-1 lg:my-2">
+      <CardHeader className="flex flex-row gap-4">
+        <CardTitle><a href={`/projects/${project.id}`}>{project.name}</a></CardTitle>
+        <CardDescription className="text-base leading-none tracking-tight">{project.description}</CardDescription>
+      </CardHeader>
+    </Card>
   )
 }

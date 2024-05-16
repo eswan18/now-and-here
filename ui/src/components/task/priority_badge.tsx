@@ -1,16 +1,16 @@
 export default function PriorityBadge({ priority }: {priority: number }) {
   let colors = null;
   switch (priority) {
-    case 0:
+    case 3:
       colors = "bg-red-200 text-red-900";
       break
-    case 1:
+    case 2:
       colors = "bg-orange-200 text-orange-900";
       break
-    case 2:
+    case 1:
       colors = "bg-yellow-200 text-yellow-900";
       break
-    case 3:
+    case 0:
       colors = "bg-blue-200 text-blue-900";
       break
   }

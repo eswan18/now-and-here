@@ -1,12 +1,10 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Form
+from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 
 from now_and_here import datastore
 from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.models import FEProject
-from now_and_here.models.task import FETask
+from now_and_here.models.task import FENewTaskIn, FETaskOut
 
 api_router = APIRouter(prefix="/api")
 
@@ -17,7 +15,7 @@ def get_tasks(
     sort_by: str = "due",
     desc: bool = False,
     include_done: bool = False,
-) -> list[FETask]:
+) -> list[FETaskOut]:
     store = datastore.get_store()
     tasks = store.get_tasks(
         project_id=project_id,
@@ -25,11 +23,11 @@ def get_tasks(
         sort_by=sort_by,
         desc=desc,
     )
-    return [FETask.from_task(t) for t in tasks]
+    return [FETaskOut.from_task(t) for t in tasks]
 
 
 @api_router.post("/checkoff_task/{id}")
-def checkoff_task(id: str) -> FETask:
+def checkoff_task(id: str) -> FETaskOut:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
@@ -37,11 +35,11 @@ def checkoff_task(id: str) -> FETask:
         raise HTTPException(status_code=404, detail="Task not found")
     task.done = True
     store.checkoff_task(task.id)
-    return FETask.from_task(task)
+    return FETaskOut.from_task(task)
 
 
 @api_router.post("/uncheckoff_task/{id}")
-def uncheckoff_task(id: str) -> FETask:
+def uncheckoff_task(id: str) -> FETaskOut:
     store = datastore.get_store()
     try:
         task = store.get_task(id)
@@ -49,7 +47,7 @@ def uncheckoff_task(id: str) -> FETask:
         raise HTTPException(status_code=404, detail="Task not found")
     task.done = True
     store.uncheckoff_task(task.id)
-    return FETask.from_task(task)
+    return FETaskOut.from_task(task)
 
 
 @api_router.get("/projects/{id}")
@@ -62,14 +60,12 @@ def get_project_by_id(id: str) -> FEProject:
     return FEProject.from_project(project)
 
 
-@api_router.post("/tasks/{id}")
-def post_task(id: str, done: Annotated[bool | None, Form()] = None) -> FETask:
+@api_router.post("/tasks")
+def post_task(task: FENewTaskIn) -> FETaskOut:
     store = datastore.get_store()
-    try:
-        task = store.get_task(id)
-    except RecordNotFoundError:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return FETask.from_task(task)
+    backend_task = task.to_task(store=store)
+    store.save_task(backend_task)
+    return FETaskOut.from_task(backend_task)
 
 
 @api_router.get("/projects")

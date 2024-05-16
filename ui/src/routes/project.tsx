@@ -1,20 +1,20 @@
-import { useEffect, useState, useRef } from "react";
-import TaskCardList from "../components/task/task_card_list"
-import TaskFilterPanel, { TaskFilter } from "../components/task/task_filter_panel";
+import { useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useTitle } from "../contexts/TitleContext";
-import { Task } from "../types/task";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify';
+import TaskCardList from "@/components/task/task_card_list"
+import CreateTaskCard from "@/components/task/create_task_card";
+import TaskFilterPanel, { TaskFilter } from "@/components/task/task_filter_panel";
+import { useTitle } from "@/contexts/TitleContext";
+import { NewTask } from "@/types/task";
+import { completeTask, getTasks, createTask, uncompleteTask } from "@/apiServices/task";
+import { getProject } from "@/apiServices/project";
 
 const defaultFilter: TaskFilter = {
   sortBy: "due",
   desc: false,
   includeDone: false,
 };
-
-function isDefined<T>(arg: T | undefined): arg is T {
-  return arg !== undefined;
-}
 
 function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,53 +39,65 @@ function useFilter(): [TaskFilter, (newFilters: TaskFilter) => void] {
 
 export default function Project() {
   const [filter, setFilter] = useFilter();
-  const { projectId } = useParams<{ projectId: string }>();
+  const { projectId } = useParams<{ projectId: string }>() as { projectId: string };
   const { setPageTitle, setHeaderTitle } = useTitle();
-  const [projectName, setProjectName] = useState('');
-  const timeoutRefs = useRef<{ [key: string]: number }>({}); // Map of task IDs to timeout IDs
-  const base_url = new URL(window.location.origin);
-  // Remove the final slash if there is one.
-  if (base_url.pathname.endsWith('/')) {
-    base_url.pathname = base_url.pathname.slice(0, -1);
-  }
+  const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout }>({}); // Map of task IDs to timeout IDs
+  const queryClient = useQueryClient();
+  const tasksQuery = useQuery({
+    queryKey: ['tasks', projectId, filter],
+    queryFn: () => getTasks({
+      projectId: projectId as string,
+      sortBy: filter.sortBy,
+      desc: filter.desc,
+      includeDone: filter.includeDone,
+    }),
+  })
+  const projectQuery = useQuery({
+    queryKey: ['projects', projectId],
+    queryFn: () => getProject(projectId),
+  })
+  const addTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({ queryKey: ['tasks', projectId, filter] })
+    }
+  });
 
-  if (!isDefined(projectId)) {
-    return <div>No project ID provided</div>;
+  if (projectQuery.isSuccess) {
+    const projectName = projectQuery.data.name;
+    setPageTitle(`Project: ${projectName}`);
+    setHeaderTitle(projectName);
   }
-  const [tasks, setTasks] = useState<Task[]>([]);
 
   // Checkoff or un-checkoff a task.
   const handleCompletionToggle = async (taskId: string, completed: boolean) => {
-    const url = completed ? `/api/checkoff_task/${taskId}` : `/api/uncheckoff_task/${taskId}`;
+    // Clear any existing timeout for this task ID. This prevents a task that's rapidly
+    // completed and then uncompleted from disappearing anyway.
+    if (timeoutRefs.current[taskId]) {
+      clearTimeout(timeoutRefs.current[taskId]);
+      delete timeoutRefs.current[taskId];
+    }
 
-    const promise = fetch(url, {
-      method: 'POST',
-    }).then((res) => {
-      if (!res.ok) {
-        throw new Error(`Failed to update task status: ${res.statusText}`);
-      }
-      // Update tasks state
-      setTasks(currentTasks =>
+    // Save the task status change.
+    const callApi = completed ? completeTask : uncompleteTask;
+    const promise = callApi(taskId).then(() => {
+      // Update the impacted task.
+      /*setTasks(currentTasks =>
         currentTasks.map(task =>
           task.id === taskId ? { ...task, done: completed } : task
         )
-      );
-
-      // Clear any existing timeout for this task ID. This prevents a task that's rapidly
-      // completed and then uncompleted from disappearing anyway.
-      if (timeoutRefs.current[taskId]) {
-        clearTimeout(timeoutRefs.current[taskId]);
-        delete timeoutRefs.current[taskId];
-      }
-
-      // If the task is now completed but we're supposed to show incomplete only tasks,
+      );*/
+      // If the task is now completed and we're showing only incomplete only tasks,
       // wait a few seconds and then remove it from the list.
-      if (!filter.includeDone && completed) {
+      /*if (!filter.includeDone && completed) {
         timeoutRefs.current[taskId] = setTimeout(() => {
           setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
           delete timeoutRefs.current[taskId];
         }, 3000);
-      }
+      }*/
+    }).catch((err) => {
+      console.error(err);
+      toast.error('Failed to update task status');
     })
 
     toast.promise(
@@ -93,8 +105,9 @@ export default function Project() {
       {
         pending: 'Updating task status...',
         success: completed ? 'Task completed!' : 'Task marked incomplete!',
-        error: 'Failed to update task.'
-      }
+        error: 'Failed to update task.',
+      },
+      {autoClose: 3000},
     );
   };
 
@@ -107,38 +120,9 @@ export default function Project() {
     setFilter(updatedFilters as TaskFilter);
   };
 
-  useEffect(() => {
-    // First, update the URL.
-    const suffix = 'api/tasks'
-    const url = new URL(suffix, base_url);
-    url.searchParams.set('project_id', projectId);
-    url.searchParams.set('sort_by', filter.sortBy);
-    url.searchParams.set('desc', filter.desc ? "true" : "false");
-    url.searchParams.set('include_done', filter.includeDone ? "true" : "false");
-    fetch(url)
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setTasks(data);
-      });
-    // Stringifying the filter prevents us from hitting a re-render loop.
-  }, [JSON.stringify(filter), projectId]);
-  useEffect(() => {
-    const suffix = `api/projects/${projectId}`;
-    const url = new URL(suffix, base_url);
-    fetch(url)
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setProjectName(data.name);
-      });
-  }, [])
-  useEffect(() => {
-    setPageTitle(`Project: ${projectName}`);
-    setHeaderTitle(projectName);
-  }, [projectName]);
+  const handleAddTask = async (newTask: NewTask) => {
+    addTaskMutation.mutate(newTask)
+  }
 
   return (
     <>
@@ -146,7 +130,8 @@ export default function Project() {
         <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       </div>
       <div className="-translate-y-6">
-        <TaskCardList tasks={tasks} onCompletionToggle={handleCompletionToggle} />
+        <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletionToggle} />
+        <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
       </div>
     </>
   )
