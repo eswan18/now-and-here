@@ -25,7 +25,7 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
             {task.project && <a href={`/projects/${task.project.id}`}>{task.project.name}</a>}
           </div>
           <div className="">
-            { /* fill this in later -- maybe labels go here? */}
+            <PriorityBadge priority={task.priority} />
           </div>
         </div>
         <div className="flex flex-row justify-between items-center w-full border-b border-b-gray-200">
@@ -33,7 +33,6 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
             <Checkbox checked={task.done} onCheckedChange={() => onToggleCompletion(task.id, !task.done)} className="h-5 w-5 mr-1.5 border border-gray-400" />
             <div className="flex flex-row items-center justify-start gap-4">
               <h3 className="font-semibold text-lg inline-block"><a href={`/tasks/${task.id}`}>{task.name}</a></h3>
-              <PriorityBadge priority={task.priority} />
             </div>
           </div>
           {task.due
