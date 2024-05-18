@@ -8,6 +8,7 @@ import {
   navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu";
 import { getProjects } from "@/apiServices/project";
+import { getTaskViews } from "@/apiServices/view";
 import { useTitle } from "@/contexts/TitleContext";
 import { cn } from "@/lib/utils"
 
@@ -41,10 +42,10 @@ function NavBar() {
     queryKey: ['projects'],
     queryFn: () => getProjects(),
   })
-  // Todo: Implement views and then fetch them from the server here.
-  const views = [
-    { name: "Today", id: "today" }
-  ]
+  const taskViewsQuery = useQuery({
+    queryKey: ['taskViews'],
+    queryFn: () => getTaskViews(),
+  })
   return (
     <div className="w-full px-4 h-10 bg-white">
       <div className="flex flex-row justify-between items-center h-full w-full px-4 lg:px-8">
@@ -55,18 +56,17 @@ function NavBar() {
               <NavigationMenuTrigger>Projects</NavigationMenuTrigger>
               <NavigationMenuContent className="max-w-40 lg:max-w-60">
                 <ul className="grid w-48 gap-3 p-4">
-                  <ListItem
+                  <BoldListItem
                     title="All projects"
                     href="/projects"
                   />
                   {projectsQuery.isSuccess && projectsQuery.data.map((project) => (
-                    <ListItem
+                    <RegularListItem
                       key={project.id}
                       title={project.name}
                       href={`/projects/${project.id}`}
                     >
-                      {project.name}
-                    </ListItem>
+                    </RegularListItem>
                   ))}
                 </ul>
               </NavigationMenuContent>
@@ -76,18 +76,17 @@ function NavBar() {
               <NavigationMenuTrigger>Views</NavigationMenuTrigger>
               <NavigationMenuContent className="max-w-40 lg:max-w-48">
                 <ul className="grid w-48 gap-3 p-4">
-                  <ListItem
+                  <BoldListItem
                     title="All views"
-                    href="/views"
+                    href="/task_views"
                   />
-                  {views.map((view) => (
-                    <ListItem
-                      key={view.id}
+                  {taskViewsQuery.isSuccess && taskViewsQuery.data.map((view) => (
+                    <RegularListItem
+                      key={`taskview-${view.name}`}
                       title={view.name}
-                      href={`/views/${view.id}`}
+                      href={`/task_views/${view.name.toLowerCase()}`}
                     >
-                      {view.name}
-                    </ListItem>
+                    </RegularListItem>
                   ))}
                 </ul>
               </NavigationMenuContent>
@@ -105,7 +104,7 @@ function NavBar() {
   )
 }
 
-const ListItem = forwardRef<
+const BoldListItem = forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
 >(({ className, title, children, ...props }, ref) => {
@@ -129,4 +128,31 @@ const ListItem = forwardRef<
     </li>
   )
 })
-ListItem.displayName = "ListItem"
+BoldListItem.displayName = "BoldListItem"
+
+
+const RegularListItem = forwardRef<
+  React.ElementRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+RegularListItem.displayName = "RegularListItem"
