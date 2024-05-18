@@ -31,8 +31,7 @@ export default function TaskView() {
   useEffect(() => {
     setPageTitle(`Now and Here: ${viewName}`);
     setHeaderTitle(viewName);
-  }, []);
-
+  }, [setPageTitle, setHeaderTitle, viewName]);
   const viewQuery = useQuery({
     queryKey: ["taskViews", viewName],
     queryFn: () => getTaskView(viewName),

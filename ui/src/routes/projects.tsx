@@ -14,7 +14,7 @@ export default function Projects() {
   useEffect(() => {
     setPageTitle("All projects");
     setHeaderTitle("All projects");
-  }, []);
+  }, [setPageTitle, setHeaderTitle]);
 
   return (
     <div className="mt-4 lg:mt-8">

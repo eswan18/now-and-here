@@ -14,7 +14,7 @@ export default function TaskViews() {
   useEffect(() => {
     setPageTitle("Now and Here: Views");
     setHeaderTitle("All views");
-  }, []);
+  }, [setPageTitle, setHeaderTitle]);
 
   return (
     <div className="mt-4 lg:mt-8">
