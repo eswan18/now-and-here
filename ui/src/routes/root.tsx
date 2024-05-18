@@ -1,22 +1,27 @@
 import { forwardRef } from "react";
 import { useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
 import {
-  NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink,
-  navigationMenuTriggerStyle
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { getProjects } from "@/apiServices/project";
 import { getTaskViews } from "@/apiServices/view";
 import { useTitle } from "@/contexts/TitleContext";
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export default function Root() {
   const { pageTitle, headerTitle } = useTitle();
 
   useEffect(() => {
-    document.title = pageTitle;  // This will update the browser tab title
+    document.title = pageTitle; // This will update the browser tab title
   }, [pageTitle]);
 
   return (
@@ -36,38 +41,36 @@ export default function Root() {
   );
 }
 
-
 function NavBar() {
   const projectsQuery = useQuery({
-    queryKey: ['projects'],
+    queryKey: ["projects"],
     queryFn: () => getProjects(),
-  })
+  });
   const taskViewsQuery = useQuery({
-    queryKey: ['taskViews'],
+    queryKey: ["taskViews"],
     queryFn: () => getTaskViews(),
-  })
+  });
   return (
     <div className="w-full px-4 h-10 bg-white">
       <div className="flex flex-row justify-between items-center h-full w-full px-4 lg:px-8">
-        <h1 className="text-base lg:text-lg font-bold text-orange-800"><Link to="/">Now and Here</Link></h1>
+        <h1 className="text-base lg:text-lg font-bold text-orange-800">
+          <Link to="/">Now and Here</Link>
+        </h1>
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Projects</NavigationMenuTrigger>
               <NavigationMenuContent className="max-w-40 lg:max-w-60">
                 <ul className="grid w-48 gap-3 p-4">
-                  <BoldListItem
-                    title="All projects"
-                    href="/projects"
-                  />
-                  {projectsQuery.isSuccess && projectsQuery.data.map((project) => (
-                    <RegularListItem
-                      key={project.id}
-                      title={project.name}
-                      href={`/projects/${project.id}`}
-                    >
-                    </RegularListItem>
-                  ))}
+                  <BoldListItem title="All projects" href="/projects" />
+                  {projectsQuery.isSuccess &&
+                    projectsQuery.data.map((project) => (
+                      <RegularListItem
+                        key={project.id}
+                        title={project.name}
+                        href={`/projects/${project.id}`}
+                      ></RegularListItem>
+                    ))}
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
@@ -76,24 +79,24 @@ function NavBar() {
               <NavigationMenuTrigger>Views</NavigationMenuTrigger>
               <NavigationMenuContent className="max-w-40 lg:max-w-48">
                 <ul className="grid w-48 gap-3 p-4">
-                  <BoldListItem
-                    title="All views"
-                    href="/task_views"
-                  />
-                  {taskViewsQuery.isSuccess && taskViewsQuery.data.map((view) => (
-                    <RegularListItem
-                      key={`taskview-${view.name}`}
-                      title={view.name}
-                      href={`/task_views/${view.name.toLowerCase()}`}
-                    >
-                    </RegularListItem>
-                  ))}
+                  <BoldListItem title="All views" href="/task_views" />
+                  {taskViewsQuery.isSuccess &&
+                    taskViewsQuery.data.map((view) => (
+                      <RegularListItem
+                        key={`taskview-${view.name}`}
+                        title={view.name}
+                        href={`/task_views/${view.name.toLowerCase()}`}
+                      ></RegularListItem>
+                    ))}
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuLink href="/docs" className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                href="/docs"
+                className={navigationMenuTriggerStyle()}
+              >
                 API Docs
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -101,7 +104,7 @@ function NavBar() {
         </NavigationMenu>
       </div>
     </div>
-  )
+  );
 }
 
 const BoldListItem = forwardRef<
@@ -115,7 +118,7 @@ const BoldListItem = forwardRef<
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
+            className,
           )}
           {...props}
         >
@@ -126,10 +129,9 @@ const BoldListItem = forwardRef<
         </a>
       </NavigationMenuLink>
     </li>
-  )
-})
-BoldListItem.displayName = "BoldListItem"
-
+  );
+});
+BoldListItem.displayName = "BoldListItem";
 
 const RegularListItem = forwardRef<
   React.ElementRef<"a">,
@@ -142,7 +144,7 @@ const RegularListItem = forwardRef<
           ref={ref}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
+            className,
           )}
           {...props}
         >
@@ -153,6 +155,6 @@ const RegularListItem = forwardRef<
         </a>
       </NavigationMenuLink>
     </li>
-  )
-})
-RegularListItem.displayName = "RegularListItem"
+  );
+});
+RegularListItem.displayName = "RegularListItem";

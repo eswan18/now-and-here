@@ -1,44 +1,42 @@
-import { Project, ProjectTree } from '@/types/project';
-import { extractErrorDetail } from '@/apiServices/common';
+import { Project, ProjectTree } from "@/types/project";
+import { extractErrorDetail } from "@/apiServices/common";
 
 export async function getProject(projectId: string): Promise<Project> {
   const url = new URL(`/api/projects/${projectId}`, window.location.origin);
   return await fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  })
-    .then(async (res) => {
-      if (!res.ok) {
-        let errorMsg = res.statusText;
-        const data = await res.json();
-        const errorDetail = extractErrorDetail(data);
-        if (errorDetail) {
-          errorMsg += `\n\n"${errorDetail}"`;
-        }
-        throw new Error(errorMsg);
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }).then(async (res) => {
+    if (!res.ok) {
+      let errorMsg = res.statusText;
+      const data = await res.json();
+      const errorDetail = extractErrorDetail(data);
+      if (errorDetail) {
+        errorMsg += `\n\n"${errorDetail}"`;
       }
-      return res.json();
-    });
+      throw new Error(errorMsg);
+    }
+    return res.json();
+  });
 }
 
 export async function getProjects(): Promise<Project[]> {
-  const url = new URL('/api/projects', window.location.origin);
+  const url = new URL("/api/projects", window.location.origin);
   return await fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' }
-  })
-    .then(async (res) => {
-      if (!res.ok) {
-        let errorMsg = res.statusText;
-        const data = await res.json();
-        const errorDetail = extractErrorDetail(data);
-        if (errorDetail) {
-          errorMsg += `\n\n"${errorDetail}"`;
-        }
-        throw new Error(errorMsg);
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }).then(async (res) => {
+    if (!res.ok) {
+      let errorMsg = res.statusText;
+      const data = await res.json();
+      const errorDetail = extractErrorDetail(data);
+      if (errorDetail) {
+        errorMsg += `\n\n"${errorDetail}"`;
       }
-      return res.json();
-    });
+      throw new Error(errorMsg);
+    }
+    return res.json();
+  });
 }
 
 export function projectsAsTrees(projects: Project[]): ProjectTree[] {
@@ -46,7 +44,7 @@ export function projectsAsTrees(projects: Project[]): ProjectTree[] {
   const projectsById: Map<string, ProjectTree> = new Map();
   projects.forEach((project) => {
     projectsById.set(project.id, { project, children: [] });
-  })
+  });
 
   // Get a list of IDs in the map.
   const projectIds = Array.from(projectsById.keys());
@@ -57,8 +55,10 @@ export function projectsAsTrees(projects: Project[]): ProjectTree[] {
     if (parentId) {
       projectsById.get(parentId)!.children.push(node);
     }
-  })
+  });
 
-  const roots = Array.from(projectsById.values()).filter((node) => !node.project.parent);
+  const roots = Array.from(projectsById.values()).filter(
+    (node) => !node.project.parent,
+  );
   return roots;
 }
