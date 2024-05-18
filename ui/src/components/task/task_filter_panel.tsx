@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
 import {
   Select,
   SelectValue,
@@ -16,8 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { useForm } from "react-hook-form";
-import { useEffect } from "react";
 
 export const TaskFilterSchema = z.object({
   sortBy: z.enum(["due", "priority"]),
@@ -38,13 +39,15 @@ export default function TaskFilterPanel({
     resolver: zodResolver(TaskFilterSchema),
     defaultValues: filter,
   });
+  const formWatcher = form.watch;
   useEffect(() => {
-    const subscription = form.watch((value) => {
+    const subscription = formWatcher((value) => {
       const f = { ...filter, ...value };
       onFilterChange(f);
     });
     return () => subscription.unsubscribe();
-  }, [form.watch, filter, onFilterChange]);
+  }, [formWatcher, filter, onFilterChange]);
+
   return (
     <Form {...form}>
       <form>
