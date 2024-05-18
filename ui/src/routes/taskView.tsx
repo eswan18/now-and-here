@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import TaskCardList from "@/components/task/task_card_list"
 import { useTitle } from "@/contexts/TitleContext";
 import { completeTask, uncompleteTask } from "@/apiServices/task";
-import { buildTaskView } from "@/apiServices/view";
+import { getTaskView, buildTaskView } from "@/apiServices/view";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 
@@ -20,20 +20,21 @@ export default function TaskView() {
     toast.error(tasksQuery.error.message);
   }
   useEffect(() => {
-    setPageTitle(`View: ${viewName}`);
+    setPageTitle(`Now and Here: ${viewName}`);
     setHeaderTitle(viewName);
   }, []);
 
-  /*const viewQuery = useQuery({
+  const viewQuery = useQuery({
     queryKey: ['taskViews', viewName],
-    queryFn: () => getView(viewName),
-  })*/
+    queryFn: () => getTaskView(viewName),
+  });
 
-  /*if (viewQuery.isSuccess) {
-    const projectName = tasksQuery.data.name;
-    setPageTitle(`Project: ${projectName}`);
-    setHeaderTitle(projectName);
-  }*/
+  if (viewQuery.isSuccess) {
+    const viewName = viewQuery.data.name;
+    const viewDescription = viewQuery.data.description;
+    setPageTitle(`Now and Here: ${viewName}`);
+    setHeaderTitle(`${viewName}: ${viewDescription}`);
+  }
 
   const completeTaskMutation = useMutation({
     mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {

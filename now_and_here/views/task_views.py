@@ -24,7 +24,9 @@ class TaskView:
 task_views: dict[str, TaskView] = {}
 
 
-def register_task_view(name: str, description: str) -> Callable[[TaskView], TaskView]:
+def register_task_view(
+    name: str, description: str
+) -> Callable[[Callable[[DataStore, UserContext], list[Task]]], TaskView]:
     """A decorator to register a task view."""
 
     def register(callable: Callable[[DataStore, UserContext], list[Task]]) -> TaskView:
@@ -35,9 +37,7 @@ def register_task_view(name: str, description: str) -> Callable[[TaskView], Task
     return register
 
 
-@register_task_view(
-    name="Today", description="All tasks due before the end of the day."
-)
+@register_task_view(name="Today", description="All tasks due before the end of the day")
 def build_today_task_view(store: DataStore, context: UserContext) -> list[Task]:
     """Return all tasks due before the end of the user's current day."""
     user_now = datetime.now(context.timezone)

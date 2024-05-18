@@ -84,6 +84,15 @@ def get_task_views() -> list[TaskView]:
     return sorted(list(task_views.values()), key=lambda v: v.name)
 
 
+@api_router.get("/task_views/{name}")
+def get_task_view(name: str) -> TaskView:
+    """Get a specific task view."""
+    try:
+        return task_views[name]
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"View '{name}' not found")
+
+
 @api_router.post("/task_views/build")
 def build_task_view(
     view_name: str = Body(), context: UserContextFE = Body()
