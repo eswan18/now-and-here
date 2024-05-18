@@ -1,67 +1,86 @@
-import { FC } from 'react';
+import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Select, SelectValue, SelectItem, SelectTrigger, SelectContent } from '@/components/ui/select';
+import { Form, FormField, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Switch } from '@/components/ui/switch';
+import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 
-export interface TaskFilter {
-  sortBy: string;
-  desc: boolean;
-  includeDone: boolean;
-};
+export const TaskFilterSchema = z.object({
+  sortBy: z.enum(["due", "priority"]),
+  desc: z.boolean(),
+  includeDone: z.boolean(),
+})
 
-export interface TaskFilterPanelParams {
-  filter: TaskFilter;
-  onFilterChange: (filterName: keyof TaskFilter, value: boolean | string) => void;
-};
-
-const SortBySelect: FC<{ currentSortBy: string; onSortChange: (value: string) => void }> = ({ currentSortBy, onSortChange }) => (
-  <select
-    name="sort_by"
-    value={currentSortBy}
-    onChange={(e) => onSortChange(e.target.value)}
-    className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 text-right">
-    <option value="due">Due date</option>
-    <option value="priority">Priority</option>
-  </select>
-);
-
-interface ToggleSortOrderProps {
-  desc: boolean;
-  onToggle: (newValue: boolean) => void;
+interface TaskFilterPanelParams {
+  filter: z.infer<typeof TaskFilterSchema>,
+  onFilterChange: (filter: z.infer<typeof TaskFilterSchema>) => void,
 }
 
-const ToggleSortOrder: React.FC<ToggleSortOrderProps> = ({ desc, onToggle }) => {
-  return (
-    <div onClick={() => onToggle(!desc)} className="cursor-pointer block px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-      {desc ? (
-        <span>↑</span>
-      ) : (
-        <span>↓</span>
-      )}
-    </div>
-  );
-};
-
-const IncludeDoneSelect: FC<{ includeDone: boolean; onIncludeChange: (value: boolean) => void }> = ({ includeDone, onIncludeChange }) => (
-  <select
-    name="include_done"
-    value={includeDone.toString()}
-    onChange={(e) => onIncludeChange(e.target.value === 'true')}
-    className="block w-auto px-0 text-sm bg-transparent appearance-none text-orange-800 font-semibold focus:outline-none focus:ring-0 focus:border-gray-200 peer">
-    <option value="true">All</option>
-    <option value="false">Incomplete</option>
-  </select>
-);
-
 export default function TaskFilterPanel({ filter, onFilterChange }: TaskFilterPanelParams) {
+  const form = useForm<z.infer<typeof TaskFilterSchema>>({
+    resolver: zodResolver(TaskFilterSchema),
+    defaultValues: filter,
+  })
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      const f = { ...filter, ...value }
+      onFilterChange(f)
+    })
+    return () => subscription.unsubscribe()
+  }, [form.watch, filter, onFilterChange])
   return (
-    <div className="flex flex-row justify-start items-end gap-8 lg:gap-12 py-1">
-      <div className="flex flex-row justify-start items-end gap-2">
-        <label htmlFor="sort-by-select" className="block text-sm text-gray-500">Sorted by</label>
-        <SortBySelect currentSortBy={filter.sortBy} onSortChange={(value) => onFilterChange('sortBy', value)} />
-        <ToggleSortOrder desc={filter.desc} onToggle={(value) => { onFilterChange('desc', value) }} />
-      </div>
-      <div className="flex flex-row justify-end items-center gap-2">
-        <label htmlFor="showing" className="block text-sm text-gray-500">Showing</label>
-        <IncludeDoneSelect includeDone={filter.includeDone} onIncludeChange={(value) => onFilterChange('includeDone', value)} />
-      </div>
-    </div>
+    <Form {...form}>
+      <form>
+        <div className="flex flex-row justify-start items-center py-1">
+          <FormField control={form.control} name="sortBy" render={({ field }) => (
+            <FormItem className='flex flex-row items-center gap-2 space-y-0 mr-3 w-[9.5rem]'>
+              <FormLabel className='font-normal text-gray-400 min-w-16 text-right'>Sorted by</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                <FormControl>
+                  <SelectTrigger className='border-0 px-0 h-6 w-auto'>
+                    <SelectValue placeholder="..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="due">Due Date</SelectItem>
+                  <SelectItem value="priority">Priority</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+          />
+          <FormField control={form.control} name="desc"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2 space-y-0 mr-10">
+                <FormLabel className="font-normal text-gray-400">Descending</FormLabel>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField control={form.control} name="includeDone" render={({ field }) => (
+            <FormItem className='flex flex-row items-center gap-2 space-y-0'>
+              <FormLabel className='font-normal text-gray-400 min-w-16 text-right'>Showing</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                <FormControl>
+                  <SelectTrigger className='border-0 px-0 h-6'>
+                    <SelectValue placeholder="..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="false">Incomplete Tasks</SelectItem>
+                  <SelectItem value="true">All Tasks</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+          />
+        </div>
+      </form>
+    </Form>
   );
 }

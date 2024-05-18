@@ -37,16 +37,16 @@ export default function Root() {
 
 
 function NavBar() {
-  // Todo: fetch projects and views from the server
   const projectsQuery = useQuery({
     queryKey: ['projects'],
     queryFn: () => getProjects(),
   })
+  // Todo: Implement views and then fetch them from the server here.
   const views = [
     { name: "Today", id: "today" }
   ]
   return (
-    <div className="w-full px-4 h-10">
+    <div className="w-full px-4 h-10 bg-white">
       <div className="flex flex-row justify-between items-center h-full w-full px-4 lg:px-8">
         <h1 className="text-base lg:text-lg font-bold text-orange-800"><Link to="/">Now and Here</Link></h1>
         <NavigationMenu>
