@@ -12,7 +12,7 @@ export default function Projects() {
     queryFn: () => getProjects(),
   });
   useEffect(() => {
-    setPageTitle("All projects");
+    setPageTitle("Now and Here: All projects");
     setHeaderTitle("All projects");
   }, [setPageTitle, setHeaderTitle]);
 
