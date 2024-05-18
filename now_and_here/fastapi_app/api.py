@@ -6,7 +6,7 @@ from now_and_here.datastore.errors import RecordNotFoundError
 from now_and_here.models import FEProject
 from now_and_here.models.task import FENewTaskIn, FETaskOut
 from now_and_here.models.user_context import UserContextFE
-from now_and_here.views import task_views
+from now_and_here.views.task_views import TaskView, task_views
 
 api_router = APIRouter(prefix="/api")
 
@@ -78,11 +78,18 @@ def get_projects() -> list[FEProject]:
     return projects_with_parents
 
 
+@api_router.get("/task_views")
+def get_task_views() -> list[TaskView]:
+    """Get a list of available task views."""
+    return sorted(list(task_views.values()), key=lambda v: v.name)
+
+
 @api_router.get("/task_views/{view_name}")
 def get_task_view(view_name: str, context: UserContextFE) -> list[FETaskOut]:
+    """Get a specific view of tasks."""
     user_context = context.to_user_context()
     try:
-        view = task_views.task_views[view_name]
+        view = task_views[view_name]
     except KeyError:
         raise HTTPException(status_code=404, detail=f"View '{view_name}' not found")
     store = datastore.get_store()

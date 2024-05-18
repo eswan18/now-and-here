@@ -8,6 +8,7 @@ import {
   navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu";
 import { getProjects } from "@/apiServices/project";
+import { getTaskViews } from "@/apiServices/view";
 import { useTitle } from "@/contexts/TitleContext";
 import { cn } from "@/lib/utils"
 
@@ -41,10 +42,10 @@ function NavBar() {
     queryKey: ['projects'],
     queryFn: () => getProjects(),
   })
-  // Todo: Implement views and then fetch them from the server here.
-  const views = [
-    { name: "Today", id: "today" }
-  ]
+  const taskViewsQuery = useQuery({
+    queryKey: ['taskViews'],
+    queryFn: () => getTaskViews(),
+  })
   return (
     <div className="w-full px-4 h-10 bg-white">
       <div className="flex flex-row justify-between items-center h-full w-full px-4 lg:px-8">
@@ -80,13 +81,13 @@ function NavBar() {
                     title="All views"
                     href="/views"
                   />
-                  {views.map((view) => (
+                  {taskViewsQuery.isSuccess && taskViewsQuery.data.map((view) => (
                     <ListItem
-                      key={view.id}
+                      key={`taskview-${view.name}`}
                       title={view.name}
-                      href={`/views/${view.id}`}
+                      href={`/task_views/${view.name}`}
                     >
-                      {view.name}
+                      {view.description}
                     </ListItem>
                   ))}
                 </ul>
