@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import TaskCardList from "@/components/task/task_card_list"
+import TaskCardList from "@/components/task/task_card_list";
 import CreateTaskCard from "@/components/task/create_task_card";
 import { useTitle } from "@/contexts/TitleContext";
 import { completeTask, uncompleteTask } from "@/apiServices/task";
@@ -11,38 +11,47 @@ import { NewTask } from "@/types/task";
 import { createTask } from "@/apiServices/task";
 
 export default function TaskView() {
-  const { viewName } = useParams<{ viewName: string }>() as { viewName: string };
+  const { viewName } = useParams<{ viewName: string }>() as {
+    viewName: string;
+  };
   const { setPageTitle, setHeaderTitle } = useTitle();
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
-    queryKey: ['build', 'taskViews', viewName],
+    queryKey: ["build", "taskViews", viewName],
     queryFn: () => buildTaskView(viewName),
-  })
+  });
   const addTaskMutation = useMutation({
     mutationFn: createTask,
     onSettled: async () => {
-      return await queryClient.invalidateQueries({ queryKey: ['build', 'taskViews', viewName] })
-    }
+      return await queryClient.invalidateQueries({
+        queryKey: ["build", "taskViews", viewName],
+      });
+    },
   });
   useEffect(() => {
-    setPageTitle(`Now and Here: ${viewName}`);
+    setPageTitle(viewName);
     setHeaderTitle(viewName);
-  }, []);
-
+  }, [setPageTitle, setHeaderTitle, viewName]);
   const viewQuery = useQuery({
-    queryKey: ['taskViews', viewName],
+    queryKey: ["taskViews", viewName],
     queryFn: () => getTaskView(viewName),
   });
 
   if (viewQuery.isSuccess) {
     const viewName = viewQuery.data.name;
     const viewDescription = viewQuery.data.description;
-    setPageTitle(`Now and Here: ${viewName}`);
+    setPageTitle(viewName);
     setHeaderTitle(`${viewName}: ${viewDescription}`);
   }
 
   const completeTaskMutation = useMutation({
-    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
+    mutationFn: async ({
+      taskId,
+      completed,
+    }: {
+      taskId: string;
+      completed: boolean;
+    }) => {
       if (completed) {
         return completeTask(taskId);
       } else {
@@ -50,21 +59,26 @@ export default function TaskView() {
       }
     },
     onSettled: async () => {
-      return await queryClient.invalidateQueries({ queryKey: ['build', 'taskViews', viewName] })
-    }
-  })
+      return await queryClient.invalidateQueries({
+        queryKey: ["build", "taskViews", viewName],
+      });
+    },
+  });
   const handleCompletion = async (taskId: string, completed: boolean) => {
     completeTaskMutation.mutate({ taskId, completed });
-  }
+  };
 
   const handleAddTask = async (newTask: NewTask) => {
-    addTaskMutation.mutate(newTask)
-  }
+    addTaskMutation.mutate(newTask);
+  };
 
   return (
     <div className="mt-4">
-      <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletion} />
+      <TaskCardList
+        tasks={tasksQuery.data || []}
+        onCompletionToggle={handleCompletion}
+      />
       <CreateTaskCard taskDefaults={{}} onAddTask={handleAddTask} />
     </div>
-  )
+  );
 }

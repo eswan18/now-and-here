@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+/* eslint react-refresh/only-export-components: 0 */
+import React, { createContext, useState, useContext, ReactNode } from "react";
 
 interface TitleContextType {
   pageTitle: string;
@@ -12,17 +13,26 @@ const TitleContext = createContext<TitleContextType | undefined>(undefined);
 export function useTitle() {
   const context = useContext(TitleContext);
   if (!context) {
-    throw new Error('useTitle must be used within a TitleProvider');
+    throw new Error("useTitle must be used within a TitleProvider");
   }
   return context;
 }
 
-export const TitleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [pageTitle, setPageTitle] = useState('');
-  const [headerTitle, setheaderTitle] = useState('');
+export const TitleProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [pageTitle, setPageTitle] = useState("");
+  const [headerTitle, setHeaderTitle] = useState("");
 
   return (
-    <TitleContext.Provider value={{ pageTitle, setPageTitle, headerTitle, setHeaderTitle: setheaderTitle }}>
+    <TitleContext.Provider
+      value={{
+        pageTitle,
+        setPageTitle,
+        headerTitle,
+        setHeaderTitle,
+      }}
+    >
       {children}
     </TitleContext.Provider>
   );

@@ -1,14 +1,22 @@
+import { z } from "zod";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'react-toastify';
-import TaskCardList from "@/components/task/task_card_list"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+
+import TaskCardList from "@/components/task/task_card_list";
 import CreateTaskCard from "@/components/task/create_task_card";
-import TaskFilterPanel, { TaskFilterSchema } from "@/components/task/task_filter_panel";
+import TaskFilterPanel, {
+  TaskFilterSchema,
+} from "@/components/task/task_filter_panel";
 import { useTitle } from "@/contexts/TitleContext";
 import { NewTask } from "@/types/task";
-import { completeTask, getTasks, createTask, uncompleteTask } from "@/apiServices/task";
+import {
+  completeTask,
+  getTasks,
+  createTask,
+  uncompleteTask,
+} from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
-import { z } from "zod";
 
 const defaultFilter: z.infer<typeof TaskFilterSchema> = {
   sortBy: "due",
@@ -16,18 +24,24 @@ const defaultFilter: z.infer<typeof TaskFilterSchema> = {
   includeDone: false,
 };
 
-function useFilter(): [z.infer<typeof TaskFilterSchema>, (newFilters: z.infer<typeof TaskFilterSchema>) => void] {
+function useFilter(): [
+  z.infer<typeof TaskFilterSchema>,
+  (newFilters: z.infer<typeof TaskFilterSchema>) => void,
+] {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  let sortBy = searchParams.get('sortBy') as "due" | "priority" | null;
-  if (sortBy && !['due', 'priority'].includes(sortBy)) {
-    toast.error('Invalid sortBy parameter in URL');
+  let sortBy = searchParams.get("sortBy") as "due" | "priority" | null;
+  if (sortBy && !["due", "priority"].includes(sortBy)) {
+    toast.error("Invalid sortBy parameter in URL");
     sortBy = null;
   }
   const filter = {
     sortBy: sortBy || defaultFilter.sortBy,
-    desc: searchParams.get('desc') === 'true' ? true : defaultFilter.desc,
-    includeDone: searchParams.get('includeDone') === 'true' ? true : defaultFilter.includeDone,
+    desc: searchParams.get("desc") === "true" ? true : defaultFilter.desc,
+    includeDone:
+      searchParams.get("includeDone") === "true"
+        ? true
+        : defaultFilter.includeDone,
   };
   // Function to update the filter and URL
   const setFilter = (newFilter: z.infer<typeof TaskFilterSchema>) => {
@@ -43,37 +57,48 @@ function useFilter(): [z.infer<typeof TaskFilterSchema>, (newFilters: z.infer<ty
 
 export default function Project() {
   const [filter, setFilter] = useFilter();
-  const { projectId } = useParams<{ projectId: string }>() as { projectId: string };
+  const { projectId } = useParams<{ projectId: string }>() as {
+    projectId: string;
+  };
   const { setPageTitle, setHeaderTitle } = useTitle();
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
-    queryKey: ['tasks', projectId, filter],
-    queryFn: () => getTasks({
-      projectId: projectId as string,
-      sortBy: filter.sortBy,
-      desc: filter.desc,
-      includeDone: filter.includeDone,
-    }),
-  })
+    queryKey: ["tasks", projectId, filter],
+    queryFn: () =>
+      getTasks({
+        projectId: projectId as string,
+        sortBy: filter.sortBy,
+        desc: filter.desc,
+        includeDone: filter.includeDone,
+      }),
+  });
   const projectQuery = useQuery({
-    queryKey: ['projects', projectId],
+    queryKey: ["projects", projectId],
     queryFn: () => getProject(projectId),
-  })
+  });
   const addTaskMutation = useMutation({
     mutationFn: createTask,
     onSettled: async () => {
-      return await queryClient.invalidateQueries({ queryKey: ['tasks', projectId, filter] })
-    }
+      return await queryClient.invalidateQueries({
+        queryKey: ["tasks", projectId, filter],
+      });
+    },
   });
 
   if (projectQuery.isSuccess) {
     const projectName = projectQuery.data.name;
-    setPageTitle(`Project: ${projectName}`);
+    setPageTitle(projectName);
     setHeaderTitle(projectName);
   }
 
   const completeTaskMutation = useMutation({
-    mutationFn: async ({ taskId, completed }: { taskId: string, completed: boolean }) => {
+    mutationFn: async ({
+      taskId,
+      completed,
+    }: {
+      taskId: string;
+      completed: boolean;
+    }) => {
       if (completed) {
         return completeTask(taskId);
       } else {
@@ -81,21 +106,23 @@ export default function Project() {
       }
     },
     onSettled: async () => {
-      return await queryClient.invalidateQueries({ queryKey: ['tasks', projectId, filter] })
-    }
-  })
+      return await queryClient.invalidateQueries({
+        queryKey: ["tasks", projectId, filter],
+      });
+    },
+  });
   const handleCompletion = async (taskId: string, completed: boolean) => {
-    completeTaskMutation.mutate({taskId, completed});
-  }
+    completeTaskMutation.mutate({ taskId, completed });
+  };
 
   // Handle changes to any filter
   const handleFilterChange = (filter: z.infer<typeof TaskFilterSchema>) => {
-    setFilter(filter)
-  }
+    setFilter(filter);
+  };
 
   const handleAddTask = async (newTask: NewTask) => {
-    addTaskMutation.mutate(newTask)
-  }
+    addTaskMutation.mutate(newTask);
+  };
 
   return (
     <>
@@ -103,9 +130,15 @@ export default function Project() {
         <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       </div>
       <div className="-translate-y-6">
-        <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletion} />
-        <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
+        <TaskCardList
+          tasks={tasksQuery.data || []}
+          onCompletionToggle={handleCompletion}
+        />
+        <CreateTaskCard
+          taskDefaults={{ projectId }}
+          onAddTask={handleAddTask}
+        />
       </div>
     </>
-  )
+  );
 }

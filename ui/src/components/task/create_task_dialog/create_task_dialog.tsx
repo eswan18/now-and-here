@@ -5,26 +5,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import CreateTaskForm, { TaskDefaults } from "./create_task_form";
-import { NewTask } from '@/types/task';
-
+import { NewTask } from "@/types/task";
 
 interface CreateTaskModalProps {
   onCreateTask: (task: NewTask) => void; // Function to call when a new task is created
   defaults?: TaskDefaults; // Default values for the task
 }
 
-export default function CreateTaskDialog({ onCreateTask, defaults }: CreateTaskModalProps) {
+export default function CreateTaskDialog({
+  onCreateTask,
+  defaults,
+}: CreateTaskModalProps) {
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle>
           <h2>Create Task</h2>
         </DialogTitle>
-        <DialogDescription>
-          Set up your new task
-        </DialogDescription>
+        <DialogDescription>Set up your new task</DialogDescription>
       </DialogHeader>
       <CreateTaskForm onCreateTask={onCreateTask} defaults={defaults} />
     </DialogContent>
-  )
+  );
 }

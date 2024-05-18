@@ -6,12 +6,19 @@ interface TaskCardListProps {
   onCompletionToggle: (taskId: string, completed: boolean) => void;
 }
 
-export default function TaskCardList({ tasks, onCompletionToggle }: TaskCardListProps) {
+export default function TaskCardList({
+  tasks,
+  onCompletionToggle,
+}: TaskCardListProps) {
   return (
     <div className="flex flex-col gap-2">
       {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} onToggleCompletion={onCompletionToggle} />
+        <TaskCard
+          key={task.id}
+          task={task}
+          onToggleCompletion={onCompletionToggle}
+        />
       ))}
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
 export interface TaskView {
-    name: string;
-    description: string;
+  name: string;
+  description: string;
 }
