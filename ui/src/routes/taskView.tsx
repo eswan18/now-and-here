@@ -1,11 +1,14 @@
 import { useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
 import TaskCardList from "@/components/task/task_card_list"
+import CreateTaskCard from "@/components/task/create_task_card";
 import { useTitle } from "@/contexts/TitleContext";
 import { completeTask, uncompleteTask } from "@/apiServices/task";
 import { getTaskView, buildTaskView } from "@/apiServices/view";
-import { useEffect } from "react";
-import { toast } from "react-toastify";
+import { NewTask } from "@/types/task";
+import { createTask } from "@/apiServices/task";
 
 export default function TaskView() {
   const { viewName } = useParams<{ viewName: string }>() as { viewName: string };
@@ -15,10 +18,12 @@ export default function TaskView() {
     queryKey: ['build', 'taskViews', viewName],
     queryFn: () => buildTaskView(viewName),
   })
-
-  if (tasksQuery.isError) {
-    toast.error(tasksQuery.error.message);
-  }
+  const addTaskMutation = useMutation({
+    mutationFn: createTask,
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({ queryKey: ['build', 'taskViews', viewName] })
+    }
+  });
   useEffect(() => {
     setPageTitle(`Now and Here: ${viewName}`);
     setHeaderTitle(viewName);
@@ -52,9 +57,14 @@ export default function TaskView() {
     completeTaskMutation.mutate({ taskId, completed });
   }
 
+  const handleAddTask = async (newTask: NewTask) => {
+    addTaskMutation.mutate(newTask)
+  }
+
   return (
     <div className="mt-4">
       <TaskCardList tasks={tasksQuery.data || []} onCompletionToggle={handleCompletion} />
+      <CreateTaskCard taskDefaults={{}} onAddTask={handleAddTask} />
     </div>
   )
 }
