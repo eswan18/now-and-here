@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi.exceptions import HTTPException
 
 from now_and_here import datastore
@@ -84,14 +84,16 @@ def get_task_views() -> list[TaskView]:
     return sorted(list(task_views.values()), key=lambda v: v.name)
 
 
-@api_router.get("/task_views/{view_name}")
-def get_task_view(view_name: str, context: UserContextFE) -> list[FETaskOut]:
+@api_router.post("/task_views/build")
+def build_task_view(
+    view_name: str = Body(), context: UserContextFE = Body()
+) -> list[FETaskOut]:
     """Get a specific view of tasks."""
-    user_context = context.to_user_context()
     try:
         view = task_views[view_name]
     except KeyError:
         raise HTTPException(status_code=404, detail=f"View '{view_name}' not found")
+    user_context = context.to_user_context()
     store = datastore.get_store()
-    tasks = view(store, user_context)
+    tasks = view.build(store, user_context)
     return [FETaskOut.from_task(t) for t in tasks]

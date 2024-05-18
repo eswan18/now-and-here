@@ -29,7 +29,7 @@ def register_task_view(name: str, description: str) -> Callable[[TaskView], Task
 
     def register(callable: Callable[[DataStore, UserContext], list[Task]]) -> TaskView:
         view = TaskView(name=name, description=description, _builder=callable)
-        task_views[view.name] = view
+        task_views[view.name.lower()] = view
         return view
 
     return register
