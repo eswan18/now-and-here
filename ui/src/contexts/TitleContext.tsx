@@ -1,3 +1,4 @@
+/* eslint react-refresh/only-export-components: 0 */
 import React, { createContext, useState, useContext, ReactNode } from "react";
 
 interface TitleContextType {
@@ -21,7 +22,7 @@ export const TitleProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [pageTitle, setPageTitle] = useState("");
-  const [headerTitle, setheaderTitle] = useState("");
+  const [headerTitle, setHeaderTitle] = useState("");
 
   return (
     <TitleContext.Provider
@@ -29,7 +30,7 @@ export const TitleProvider: React.FC<{ children: ReactNode }> = ({
         pageTitle,
         setPageTitle,
         headerTitle,
-        setHeaderTitle: setheaderTitle,
+        setHeaderTitle,
       }}
     >
       {children}
