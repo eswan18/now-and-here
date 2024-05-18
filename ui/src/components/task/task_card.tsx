@@ -26,7 +26,7 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
                         { /* fill this in later -- maybe labels go here? */}
                     </div>
                 </div>
-                <div className="flex flex-row justify-between items-end w-full border-b border-b-gray-200 pb-1">
+                <div className="flex flex-row justify-between items-center w-full border-b border-b-gray-200">
                     <div className="flex flex-row items-center justify-start gap-4 pl-4">
                         <label className="relative flex items-center py-2 rounded-full cursor-pointer" htmlFor="green">
                             <input type="checkbox"
