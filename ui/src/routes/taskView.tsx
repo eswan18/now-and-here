@@ -29,7 +29,7 @@ export default function TaskView() {
     },
   });
   useEffect(() => {
-    setPageTitle(`Now and Here: ${viewName}`);
+    setPageTitle(viewName);
     setHeaderTitle(viewName);
   }, [setPageTitle, setHeaderTitle, viewName]);
   const viewQuery = useQuery({
@@ -40,7 +40,7 @@ export default function TaskView() {
   if (viewQuery.isSuccess) {
     const viewName = viewQuery.data.name;
     const viewDescription = viewQuery.data.description;
-    setPageTitle(`Now and Here: ${viewName}`);
+    setPageTitle(viewName);
     setHeaderTitle(`${viewName}: ${viewDescription}`);
   }
 

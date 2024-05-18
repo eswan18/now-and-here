@@ -87,7 +87,7 @@ export default function Project() {
 
   if (projectQuery.isSuccess) {
     const projectName = projectQuery.data.name;
-    setPageTitle(`Now and Here: ${projectName}`);
+    setPageTitle(projectName);
     setHeaderTitle(projectName);
   }
 

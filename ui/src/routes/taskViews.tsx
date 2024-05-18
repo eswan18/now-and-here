@@ -12,7 +12,7 @@ export default function TaskViews() {
     queryFn: () => getTaskViews(),
   });
   useEffect(() => {
-    setPageTitle("Now and Here: Views");
+    setPageTitle("Views");
     setHeaderTitle("All views");
   }, [setPageTitle, setHeaderTitle]);
 

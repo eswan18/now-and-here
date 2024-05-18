@@ -21,7 +21,8 @@ export default function Root() {
   const { pageTitle, headerTitle } = useTitle();
 
   useEffect(() => {
-    document.title = pageTitle; // This will update the browser tab title
+    // This will update the browser tab title.
+    document.title = `Now and Here: ${pageTitle}`;
   }, [pageTitle]);
 
   return (
