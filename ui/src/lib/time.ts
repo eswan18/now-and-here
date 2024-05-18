@@ -7,7 +7,7 @@ export function relativeTimeString(d: Date, now: Date | undefined = undefined): 
   if (!now) {
     now = new Date();
   }
-  const diff = now.getTime() - d.getTime();
+  const diff = d.getTime() - now.getTime();
   const absDiff = Math.abs(diff);
 
   if (absDiff < 60 * 1000) {
@@ -18,8 +18,6 @@ export function relativeTimeString(d: Date, now: Date | undefined = undefined): 
     ? `${Math.floor(absDiff / (60 * 1000))} minutes`
     : absDiff < 24 * 60 * 60 * 1000
       ? `${Math.floor(absDiff / (60 * 60 * 1000))} hours`
-      : absDiff < 7 * 24 * 60 * 60 * 1000
-        ? `${Math.floor(absDiff / (24 * 60 * 60 * 1000))} days`
-        : d.toLocaleDateString();
-  return diff < 0 ? `in ${timedeltaString}` : `${timedeltaString} ago`;
+      : `${Math.floor(absDiff / (24 * 60 * 60 * 1000))} days`
+  return diff > 0 ? `in ${timedeltaString}` : `${timedeltaString} ago`;
 }
