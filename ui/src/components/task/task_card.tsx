@@ -5,6 +5,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
 import { Task } from "@/types/task";
@@ -17,8 +18,8 @@ interface TaskCardProps {
 
 export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
   return (
-    <>
-      <div className="rounded my-2 p-4 flex flex-col items-center bg-white shadow-sm">
+    <Card>
+      <CardContent className="px-4 py-3">
         <div className="flex flex-row flex-wrap w-full justify-between pl-12 mb-1">
           <div className="text-sm font-semibold text-orange-700">
             {task.project && <a href={`/projects/${task.project.id}`}>{task.project.name}</a>}
@@ -59,7 +60,7 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
             {task.description}
           </div>
         </div>
-      </div>
-    </>
+      </CardContent>
+    </Card>
   )
 }
