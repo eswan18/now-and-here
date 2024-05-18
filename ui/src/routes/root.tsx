@@ -78,7 +78,7 @@ function NavBar() {
                 <ul className="grid w-48 gap-3 p-4">
                   <BoldListItem
                     title="All views"
-                    href="/views"
+                    href="/task_views"
                   />
                   {taskViewsQuery.isSuccess && taskViewsQuery.data.map((view) => (
                     <RegularListItem

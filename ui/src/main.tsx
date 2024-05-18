@@ -15,6 +15,7 @@ import TaskView from './routes/taskView';
 import { TitleProvider } from './contexts/TitleContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import TaskViews from './routes/taskViews';
 
 const queryClient = new QueryClient()
 
@@ -29,11 +30,15 @@ const router = createBrowserRouter([
         element: <Projects />,
       },
       {
-        path: "/projects/:projectId",
+        path: "projects/:projectId",
         element: <Project />,
       },
       {
-        path: "/task_views/:viewName",
+        path: "task_views",
+        element: <TaskViews />,
+      },
+      {
+        path: "task_views/:viewName",
         element: <TaskView />,
       },
     ],
