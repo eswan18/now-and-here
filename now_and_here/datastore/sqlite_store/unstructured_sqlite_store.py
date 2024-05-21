@@ -56,9 +56,11 @@ class UnstructuredSQLiteStore:
         """Pull items from the tasks table."""
         # Sanity validations:
         if project_name and project_id:
-            raise ValueError("Cannot filter by both project name and project id")
-        if not (project_name or project_id) and include_child_projects:
-            raise ValueError("Cannot include child projects without a project filter")
+            raise ValueError("Cannot filter by both project name and project ID")
+        if not project_id and include_child_projects:
+            raise ValueError(
+                "Cannot include child projects without a project ID filter"
+            )
         query = TASKS_QUERY
         params = []
         if not include_done:
@@ -72,8 +74,19 @@ class UnstructuredSQLiteStore:
             query += " AND lower(ph.json ->> 'name') = (?)"
             params.append(project_name)
         if project_id:
-            query += " AND ph.id = (?)"
-            params.append(project_id)
+            if not include_child_projects:
+                query += " AND ph.id = (?)"
+                params.append(project_id)
+            else:
+                query += """ AND (
+                    ph.id = (?)
+                    OR EXISTS (
+                        SELECT 1 FROM json_each(ph.parent_ids)
+                        WHERE value = (?)
+                    )
+                )"""
+                params.extend([project_id, project_id])
+
         if sort_by:
             # Some very limited validation to avoid extremely easy sql injection.
             if sort_by not in Task.sortable_columns():

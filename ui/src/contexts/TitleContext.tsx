@@ -4,8 +4,6 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 interface TitleContextType {
   pageTitle: string;
   setPageTitle: (title: string) => void;
-  headerTitle: string;
-  setHeaderTitle: (title: string) => void;
 }
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
@@ -22,15 +20,12 @@ export const TitleProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [pageTitle, setPageTitle] = useState("");
-  const [headerTitle, setHeaderTitle] = useState("");
 
   return (
     <TitleContext.Provider
       value={{
         pageTitle,
         setPageTitle,
-        headerTitle,
-        setHeaderTitle,
       }}
     >
       {children}

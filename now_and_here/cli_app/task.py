@@ -32,6 +32,9 @@ def list_(
         "--project-id",
         help="Only show tasks in a specific project, by id.",
     ),
+    include_child_projects: bool = typer.Option(
+        False, "--include-child-projects", help="Include tasks in child projects."
+    ),
     sort: str = typer.Option("due", "--sort", help="Sort by a column."),
     desc: bool = typer.Option(False, "--desc", help="Sort in descending order."),
     include_done: bool = typer.Option(
@@ -50,6 +53,7 @@ def list_(
         desc=desc,
         project_name=project_name,
         project_id=project_id,
+        include_child_projects=include_child_projects,
         include_done=include_done,
     )
     if id_only:
