@@ -1,6 +1,6 @@
 PROJECTS_HIERARCHY_CTE = """
 -- Initial query: Select all projects and their immediate parent ID
-SELECT p.id, p.json
+SELECT p.id, p.json, '[]' AS parent_ids
 FROM projects p
 WHERE p.json ->> '$.parent' IS NULL
 UNION ALL
@@ -10,13 +10,14 @@ SELECT p2.id, json_set(
     p2.json,
     '$.parent',
     json(ph.json)
-) as json
+) as json,
+json_insert(ph.parent_ids, '$[#]', ph.id) AS parent_ids
 FROM projects p2
 JOIN project_hierarchy ph ON p2.json ->> '$.parent' = ph.id
 """
 
 TASKS_QUERY = f"""
-WITH RECURSIVE project_hierarchy(id, json) AS ({PROJECTS_HIERARCHY_CTE})
+WITH RECURSIVE project_hierarchy(id, json, parent_ids) AS ({PROJECTS_HIERARCHY_CTE})
 SELECT 
     json_set(
         t.json,
@@ -30,7 +31,7 @@ WHERE 1=1
 """
 
 PROJECTS_QUERY = f"""
-WITH RECURSIVE project_hierarchy(id, json) AS ({PROJECTS_HIERARCHY_CTE})
+WITH RECURSIVE project_hierarchy(id, json, parent_ids) AS ({PROJECTS_HIERARCHY_CTE})
 SELECT json
 FROM project_hierarchy ph
 WHERE 1 = 1

@@ -27,17 +27,23 @@ export async function getTasks({
   sortBy,
   desc,
   includeDone,
+  includeChildProjects,
 }: {
   projectId: string;
   sortBy: string;
   desc: boolean;
   includeDone: boolean;
+  includeChildProjects: boolean;
 }): Promise<Task[]> {
   const url = new URL("/api/tasks", window.location.origin);
   url.searchParams.set("project_id", projectId);
   url.searchParams.set("sort_by", sortBy);
   url.searchParams.set("desc", desc ? "true" : "false");
   url.searchParams.set("include_done", includeDone ? "true" : "false");
+  url.searchParams.set(
+    "include_child_projects",
+    includeChildProjects ? "true" : "false",
+  );
   return await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },

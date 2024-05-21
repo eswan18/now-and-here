@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,11 +18,13 @@ import {
   uncompleteTask,
 } from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
+import PageHeading from "@/components/common/pageHeading";
 
 const defaultFilter: z.infer<typeof TaskFilterSchema> = {
   sortBy: "due",
   desc: false,
   includeDone: false,
+  includeChildProjects: false,
 };
 
 function useFilter(): [
@@ -30,7 +33,7 @@ function useFilter(): [
 ] {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  let sortBy = searchParams.get("sortBy") as "due" | "priority" | null;
+  let sortBy = searchParams.get("sort_by") as "due" | "priority" | null;
   if (sortBy && !["due", "priority"].includes(sortBy)) {
     toast.error("Invalid sortBy parameter in URL");
     sortBy = null;
@@ -39,16 +42,21 @@ function useFilter(): [
     sortBy: sortBy || defaultFilter.sortBy,
     desc: searchParams.get("desc") === "true" ? true : defaultFilter.desc,
     includeDone:
-      searchParams.get("includeDone") === "true"
+      searchParams.get("include_done") === "true"
         ? true
         : defaultFilter.includeDone,
+    includeChildProjects:
+      searchParams.get("include_child_projects") === "true"
+        ? true
+        : defaultFilter.includeChildProjects,
   };
   // Function to update the filter and URL
   const setFilter = (newFilter: z.infer<typeof TaskFilterSchema>) => {
     setSearchParams({
-      ...newFilter,
-      desc: newFilter.desc.toString(), // ensure boolean is converted to string
-      includeDone: newFilter.includeDone.toString(),
+      sort_by: newFilter.sortBy,
+      desc: newFilter.desc.toString(),
+      include_done: newFilter.includeDone.toString(),
+      include_child_projects: newFilter.includeChildProjects.toString(),
     });
   };
 
@@ -60,7 +68,8 @@ export default function Project() {
   const { projectId } = useParams<{ projectId: string }>() as {
     projectId: string;
   };
-  const { setPageTitle, setHeaderTitle } = useTitle();
+  const [projectName, setProjectName] = useState("");
+  const { setPageTitle } = useTitle();
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
     queryKey: ["tasks", projectId, filter],
@@ -70,6 +79,7 @@ export default function Project() {
         sortBy: filter.sortBy,
         desc: filter.desc,
         includeDone: filter.includeDone,
+        includeChildProjects: filter.includeChildProjects,
       }),
   });
   const projectQuery = useQuery({
@@ -84,12 +94,14 @@ export default function Project() {
       });
     },
   });
-
-  if (projectQuery.isSuccess) {
-    const projectName = projectQuery.data.name;
+  useEffect(() => {
     setPageTitle(projectName);
-    setHeaderTitle(projectName);
-  }
+  }, [setPageTitle, projectName]);
+  useEffect(() => {
+    if (projectQuery.isSuccess) {
+      setProjectName(projectQuery.data.name);
+    }
+  }, [projectQuery, setProjectName]);
 
   const completeTaskMutation = useMutation({
     mutationFn: async ({
@@ -126,19 +138,13 @@ export default function Project() {
 
   return (
     <>
-      <div className="w-full mt-4 -translate-y-6 lg:-translate-y-8 bg-white rounded-md py-1 px-4 lg:px-8 shadow-sm shadow-orange-800 ">
-        <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
-      </div>
-      <div className="-translate-y-6">
-        <TaskCardList
-          tasks={tasksQuery.data || []}
-          onCompletionToggle={handleCompletion}
-        />
-        <CreateTaskCard
-          taskDefaults={{ projectId }}
-          onAddTask={handleAddTask}
-        />
-      </div>
+      <PageHeading title={`Project: ${projectName}`} className="mb-8 lg:mb-8" />
+      <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
+      <TaskCardList
+        tasks={tasksQuery.data || []}
+        onCompletionToggle={handleCompletion}
+      />
+      <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
     </>
   );
 }

@@ -12,13 +12,14 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Separator } from "@/components/ui/separator";
 import { getProjects } from "@/apiServices/project";
 import { getTaskViews } from "@/apiServices/view";
 import { useTitle } from "@/contexts/TitleContext";
 import { cn } from "@/lib/utils";
 
 export default function Root() {
-  const { pageTitle, headerTitle } = useTitle();
+  const { pageTitle } = useTitle();
 
   useEffect(() => {
     // This will update the browser tab title.
@@ -28,11 +29,6 @@ export default function Root() {
   return (
     <div className="flex flex-col justify-start w-full min-h-screen bg-gray-50">
       <NavBar />
-      <div className="w-full h-16 lg:h-28 lg:py-4 bg-orange-800">
-        <div className="lg:max-w-[60rem] mx-auto p-4 lg:p-8 text-orange-50 text-xl font-semibold tracking-tight">
-          {headerTitle}
-        </div>
-      </div>
       <div className="w-full">
         <div className="lg:max-w-[60rem] mx-auto px-4 lg:px-8">
           <Outlet />
@@ -64,6 +60,7 @@ function NavBar() {
               <NavigationMenuContent className="max-w-40 lg:max-w-60">
                 <ul className="grid w-48 gap-3 p-4">
                   <BoldListItem title="All projects" href="/projects" />
+                  <Separator />
                   {projectsQuery.isSuccess &&
                     projectsQuery.data.map((project) => (
                       <RegularListItem
@@ -80,7 +77,8 @@ function NavBar() {
               <NavigationMenuTrigger>Views</NavigationMenuTrigger>
               <NavigationMenuContent className="max-w-40 lg:max-w-48">
                 <ul className="grid w-48 gap-3 p-4">
-                  <BoldListItem title="All views" href="/task_views" />
+                  <BoldListItem title="All Views" href="/task_views" />
+                  <Separator />
                   {taskViewsQuery.isSuccess &&
                     taskViewsQuery.data.map((view) => (
                       <RegularListItem

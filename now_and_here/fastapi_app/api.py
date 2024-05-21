@@ -14,6 +14,7 @@ api_router = APIRouter(prefix="/api")
 @api_router.get("/tasks")
 def get_tasks(
     project_id: str,
+    include_child_projects: bool = False,
     sort_by: str = "due",
     desc: bool = False,
     include_done: bool = False,
@@ -21,6 +22,7 @@ def get_tasks(
     store = datastore.get_store()
     tasks = store.get_tasks(
         project_id=project_id,
+        include_child_projects=include_child_projects,
         include_done=include_done,
         sort_by=sort_by,
         desc=desc,

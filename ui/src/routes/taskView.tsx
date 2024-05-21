@@ -9,12 +9,13 @@ import { completeTask, uncompleteTask } from "@/apiServices/task";
 import { getTaskView, buildTaskView } from "@/apiServices/view";
 import { NewTask } from "@/types/task";
 import { createTask } from "@/apiServices/task";
+import PageHeading from "@/components/common/pageHeading";
 
 export default function TaskView() {
-  const { viewName } = useParams<{ viewName: string }>() as {
+  let { viewName } = useParams<{ viewName: string }>() as {
     viewName: string;
   };
-  const { setPageTitle, setHeaderTitle } = useTitle();
+  const { setPageTitle } = useTitle();
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
     queryKey: ["build", "taskViews", viewName],
@@ -30,18 +31,15 @@ export default function TaskView() {
   });
   useEffect(() => {
     setPageTitle(viewName);
-    setHeaderTitle(viewName);
-  }, [setPageTitle, setHeaderTitle, viewName]);
+  }, [setPageTitle, viewName]);
   const viewQuery = useQuery({
     queryKey: ["taskViews", viewName],
     queryFn: () => getTaskView(viewName),
   });
 
   if (viewQuery.isSuccess) {
-    const viewName = viewQuery.data.name;
-    const viewDescription = viewQuery.data.description;
+    viewName = viewQuery.data.name;
     setPageTitle(viewName);
-    setHeaderTitle(`${viewName}: ${viewDescription}`);
   }
 
   const completeTaskMutation = useMutation({
@@ -73,12 +71,13 @@ export default function TaskView() {
   };
 
   return (
-    <div className="mt-4">
+    <>
+      <PageHeading title={`Task view: ${viewName}`} />
       <TaskCardList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
       />
       <CreateTaskCard taskDefaults={{}} onAddTask={handleAddTask} />
-    </div>
+    </>
   );
 }
