@@ -1,7 +1,6 @@
-import { forwardRef } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 
 import {
   NavigationMenu,
@@ -90,7 +89,7 @@ export default function NavBar() {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-        <CommandMenu />
+        <SearchMenu />
       </div>
     </div>
   );
@@ -148,8 +147,28 @@ const RegularListItem = forwardRef<
 });
 RegularListItem.displayName = "RegularListItem";
 
-function CommandMenu() {
+function SearchMenu() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    // Catch "/" key press to open search dialog.
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "/") {
+        if (
+          (e.target instanceof HTMLElement && e.target.isContentEditable) ||
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement ||
+          e.target instanceof HTMLSelectElement
+        ) {
+          return;
+        }
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
   return (
     <div className="flex flex-row items-center space-x-4">
       <Dialog open={open} onOpenChange={setOpen}>
@@ -157,13 +176,14 @@ function CommandMenu() {
           <Button
             variant="outline"
             onClick={() => setOpen(true)}
-            className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+            className="relative h-8 w-full justify-end rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none md:w-32 lg:w-48"
           >
-            <span className="hidden lg:inline-flex">Search tasks...</span>
-            <span className="inline-flex lg:hidden">Search...</span>
-            <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-              <span className="text-xs">⌘</span>K
+            <span className="hidden lg:inline-flex">Press</span>
+            <kbd className="mx-0.5 pointer-events-none top-[0.3rem] flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
+              <span className="text-xs">/</span>
             </kbd>
+            <span className="hidden lg:inline-flex">to search tasks</span>
+            <span className="hidden sm:inline-flex lg:hidden">to search</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-xl">
