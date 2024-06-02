@@ -1,6 +1,7 @@
 import { useState, useEffect, forwardRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { useDebounce } from "@uidotdev/usehooks";
 
 import {
   NavigationMenu,
@@ -203,10 +204,11 @@ function SearchDialog() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   };
+  const debouncedQuery = useDebounce(query, 500);
   const { data } = useQuery({
-    queryKey: ["tasks", "query", query],
-    queryFn: () => searchTasks(query),
-    enabled: query !== "",
+    queryKey: ["tasks", "query", debouncedQuery],
+    queryFn: () => searchTasks(debouncedQuery),
+    enabled: debouncedQuery !== "",
   });
   return (
     <div className="flex flex-col items-center justify-start gap-y-4 w-full h-max">
