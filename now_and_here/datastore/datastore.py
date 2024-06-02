@@ -26,6 +26,11 @@ class DataStore(Protocol):
 
     def search_tasks(self, query: str, limit: int = 10) -> list[Task]:
         """Execute a semantic search against tasks."""
+        ...
+
+    def regen_embeddings(self) -> None:
+        """Regenerate the embeddings for all tasks."""
+        ...
 
     def update_task(self, id: str, task: Task) -> None: ...
 

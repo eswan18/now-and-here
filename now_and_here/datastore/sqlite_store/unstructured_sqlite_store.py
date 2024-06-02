@@ -23,7 +23,7 @@ def encode_string_as_int(s: str) -> int:
     """
     num = 0
     for char in s:
-        num = num * 26 + ord(char)
+        num = num * 26 + (ord(char) - ord("a"))
     return num
 
 
@@ -74,18 +74,36 @@ class UnstructuredSQLiteStore:
         # task ID from a string.
         task_id_int = encode_string_as_int(task.id)
         with self.conn as conn:
+            # Update and upsert operations don't seem to be supported in vss0, so we
+            # delete existing rows ourselves as part of the current transaction.
+            conn.execute("DELETE FROM vss_tasks WHERE rowid = (?)", (task_id_int,))
+            # Then insert the new embedding.
             conn.execute(
                 "INSERT INTO vss_tasks (rowid, a) VALUES (?, ?)",
                 (task_id_int, embedding.astype(np.float32).tobytes()),
             )
+            conn.commit()
 
-    def search_tasks(self, query: str, limit: int = 10) -> list[Task]:
-        """Execute a semantic search against tasks."""
+    def regen_embeddings(self) -> None:
+        # Load the sqlite_vss extension.
+        self.conn.enable_load_extension(True)
+        sqlite_vss.load(self.conn)
+        self.conn.enable_load_extension(False)
+
+        # Create the embeddings table.
+        stmt = "CREATE VIRTUAL TABLE IF NOT EXISTS vss_tasks USING vss0(a(384));"
+        self.conn.execute(stmt)
+
+        for task in self.get_tasks():
+            self._update_embeddings(task)
+        self.conn.commit()
+
+    def search_tasks(self, query: str, limit: int = 5) -> list[Task]:
         embedding_model = TextEmbedding()
         embedding, *_ = embedding_model.embed([query])
         with self.conn as conn:
             cursor = conn.execute(
-                "SELECT rowid, a FROM vss_tasks WHERE vss_tasks MATCH (?) LIMIT (?)",
+                "SELECT rowid, a FROM vss_tasks WHERE vss_search(a, ?) limit ?",
                 (embedding.astype(np.float32).tobytes(), limit),
             )
             rows = cursor.fetchall()
@@ -166,6 +184,7 @@ class UnstructuredSQLiteStore:
         data = task.as_json()
         with self.conn as conn:
             conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
+        self._update_embeddings(task)
 
     def checkoff_task(self, id: str) -> tuple[bool, datetime | None]:
         """

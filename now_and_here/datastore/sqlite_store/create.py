@@ -28,7 +28,7 @@ def create_db(path: Path):
         conn.enable_load_extension(False)
 
         # Create the embeddings table.
-        stmt = "CREATE VIRTUAL TABLE IF NOT EXISTS vss_tasks USING vss0(a(2));"
+        stmt = "CREATE VIRTUAL TABLE IF NOT EXISTS vss_tasks USING vss0(a(384));"
         logger.debug(stmt)
         conn.execute(stmt)
         logger.info("Created virtual table vss_tasks")

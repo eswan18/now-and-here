@@ -334,3 +334,19 @@ def due(
     store = datastore.get_store()
     tasks = store.get_tasks(due_before=before, include_done=include_done)
     console.print(Task.as_rich_table(tasks))
+
+
+@task_app.command()
+def search(query: str):
+    """Search for tasks by name or description."""
+    store = datastore.get_store()
+    tasks = store.search_tasks(query)
+    console.print(Task.as_rich_table(tasks))
+
+
+@task_app.command()
+def regen_embeddings():
+    """Regenerate the embeddings for all tasks."""
+    store = datastore.get_store()
+    store.regen_embeddings()
+    console.print("[green]Embeddings regenerated![/green]")
