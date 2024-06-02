@@ -4,40 +4,22 @@ from pathlib import Path
 
 import numpy as np
 import sqlite_vss
-from fastembed.embedding import TextEmbedding
+from loguru import logger
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfo
 
 from now_and_here.datastore.errors import InvalidSortError, RecordNotFoundError
 from now_and_here.models import Label, Project, Task
+from now_and_here.models.common import decode_id_from_int, id_as_int
 
 from .create import create_db
 from .queries import PROJECTS_QUERY, TASKS_QUERY
 
+# Suppress the default (useless) warning from fastembed.
+logger.disable("fastembed")
+from fastembed.embedding import TextEmbedding  # noqa: E402
 
-def encode_string_as_int(s: str) -> int:
-    """
-    Convert an alphabetical string to an integer.
-
-    The string must be lowercase letters only.
-    """
-    num = 0
-    for char in s:
-        num = num * 26 + (ord(char) - ord("a"))
-    return num
-
-
-def decode_int_as_string(num: int) -> str:
-    """
-    Convert an integer to an alphabetical string.
-
-    The integer must be positive; the resulting string will be lowercase letters only.
-    """
-    s = ""
-    while num:
-        num, remainder = divmod(num, 26)
-        s = chr(remainder + ord("a")) + s
-    return s
+logger.enable("fastembed")
 
 
 class UnstructuredSQLiteStore:
@@ -61,42 +43,45 @@ class UnstructuredSQLiteStore:
         data = task.as_json()
         with self.conn as conn:
             conn.execute("INSERT INTO tasks (id, json) VALUES (?, ?)", (task.id, data))
-        self._update_embeddings(task)
+        self._update_embeddings([task])
         return task.id
 
-    def _update_embeddings(self, task: Task) -> None:
-        document = task.name
-        if task.description:
-            document += f": {task.description}"
+    def _update_embeddings(self, tasks: list[Task]) -> None:
         embedding_model = TextEmbedding()
-        embedding, *_ = embedding_model.embed([document])
+        records = []
+
+        def doc_from_task(task: Task) -> str:
+            doc = task.name
+            if task.description:
+                doc += f": {task.description}"
+            return doc
+
+        documents = [doc_from_task(task) for task in tasks]
         # Our primary key in the vss_tasks table is an int, so we need to convert the
         # task ID from a string.
-        task_id_int = encode_string_as_int(task.id)
+        row_ids = [id_as_int(task.id) for task in tasks]
+        embeddings = embedding_model.embed(documents)
+        records = list(
+            zip(
+                row_ids,
+                (emb.astype(np.float32).tobytes() for emb in embeddings),
+            )
+        )
+
         with self.conn as conn:
             # Update and upsert operations don't seem to be supported in vss0, so we
             # delete existing rows ourselves as part of the current transaction.
-            conn.execute("DELETE FROM vss_tasks WHERE rowid = (?)", (task_id_int,))
-            # Then insert the new embedding.
+            bind_vars = ",".join("?" for _ in records)
             conn.execute(
-                "INSERT INTO vss_tasks (rowid, a) VALUES (?, ?)",
-                (task_id_int, embedding.astype(np.float32).tobytes()),
+                f"DELETE FROM vss_tasks WHERE rowid IN ({bind_vars})", (row_ids)
             )
+            # Then insert the new embeddings.
+            conn.executemany("INSERT INTO vss_tasks (rowid, a) VALUES (?, ?)", records)
             conn.commit()
 
     def regen_embeddings(self) -> None:
-        # Load the sqlite_vss extension.
-        self.conn.enable_load_extension(True)
-        sqlite_vss.load(self.conn)
-        self.conn.enable_load_extension(False)
-
-        # Create the embeddings table.
-        stmt = "CREATE VIRTUAL TABLE IF NOT EXISTS vss_tasks USING vss0(a(384));"
-        self.conn.execute(stmt)
-
-        for task in self.get_tasks():
-            self._update_embeddings(task)
-        self.conn.commit()
+        tasks = self.get_tasks()
+        self._update_embeddings(tasks)
 
     def search_tasks(self, query: str, limit: int = 5) -> list[Task]:
         embedding_model = TextEmbedding()
@@ -107,7 +92,7 @@ class UnstructuredSQLiteStore:
                 (embedding.astype(np.float32).tobytes(), limit),
             )
             rows = cursor.fetchall()
-        task_ids = [decode_int_as_string(row[0]) for row in rows]
+        task_ids = [decode_id_from_int(row[0]) for row in rows]
         tasks = [self.get_task(id) for id in task_ids]
         return tasks
 
@@ -184,7 +169,7 @@ class UnstructuredSQLiteStore:
         data = task.as_json()
         with self.conn as conn:
             conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
-        self._update_embeddings(task)
+        self._update_embeddings([task])
 
     def checkoff_task(self, id: str) -> tuple[bool, datetime | None]:
         """
