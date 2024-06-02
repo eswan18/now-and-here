@@ -24,6 +24,9 @@ class DataStore(Protocol):
         due_before: datetime | None = None,
     ) -> list[Task]: ...
 
+    def search_tasks(self, query: str, limit: int = 10) -> list[Task]:
+        """Execute a semantic search against tasks."""
+
     def update_task(self, id: str, task: Task) -> None: ...
 
     def checkoff_task(self, id: str) -> tuple[bool, datetime | None]:

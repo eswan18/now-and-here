@@ -2,6 +2,9 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
+import sqlite_vss
+from fastembed.embedding import TextEmbedding
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfo
 
@@ -12,9 +15,37 @@ from .create import create_db
 from .queries import PROJECTS_QUERY, TASKS_QUERY
 
 
+def encode_string_as_int(s: str) -> int:
+    """
+    Convert an alphabetical string to an integer.
+
+    The string must be lowercase letters only.
+    """
+    num = 0
+    for char in s:
+        num = num * 26 + ord(char)
+    return num
+
+
+def decode_int_as_string(num: int) -> str:
+    """
+    Convert an integer to an alphabetical string.
+
+    The integer must be positive; the resulting string will be lowercase letters only.
+    """
+    s = ""
+    while num:
+        num, remainder = divmod(num, 26)
+        s = chr(remainder + ord("a")) + s
+    return s
+
+
 class UnstructuredSQLiteStore:
     def __init__(self, path: Path):
         self.conn = sqlite3.connect(path)
+        self.conn.enable_load_extension(True)
+        sqlite_vss.load(self.conn)
+        self.conn.enable_load_extension(False)
 
     @classmethod
     def exists(cls, path: Path) -> bool:
@@ -30,7 +61,37 @@ class UnstructuredSQLiteStore:
         data = task.as_json()
         with self.conn as conn:
             conn.execute("INSERT INTO tasks (id, json) VALUES (?, ?)", (task.id, data))
+        self._update_embeddings(task)
         return task.id
+
+    def _update_embeddings(self, task: Task) -> None:
+        document = task.name
+        if task.description:
+            document += f": {task.description}"
+        embedding_model = TextEmbedding()
+        embedding, *_ = embedding_model.embed([document])
+        # Our primary key in the vss_tasks table is an int, so we need to convert the
+        # task ID from a string.
+        task_id_int = encode_string_as_int(task.id)
+        with self.conn as conn:
+            conn.execute(
+                "INSERT INTO vss_tasks (rowid, a) VALUES (?, ?)",
+                (task_id_int, embedding.astype(np.float32).tobytes()),
+            )
+
+    def search_tasks(self, query: str, limit: int = 10) -> list[Task]:
+        """Execute a semantic search against tasks."""
+        embedding_model = TextEmbedding()
+        embedding, *_ = embedding_model.embed([query])
+        with self.conn as conn:
+            cursor = conn.execute(
+                "SELECT rowid, a FROM vss_tasks WHERE vss_tasks MATCH (?) LIMIT (?)",
+                (embedding.astype(np.float32).tobytes(), limit),
+            )
+            rows = cursor.fetchall()
+        task_ids = [decode_int_as_string(row[0]) for row in rows]
+        tasks = [self.get_task(id) for id in task_ids]
+        return tasks
 
     def get_task(self, id: str) -> Task:
         query = TASKS_QUERY
