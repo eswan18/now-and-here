@@ -97,7 +97,10 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
 
 export async function searchTasks(query: string): Promise<Task[]> {
   return await fetch(`/api/tasks/search`, {
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ query }),
   }).then(async (res) => {
     if (!res.ok) {
