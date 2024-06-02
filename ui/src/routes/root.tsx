@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,11 +12,19 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+} from "@/components/ui/command";
 import { Separator } from "@/components/ui/separator";
 import { getProjects } from "@/apiServices/project";
 import { getTaskViews } from "@/apiServices/view";
 import { useTitle } from "@/contexts/TitleContext";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function Root() {
   const { pageTitle } = useTitle();
@@ -101,6 +109,7 @@ function NavBar() {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
+        <CommandMenu />
       </div>
     </div>
   );
@@ -157,3 +166,31 @@ const RegularListItem = forwardRef<
   );
 });
 RegularListItem.displayName = "RegularListItem";
+
+function CommandMenu() {
+  // Much of this is taken from https://github.com/shadcn-ui/ui/blob/98859e7/apps/www/components/command-menu.tsx#L28
+  const [open, setOpen] = useState(false);
+  open;
+  return (
+    <div className="flex flex-row items-center space-x-4">
+      <Button
+        variant="outline"
+        onClick={() => setOpen(true)}
+        className="relative h-8 w-full justify-start rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+      >
+        <span className="hidden lg:inline-flex">Search tasks...</span>
+        <span className="inline-flex lg:hidden">Search...</span>
+        <kbd className="pointer-events-none absolute right-[0.3rem] top-[0.3rem] hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+          <span className="text-xs">⌘</span>K
+        </kbd>
+      </Button>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Search tasks..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Tasks"></CommandGroup>
+        </CommandList>
+      </CommandDialog>
+    </div>
+  );
+}

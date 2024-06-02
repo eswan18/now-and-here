@@ -94,3 +94,21 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
     return res.json();
   });
 }
+
+export async function searchTasks(query: string): Promise<Task[]> {
+  return await fetch(`/api/tasks/search`, {
+    method: "GET",
+    body: JSON.stringify({ query }),
+  }).then(async (res) => {
+    if (!res.ok) {
+      let errorMsg = res.statusText;
+      const data = await res.json();
+      const errorDetail = extractErrorDetail(data);
+      if (errorDetail) {
+        errorMsg += `\n\n"${errorDetail}"`;
+      }
+      throw new Error(errorMsg);
+    }
+    return res.json();
+  });
+}
