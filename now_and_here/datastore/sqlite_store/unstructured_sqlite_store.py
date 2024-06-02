@@ -12,7 +12,7 @@ from now_and_here.datastore.errors import InvalidSortError, RecordNotFoundError
 from now_and_here.models import Label, Project, Task
 from now_and_here.models.common import decode_id_from_int, id_as_int
 
-from .create import create_db
+from .create import create_db, create_vector_store
 from .queries import PROJECTS_QUERY, TASKS_QUERY
 
 # Suppress the default (useless) warning from fastembed.
@@ -80,6 +80,18 @@ class UnstructuredSQLiteStore:
             conn.commit()
 
     def regen_embeddings(self) -> None:
+        self.conn.enable_load_extension(True)
+        sqlite_vss.load(self.conn)
+        self.conn.enable_load_extension(False)
+        with self.conn as conn:
+            # Check if the table vss_tasks exists and create it if not.
+            cursor = conn.execute(
+                "SELECT name FROM sqlite_master WHERE name='vss_tasks'"
+            )
+            row = cursor.fetchone()
+            table_exists = row is not None
+            if not table_exists:
+                create_vector_store(conn)
         tasks = self.get_tasks()
         self._update_embeddings(tasks)
 
