@@ -1,0 +1,3 @@
+from sqlite3 import Connection
+
+def load(conn: Connection) -> None: ...

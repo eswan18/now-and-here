@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import sqlite_vss
-from loguru import logger
+from fastembed import TextEmbedding
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfo
 
@@ -14,12 +14,6 @@ from now_and_here.models.common import decode_id_from_int, id_as_int
 
 from .create import create_db, create_vector_store
 from .queries import PROJECTS_QUERY, TASKS_QUERY
-
-# Suppress the default (useless) warning from fastembed.
-logger.disable("fastembed")
-from fastembed.embedding import TextEmbedding  # noqa: E402
-
-logger.enable("fastembed")
 
 
 class UnstructuredSQLiteStore:
