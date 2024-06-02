@@ -108,3 +108,11 @@ def build_task_view(
     store = datastore.get_store()
     tasks = view.build(store, user_context)
     return [FETaskOut.from_task(t) for t in tasks]
+
+
+@api_router.post("/tasks/search")
+def search_tasks(query: str = Body(..., embed=True)) -> list[FETaskOut]:
+    """Search for tasks."""
+    store = datastore.get_store()
+    tasks = store.search_tasks(query)
+    return [FETaskOut.from_task(t) for t in tasks]
