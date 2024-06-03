@@ -2,19 +2,26 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
+import numpy as np
+import sqlite_vss
+from fastembed import TextEmbedding
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfo
 
 from now_and_here.datastore.errors import InvalidSortError, RecordNotFoundError
 from now_and_here.models import Label, Project, Task
+from now_and_here.models.common import decode_id_from_int, id_as_int
 
-from .create import create_db
+from .create import create_db, create_vector_store
 from .queries import PROJECTS_QUERY, TASKS_QUERY
 
 
 class UnstructuredSQLiteStore:
     def __init__(self, path: Path):
         self.conn = sqlite3.connect(path)
+        self.conn.enable_load_extension(True)
+        sqlite_vss.load(self.conn)
+        self.conn.enable_load_extension(False)
 
     @classmethod
     def exists(cls, path: Path) -> bool:
@@ -30,7 +37,70 @@ class UnstructuredSQLiteStore:
         data = task.as_json()
         with self.conn as conn:
             conn.execute("INSERT INTO tasks (id, json) VALUES (?, ?)", (task.id, data))
+        self._update_embeddings([task])
         return task.id
+
+    def _update_embeddings(self, tasks: list[Task]) -> None:
+        embedding_model = TextEmbedding()
+        records = []
+
+        def doc_from_task(task: Task) -> str:
+            doc = task.name
+            if task.description:
+                doc += f": {task.description}"
+            return doc
+
+        documents = [doc_from_task(task) for task in tasks]
+        # Our primary key in the vss_tasks table is an int, so we need to convert the
+        # task ID from a string.
+        row_ids = [id_as_int(task.id) for task in tasks]
+        embeddings = embedding_model.embed(documents)
+        records = list(
+            zip(
+                row_ids,
+                (emb.astype(np.float32).tobytes() for emb in embeddings),
+            )
+        )
+
+        with self.conn as conn:
+            # Update and upsert operations don't seem to be supported in vss0, so we
+            # delete existing rows ourselves as part of the current transaction.
+            bind_vars = ",".join("?" for _ in records)
+            conn.execute(
+                f"DELETE FROM vss_tasks WHERE rowid IN ({bind_vars})", (row_ids)
+            )
+            # Then insert the new embeddings.
+            conn.executemany("INSERT INTO vss_tasks (rowid, a) VALUES (?, ?)", records)
+            conn.commit()
+
+    def regen_embeddings(self) -> None:
+        self.conn.enable_load_extension(True)
+        sqlite_vss.load(self.conn)
+        self.conn.enable_load_extension(False)
+        with self.conn as conn:
+            # Check if the table vss_tasks exists and create it if not.
+            cursor = conn.execute(
+                "SELECT name FROM sqlite_master WHERE name='vss_tasks'"
+            )
+            row = cursor.fetchone()
+            table_exists = row is not None
+            if not table_exists:
+                create_vector_store(conn)
+        tasks = self.get_tasks()
+        self._update_embeddings(tasks)
+
+    def search_tasks(self, query: str, limit: int = 5) -> list[Task]:
+        embedding_model = TextEmbedding()
+        embedding, *_ = embedding_model.embed([query])
+        with self.conn as conn:
+            cursor = conn.execute(
+                "SELECT rowid, a FROM vss_tasks WHERE vss_search(a, ?) limit ?",
+                (embedding.astype(np.float32).tobytes(), limit),
+            )
+            rows = cursor.fetchall()
+        task_ids = [decode_id_from_int(row[0]) for row in rows]
+        tasks = [self.get_task(id) for id in task_ids]
+        return tasks
 
     def get_task(self, id: str) -> Task:
         query = TASKS_QUERY
@@ -105,6 +175,7 @@ class UnstructuredSQLiteStore:
         data = task.as_json()
         with self.conn as conn:
             conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
+        self._update_embeddings([task])
 
     def checkoff_task(self, id: str) -> tuple[bool, datetime | None]:
         """
