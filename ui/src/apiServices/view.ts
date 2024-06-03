@@ -1,9 +1,9 @@
 import { Task } from "@/types/task";
-import { extractErrorDetail } from "./common";
+import { extractErrorDetail, baseUrl } from "./common";
 import { TaskView } from "@/types/view";
 
 export async function getTaskViews(): Promise<TaskView[]> {
-  const url = new URL("/api/task_views", window.location.origin);
+  const url = new URL("/api/task_views", baseUrl());
   return await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -22,7 +22,7 @@ export async function getTaskViews(): Promise<TaskView[]> {
 }
 
 export async function getTaskView(viewName: string): Promise<TaskView> {
-  const url = new URL(`/api/task_views/${viewName}`, window.location.origin);
+  const url = new URL(`/api/task_views/${viewName}`, baseUrl());
   return await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -44,7 +44,7 @@ export async function buildTaskView(viewName: string): Promise<Task[]> {
   const userContext = {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
-  const url = new URL(`/api/task_views/build`, window.location.origin);
+  const url = new URL(`/api/task_views/build`, baseUrl());
   return await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

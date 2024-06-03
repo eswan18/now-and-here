@@ -1,8 +1,9 @@
 import { NewTask, Task } from "@/types/task";
-import { extractErrorDetail } from "@/apiServices/common";
+import { extractErrorDetail, baseUrl } from "@/apiServices/common";
 
 export async function createTask(task: NewTask): Promise<Task> {
-  return await fetch("/api/tasks", {
+  const url = new URL(`/api/tasks`, baseUrl());
+  return await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -35,7 +36,7 @@ export async function getTasks({
   includeDone: boolean;
   includeChildProjects: boolean;
 }): Promise<Task[]> {
-  const url = new URL("/api/tasks", window.location.origin);
+  const url = new URL("/api/tasks", baseUrl());
   url.searchParams.set("project_id", projectId);
   url.searchParams.set("sort_by", sortBy);
   url.searchParams.set("desc", desc ? "true" : "false");
@@ -62,7 +63,8 @@ export async function getTasks({
 }
 
 export async function completeTask(taskId: string): Promise<Task> {
-  return await fetch(`/api/checkoff_task/${taskId}`, {
+  const url = new URL(`/api/checkoff_task/${taskId}`, baseUrl());
+  return await fetch(url, {
     method: "POST",
   }).then((res) => {
     if (!res.ok) {
@@ -79,7 +81,8 @@ export async function completeTask(taskId: string): Promise<Task> {
 }
 
 export async function uncompleteTask(taskId: string): Promise<Task> {
-  return await fetch(`/api/uncheckoff_task/${taskId}`, {
+  const url = new URL(`/api/uncheckoff_task/${taskId}`, baseUrl());
+  return await fetch(url, {
     method: "POST",
   }).then((res) => {
     if (!res.ok) {
@@ -96,7 +99,8 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
 }
 
 export async function searchTasks(query: string): Promise<Task[]> {
-  return await fetch(`/api/tasks/search`, {
+  const url = new URL(`/api/tasks/search`, baseUrl());
+  return await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
