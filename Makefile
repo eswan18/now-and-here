@@ -10,7 +10,15 @@ format:
 test:
 	pytest
 
-css:
-	tailwindcss -i ./now_and_here/fastapi_app/static/src/tw.css -o ./now_and_here/fastapi_app/static/css/main.css --minify
-
 check: lint typecheck test
+
+dev:
+	$(MAKE) -j 2 dev-parallel
+
+dev-parallel: backend dev-frontend
+
+backend:
+	nh web
+
+dev-frontend:
+	cd ui && VITE_API_BASE_URL=http://localhost:8787 npm run dev

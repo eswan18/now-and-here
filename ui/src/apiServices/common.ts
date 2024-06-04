@@ -1,5 +1,5 @@
 // Check the env var to determine the base URL.
-const BASE_URL = process.env.API_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function baseUrl() {
   const baseUrl = BASE_URL || window.location.origin;
