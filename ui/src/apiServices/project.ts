@@ -1,7 +1,6 @@
 import { Project, ProjectTree } from "@/types/project";
 import { extractErrorDetail, baseUrl } from "@/apiServices/common";
 
-
 export async function getProject(projectId: string): Promise<Project> {
   const url = new URL(`/api/projects/${projectId}`, baseUrl());
   return await fetch(url, {
