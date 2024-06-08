@@ -1,8 +1,8 @@
 import { Project, ProjectTree } from "@/types/project";
-import { extractErrorDetail } from "@/apiServices/common";
+import { extractErrorDetail, baseUrl } from "@/apiServices/common";
 
 export async function getProject(projectId: string): Promise<Project> {
-  const url = new URL(`/api/projects/${projectId}`, window.location.origin);
+  const url = new URL(`/api/projects/${projectId}`, baseUrl());
   return await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -21,7 +21,7 @@ export async function getProject(projectId: string): Promise<Project> {
 }
 
 export async function getProjects(): Promise<Project[]> {
-  const url = new URL("/api/projects", window.location.origin);
+  const url = new URL("/api/projects", baseUrl());
   return await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
