@@ -16,7 +16,9 @@ export default function PageHeading({
   const finalClass = cn(defaultClass, className);
   return (
     <div className={finalClass}>
-      <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 tracking-wide">
+        {title}
+      </h1>
       {children}
     </div>
   );
