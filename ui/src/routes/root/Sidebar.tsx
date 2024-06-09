@@ -36,7 +36,7 @@ export default function Sidebar() {
   ]
 
   return (
-    <div className="pt-20 px-10 bg-white border-r">
+    <div className="pt-20 px-10 bg-white border-r min-h-full">
       <ul>
         <li>
           <SidebarLinkAccordion title="Projects" links={projectsLinks} icon={FolderOpen} />

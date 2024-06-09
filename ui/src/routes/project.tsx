@@ -138,7 +138,7 @@ export default function Project() {
 
   return (
     <>
-      <PageHeading title={`Project: ${projectName}`} className="mb-8 lg:mb-8" />
+      <PageHeading title={projectName} className="mb-8 lg:mb-8" />
       <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
       <TaskCardList
         tasks={tasksQuery.data || []}

@@ -16,7 +16,7 @@ export default function Root() {
   return (
     <div className="flex flex-col w-full min-h-screen bg-gray-50">
       <NavBar />
-      <div className="w-full flex flex-row lg:justify-start">
+      <div className="w-full flex-1 flex flex-row lg:justify-start">
         <div className="hidden md:block w-72 min-h-full flex-shrink-0">
           <Sidebar />
         </div>

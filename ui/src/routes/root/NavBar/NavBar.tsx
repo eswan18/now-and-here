@@ -10,19 +10,20 @@ import { searchTasks } from "@/apiServices/task";
 import TaskCard from "@/components/task/task_card";
 import { Task } from "@/types/task";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import TaskCardList from "@/components/task/task_card_list";
 
 export default function NavBar() {
   return (
-    <div className="w-full px-4 h-12 bg-white border-b">
-      <div className="flex flex-row justify-between items-center h-full w-full px-4 lg:px-8">
+    <div className="w-full flex flex-row justify-between items-center pl-1 lg:pl-8 pr-3 h-12 bg-white border-b">
+      <div className="flex flex-row items-center justify-start gap-2">
+        <Button size="sm" variant="ghost" className="inline md:hidden px-2"><Menu /></Button>
         <h1 className="text-base lg:text-lg font-bold text-orange-800">
           <Link to="/">Now and Here</Link>
         </h1>
-        <SearchMenu />
       </div>
+      <SearchMenu />
     </div>
   );
 }
@@ -76,7 +77,7 @@ function SearchMenu() {
 }
 
 export function TaskCommandItem({ task }: { task: Task }) {
-  return <TaskCard task={task} onToggleCompletion={() => {}} />;
+  return <TaskCard task={task} onToggleCompletion={() => { }} />;
 }
 
 function SearchDialog() {
@@ -98,7 +99,7 @@ function SearchDialog() {
       </div>
       <ScrollArea className="px-2 lg:px-4">
         {data && data.length > 0 && (
-          <TaskCardList tasks={data} onCompletionToggle={() => {}} />
+          <TaskCardList tasks={data} onCompletionToggle={() => { }} />
         )}
       </ScrollArea>
     </div>
