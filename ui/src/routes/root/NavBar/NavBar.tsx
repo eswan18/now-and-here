@@ -13,13 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Search, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import TaskCardList from "@/components/task/task_card_list";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "../Sidebar";
-
 
 export default function NavBar() {
   return (
@@ -27,7 +22,9 @@ export default function NavBar() {
       <div className="flex flex-row items-center justify-start gap-2">
         <Sheet>
           <SheetTrigger>
-            <Button size="sm" variant="ghost" className="inline md:hidden px-2"><Menu /></Button>
+            <Button size="sm" variant="ghost" className="inline md:hidden px-2">
+              <Menu />
+            </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-60">
             <Sidebar />
@@ -41,7 +38,6 @@ export default function NavBar() {
     </div>
   );
 }
-
 
 function SearchMenu() {
   const [open, setOpen] = useState(false);
@@ -91,7 +87,7 @@ function SearchMenu() {
 }
 
 export function TaskCommandItem({ task }: { task: Task }) {
-  return <TaskCard task={task} onToggleCompletion={() => { }} />;
+  return <TaskCard task={task} onToggleCompletion={() => {}} />;
 }
 
 function SearchDialog() {
@@ -113,7 +109,7 @@ function SearchDialog() {
       </div>
       <ScrollArea className="px-2 lg:px-4">
         {data && data.length > 0 && (
-          <TaskCardList tasks={data} onCompletionToggle={() => { }} />
+          <TaskCardList tasks={data} onCompletionToggle={() => {}} />
         )}
       </ScrollArea>
     </div>
