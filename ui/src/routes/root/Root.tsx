@@ -14,16 +14,14 @@ export default function Root() {
   }, [pageTitle]);
 
   return (
-    <div className="flex flex-col justify-start w-full min-h-screen bg-gray-50">
+    <div className="flex flex-col w-full min-h-screen bg-gray-50">
       <NavBar />
-      <div className="w-full flex flex-row items-start lg:justify-center">
-        <div className="hidden lg:block lg:flex-grow">
+      <div className="w-full flex flex-row lg:justify-start">
+        <div className="hidden md:block w-72 min-h-full flex-shrink-0">
           <Sidebar />
         </div>
-        <div className="flex-shrink-0 w-full lg:max-w-[60rem] mx-auto px-4 lg:px-8">
+        <div className="flex-shrink-1 w-full lg:max-w-[60rem] mx-auto px-4 lg:px-8">
           <Outlet />
-        </div>
-        <div className="hidden lg:block lg:flex-grow">
         </div>
       </div>
     </div>

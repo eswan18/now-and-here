@@ -1,6 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { FolderOpen, ScanSearch, LucideIcon, Link } from "lucide-react";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { getProjects } from "@/apiServices/project";
 import { getTaskViews } from "@/apiServices/view";
+
+
 
 export default function Sidebar() {
   const projectsQuery = useQuery({
@@ -26,44 +36,57 @@ export default function Sidebar() {
   ]
 
   return (
-    <div className="pt-20 px-16 bg-white border-r">
-      <ul className="space-y-12">
+    <div className="pt-20 px-10 bg-white border-r">
+      <ul>
         <li>
-          <SidebarLinkList title="Projects" titleLink="/projects" links={projectsLinks} />
+          <SidebarLinkAccordion title="Projects" links={projectsLinks} icon={FolderOpen} />
         </li>
         <li>
-          <SidebarLinkList title="Views" titleLink="/task_views" links={taskViewsLinks} />
+          <SidebarLinkAccordion title="Views" links={taskViewsLinks} icon={ScanSearch} />
         </li>
         <li>
-          <SidebarLinkList title="Other Links" links={otherLinks} />
+          <SidebarLinkAccordion title="Other Links" links={otherLinks} icon={Link} />
         </li>
       </ul>
     </div>
   );
 }
 
-interface SidebarLinkListProps {
+interface SidebarLinkAccordionProps {
   title: string;
-  titleLink?: string;
   links: { title: string; href: string }[];
+  icon: LucideIcon;
 }
 
-function SidebarLinkList({ title, titleLink, links }: SidebarLinkListProps) {
+function SidebarLinkAccordion({ title, links, icon: Icon }: SidebarLinkAccordionProps) {
   return (
-    <>
-      <h4 className="font-bold mb-2 text-gray-500">
-        {titleLink
-          ? <a href={titleLink}>{title}</a>
-          : title
-        }
-      </h4>
-      <ul className="space-y-1">
-        {links.map(({ title, href }) => (
-          <li key={href}>
-            <a href={href}>{title}</a>
-          </li>
-        ))}
-      </ul>
-    </>
+    <Accordion type="single" collapsible>
+      <AccordionItem value="item-1" className="border-b-0">
+        <AccordionTrigger>
+          <div className="flex justify-start items-center">
+            <Icon className="inline mr-4" size={16} />
+            <p className="text-sm text-gray-600">{title}</p>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="pl-8 mb-4">
+          <ul className="space-y-3">
+            {links.map(({ title, href }) => <LinkListItem title={title} href={href} />)}
+          </ul>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+interface LinkListItemProps {
+  title: string;
+  href: string;
+}
+
+function LinkListItem({ title, href }: LinkListItemProps) {
+  return (
+    <li>
+      <a href={href}>{title}</a>
+    </li>
   )
 }
