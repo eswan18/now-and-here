@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { FolderOpen, ScanSearch, LucideIcon, Link } from "lucide-react";
+import { FolderOpen, ScanSearch, LucideIcon, Link as LinkIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import {
   Accordion,
@@ -45,7 +46,7 @@ export default function Sidebar() {
           <SidebarLinkAccordion title="Views" links={taskViewsLinks} icon={ScanSearch} />
         </li>
         <li>
-          <SidebarLinkAccordion title="Other Links" links={otherLinks} icon={Link} />
+          <SidebarLinkAccordion title="Other Links" links={otherLinks} icon={LinkIcon} />
         </li>
       </ul>
     </div>
@@ -86,7 +87,7 @@ interface LinkListItemProps {
 function LinkListItem({ title, href }: LinkListItemProps) {
   return (
     <li>
-      <a href={href}>{title}</a>
+      <Link to={href}>{title}</Link>
     </li>
   )
 }

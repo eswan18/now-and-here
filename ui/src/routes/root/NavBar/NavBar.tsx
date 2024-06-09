@@ -32,7 +32,6 @@ export default function NavBar() {
           <SheetContent side="left" className="w-60">
             <Sidebar />
           </SheetContent>
-
         </Sheet>
         <h1 className="text-base lg:text-lg font-bold text-orange-800">
           <Link to="/">Now and Here</Link>
