@@ -17,7 +17,10 @@ interface TaskCardProps {
   onToggleCompletion: (taskId: string, completed: boolean) => void;
 }
 
-export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
+export default function TaskListItem({
+  task,
+  onToggleCompletion,
+}: TaskCardProps) {
   return (
     <Dialog>
       <div className="grid grid-cols-[2rem_1fr] gap-2 mb-4">

@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-import TaskCardList from "@/components/task/task_card_list";
+import TaskList from "@/components/task/task_list";
 import CreateTaskCard from "@/components/task/create_task_card";
 import TaskFilterPanel, {
   TaskFilterSchema,
@@ -145,7 +145,7 @@ export default function Project() {
           className="mt-1"
         />
       </PageHeading>
-      <TaskCardList
+      <TaskList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
       />
