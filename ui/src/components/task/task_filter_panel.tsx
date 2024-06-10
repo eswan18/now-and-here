@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 
 export const TaskFilterSchema = z.object({
   sortBy: z.enum(["due", "priority"]),
@@ -31,11 +32,13 @@ export const TaskFilterSchema = z.object({
 interface TaskFilterPanelParams {
   filter: z.infer<typeof TaskFilterSchema>;
   onFilterChange: (filter: z.infer<typeof TaskFilterSchema>) => void;
+  className?: string;
 }
 
 export default function TaskFilterPanel({
   filter,
   onFilterChange,
+  className,
 }: TaskFilterPanelParams) {
   const form = useForm<z.infer<typeof TaskFilterSchema>>({
     resolver: zodResolver(TaskFilterSchema),
@@ -50,12 +53,14 @@ export default function TaskFilterPanel({
     return () => subscription.unsubscribe();
   }, [formWatcher, filter, onFilterChange]);
 
+  const defaultClass = "w-full flex flex-col items-start gap-2";
+  const finalClass = cn(defaultClass, className);
   return (
     <Form {...form}>
       <form>
-        <div className="w-full px-6 lg:px-10 mb-4 lg:mb-8 flex flex-row flex-wrap justify-between items-center gap-4 lg:gap-x-8">
-          <SortFormFields form={form} />
+        <div className={finalClass}>
           <FilterFormFields form={form} />
+          <SortFormFields form={form} />
         </div>
       </form>
     </Form>
@@ -68,8 +73,8 @@ function SortFormFields({
   form: UseFormReturn<z.infer<typeof TaskFilterSchema>>;
 }) {
   return (
-    <div className="flex flex-row items-center justify-start mx-4 gap-2 text-gray-400">
-      <ArrowDownUp size={24} />
+    <div className="flex flex-row items-center justify-start gap-1 text-gray-400">
+      <ArrowDownUp size={22} className="mr-2" />
       <FormField
         control={form.control}
         name="sortBy"
@@ -118,8 +123,8 @@ function FilterFormFields({
   form: UseFormReturn<z.infer<typeof TaskFilterSchema>>;
 }) {
   return (
-    <div className="flex flex-row items-center justify-start mx-4 gap-2 text-gray-400">
-      <ListFilter size={24} />
+    <div className="flex flex-row items-center justify-start gap-1 text-gray-400">
+      <ListFilter size={22} className="mr-2" />
       <FormField
         control={form.control}
         name="includeDone"

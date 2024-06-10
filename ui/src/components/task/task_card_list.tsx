@@ -11,7 +11,7 @@ export default function TaskCardList({
   onCompletionToggle,
 }: TaskCardListProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {tasks.map((task) => (
         <TaskCard
           key={task.id}
