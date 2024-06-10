@@ -12,7 +12,7 @@ export default function PageHeading({
   className,
 }: PageHeadingProps) {
   const defaultClass =
-    "flex flex-row justify-between items-center my-8 lg:my-16";
+    "flex flex-row justify-between items-start my-8 lg:my-16";
   const finalClass = cn(defaultClass, className);
   return (
     <div className={finalClass}>

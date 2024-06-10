@@ -53,7 +53,7 @@ export default function TaskFilterPanel({
     return () => subscription.unsubscribe();
   }, [formWatcher, filter, onFilterChange]);
 
-  const defaultClass = "w-full flex flex-col items-start gap-2";
+  const defaultClass = "w-full flex flex-row items-start gap-6";
   const finalClass = cn(defaultClass, className);
   return (
     <Form {...form}>
@@ -73,46 +73,49 @@ function SortFormFields({
   form: UseFormReturn<z.infer<typeof TaskFilterSchema>>;
 }) {
   return (
-    <div className="flex flex-row items-center justify-start gap-1 text-gray-400">
-      <ArrowDownUp size={22} className="mr-2" />
-      <FormField
-        control={form.control}
-        name="sortBy"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center gap-2 space-y-0 w-[9.5rem]">
-            <FormLabel className="font-normal min-w-16 text-right">
-              Sorted by
-            </FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value.toString()}
-            >
+    <div className="grid grid-cols-[1rem_1fr] gap-x-5 text-gray-400">
+      <ArrowDownUp size={24} />
+      <div className="flex flex-col gap-y-1">
+        <FormField
+          control={form.control}
+          name="sortBy"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+              <FormLabel className="font-normal min-w-16">Sorted by</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger className="border-0 px-0 h-6 w-auto bg-inherit font-medium">
+                    <SelectValue placeholder="..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="due">due date</SelectItem>
+                  <SelectItem value="priority">priority</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="desc"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+              <FormLabel className="font-normal">Descending</FormLabel>
               <FormControl>
-                <SelectTrigger className="border-0 px-0 h-6 w-auto bg-inherit text-gray-900">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
-              <SelectContent>
-                <SelectItem value="due">due date</SelectItem>
-                <SelectItem value="priority">priority</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="desc"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center gap-2 space-y-0">
-            <FormLabel className="font-normal">Descending</FormLabel>
-            <FormControl>
-              <Switch checked={field.value} onCheckedChange={field.onChange} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }
@@ -123,56 +126,58 @@ function FilterFormFields({
   form: UseFormReturn<z.infer<typeof TaskFilterSchema>>;
 }) {
   return (
-    <div className="flex flex-row items-center justify-start gap-1 text-gray-400">
-      <ListFilter size={22} className="mr-2" />
-      <FormField
-        control={form.control}
-        name="includeDone"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center gap-2 space-y-0 w-[9.5rem]">
-            <FormLabel className="font-normal text-right">Showing</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value.toString()}
-            >
-              <FormControl>
-                <SelectTrigger className="border-0 px-0 h-6 w-auto bg-inherit text-gray-900">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="false">incomplete</SelectItem>
-                <SelectItem value="true">all tasks</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="includeChildProjects"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-center gap-2 space-y-0">
-            <FormLabel className="font-normal text-right">in</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value.toString()}
-            >
-              <FormControl>
-                <SelectTrigger className="border-0 px-0 h-6 bg-inherit text-gray-900">
-                  <SelectValue placeholder="..." />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="false">this project</SelectItem>
-                <SelectItem value="true">this & child projects</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <div className="grid grid-cols-[1rem_1fr] gap-x-5 text-gray-400">
+      <ListFilter size={24} />
+      <div className="flex flex-col gap-y-1">
+        <FormField
+          control={form.control}
+          name="includeDone"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+              <FormLabel className="font-normal text-right">Showing</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger className="border-0 px-0 h-6 w-auto bg-inherit font-medium">
+                    <SelectValue placeholder="..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="false">incomplete</SelectItem>
+                  <SelectItem value="true">all tasks</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="includeChildProjects"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+              <FormLabel className="font-normal text-right">in</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value.toString()}
+              >
+                <FormControl>
+                  <SelectTrigger className="border-0 px-0 h-6 bg-inherit justify-end font-medium">
+                    <SelectValue placeholder="..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="false">this project</SelectItem>
+                  <SelectItem value="true">this & child projects</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 }

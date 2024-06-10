@@ -138,10 +138,13 @@ export default function Project() {
 
   return (
     <>
-      <div className="mb-8">
-        <PageHeading title={projectName} className="mb-4 lg:mb-4" />
-        <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
-      </div>
+      <PageHeading title={projectName}>
+        <TaskFilterPanel
+          filter={filter}
+          onFilterChange={handleFilterChange}
+          className="mt-1"
+        />
+      </PageHeading>
       <TaskCardList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
