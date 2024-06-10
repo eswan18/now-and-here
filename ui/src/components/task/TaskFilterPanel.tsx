@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm, UseFormReturn, ControllerRenderProps } from "react-hook-form";
 import { ListFilter, ArrowDownUp } from "lucide-react";
 
 import {
@@ -82,20 +82,13 @@ function SortFormFields({
           render={({ field }) => (
             <TaskFilterFormItem>
               <FormLabel className="font-normal">Sorted by</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value.toString()}
-              >
-                <FormControl>
-                  <SelectTrigger className="border-0 px-0 h-6 w-auto bg-inherit font-medium">
-                    <SelectValue placeholder="..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="due">due date</SelectItem>
-                  <SelectItem value="priority">priority</SelectItem>
-                </SelectContent>
-              </Select>
+              <TaskFilterFormSelect
+                field={field}
+                items={[
+                  { value: "due", label: "due date" },
+                  { value: "priority", label: "priority" },
+                ]}
+              />
               <FormMessage />
             </TaskFilterFormItem>
           )}
@@ -135,20 +128,13 @@ function FilterFormFields({
           render={({ field }) => (
             <TaskFilterFormItem>
               <FormLabel className="font-normal text-right">Showing</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value.toString()}
-              >
-                <FormControl>
-                  <SelectTrigger className="border-0 px-0 h-6 w-auto bg-inherit font-medium">
-                    <SelectValue placeholder="..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="false">incomplete</SelectItem>
-                  <SelectItem value="true">all tasks</SelectItem>
-                </SelectContent>
-              </Select>
+              <TaskFilterFormSelect
+                field={field}
+                items={[
+                  { value: "false", label: "incomplete tasks" },
+                  { value: "true", label: "all tasks" },
+                ]}
+              />
               <FormMessage />
             </TaskFilterFormItem>
           )}
@@ -159,20 +145,13 @@ function FilterFormFields({
           render={({ field }) => (
             <TaskFilterFormItem>
               <FormLabel className="font-normal text-right">in</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value.toString()}
-              >
-                <FormControl>
-                  <SelectTrigger className="border-0 px-0 h-6 bg-inherit justify-end font-medium">
-                    <SelectValue placeholder="..." />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="false">this project</SelectItem>
-                  <SelectItem value="true">this & child projects</SelectItem>
-                </SelectContent>
-              </Select>
+              <TaskFilterFormSelect
+                field={field}
+                items={[
+                  { value: "false", label: "this project" },
+                  { value: "true", label: "this & child projects" },
+                ]}
+              />
               <FormMessage />
             </TaskFilterFormItem>
           )}
@@ -204,5 +183,36 @@ function TaskFilterFormItem({ children }: TaskFilterFormItemProps) {
     <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
       {children}
     </FormItem>
+  );
+}
+
+interface TaskFilterFormSelectProps<
+  T extends keyof z.infer<typeof TaskFilterSchema>,
+> {
+  field: ControllerRenderProps<z.infer<typeof TaskFilterSchema>, T>;
+  items: { value: string; label: string }[];
+}
+
+function TaskFilterFormSelect<
+  T extends keyof z.infer<typeof TaskFilterSchema>,
+>({ field, items }: TaskFilterFormSelectProps<T>) {
+  return (
+    <Select
+      onValueChange={field.onChange}
+      defaultValue={field.value.toString()}
+    >
+      <FormControl>
+        <SelectTrigger className="border-0 px-0 h-6 bg-inherit justify-end font-medium">
+          <SelectValue placeholder="..." />
+        </SelectTrigger>
+      </FormControl>
+      <SelectContent>
+        {items.map((item) => (
+          <SelectItem key={item.value} value={item.value}>
+            {item.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
