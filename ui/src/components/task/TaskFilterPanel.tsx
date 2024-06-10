@@ -73,15 +73,15 @@ function SortFormFields({
   form: UseFormReturn<z.infer<typeof TaskFilterSchema>>;
 }) {
   return (
-    <div className="grid grid-cols-[1rem_1fr] gap-x-5 text-gray-400">
+    <TaskFilterFormFieldsContainer>
       <ArrowDownUp size={24} />
       <div className="flex flex-col gap-y-1">
         <FormField
           control={form.control}
           name="sortBy"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
-              <FormLabel className="font-normal min-w-16">Sorted by</FormLabel>
+            <TaskFilterFormItem>
+              <FormLabel className="font-normal">Sorted by</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value.toString()}
@@ -97,14 +97,14 @@ function SortFormFields({
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
+            </TaskFilterFormItem>
           )}
         />
         <FormField
           control={form.control}
           name="desc"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+            <TaskFilterFormItem>
               <FormLabel className="font-normal">Descending</FormLabel>
               <FormControl>
                 <Switch
@@ -112,11 +112,11 @@ function SortFormFields({
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
-            </FormItem>
+            </TaskFilterFormItem>
           )}
         />
       </div>
-    </div>
+    </TaskFilterFormFieldsContainer>
   );
 }
 
@@ -126,14 +126,14 @@ function FilterFormFields({
   form: UseFormReturn<z.infer<typeof TaskFilterSchema>>;
 }) {
   return (
-    <div className="grid grid-cols-[1rem_1fr] gap-x-5 text-gray-400">
+    <TaskFilterFormFieldsContainer>
       <ListFilter size={24} />
       <div className="flex flex-col gap-y-1">
         <FormField
           control={form.control}
           name="includeDone"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+            <TaskFilterFormItem>
               <FormLabel className="font-normal text-right">Showing</FormLabel>
               <Select
                 onValueChange={field.onChange}
@@ -150,14 +150,14 @@ function FilterFormFields({
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
+            </TaskFilterFormItem>
           )}
         />
         <FormField
           control={form.control}
           name="includeChildProjects"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+            <TaskFilterFormItem>
               <FormLabel className="font-normal text-right">in</FormLabel>
               <Select
                 onValueChange={field.onChange}
@@ -174,10 +174,35 @@ function FilterFormFields({
                 </SelectContent>
               </Select>
               <FormMessage />
-            </FormItem>
+            </TaskFilterFormItem>
           )}
         />
       </div>
+    </TaskFilterFormFieldsContainer>
+  );
+}
+
+interface TaskFilterFormFieldsContainerProps {
+  children: React.ReactNode;
+}
+function TaskFilterFormFieldsContainer({
+  children,
+}: TaskFilterFormFieldsContainerProps) {
+  return (
+    <div className="grid grid-cols-[1rem_1fr] gap-x-5 text-gray-400">
+      {children}
     </div>
+  );
+}
+
+interface TaskFilterFormItemProps {
+  children: React.ReactNode;
+}
+
+function TaskFilterFormItem({ children }: TaskFilterFormItemProps) {
+  return (
+    <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+      {children}
+    </FormItem>
   );
 }

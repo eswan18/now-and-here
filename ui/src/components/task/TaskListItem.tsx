@@ -31,7 +31,7 @@ export default function TaskListItem({
             className="h-6 w-6 mr-1.5 border-[1.5px] border-gray-400"
           />
         </div>
-        <div className="flex flex-row justify-between items-center w-full">
+        <div className="flex flex-row justify-between items-center w-full gap-2">
           <div className="flex flex-row items-start justify-between gap-2">
             <DialogTrigger>
               <h3 className="text-lg">

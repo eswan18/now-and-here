@@ -7,12 +7,12 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
 import { searchTasks } from "@/apiServices/task";
-import TaskListItem from "@/components/task/task_list_item";
+import TaskListItem from "@/components/task/TaskListItem";
 import { Task } from "@/types/task";
 import { Input } from "@/components/ui/input";
 import { Search, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import TaskList from "@/components/task/task_list";
+import TaskList from "@/components/task/TaskList";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Sidebar from "../Sidebar";
 

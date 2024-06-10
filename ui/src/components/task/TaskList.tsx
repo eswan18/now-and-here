@@ -1,5 +1,5 @@
 import { Task } from "../../types/task";
-import TaskListItem from "./task_list_item";
+import TaskListItem from "./TaskListItem";
 
 interface TaskCardListProps {
   tasks: Task[];

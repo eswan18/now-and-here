@@ -4,11 +4,11 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-import TaskList from "@/components/task/task_list";
+import TaskList from "@/components/task/TaskList";
 import CreateTaskCard from "@/components/task/create_task_card";
 import TaskFilterPanel, {
   TaskFilterSchema,
-} from "@/components/task/task_filter_panel";
+} from "@/components/task/TaskFilterPanel";
 import { useTitle } from "@/contexts/TitleContext";
 import { NewTask } from "@/types/task";
 import {

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import TaskList from "@/components/task/task_list";
+import TaskList from "@/components/task/TaskList";
 import CreateTaskCard from "@/components/task/create_task_card";
 import { useTitle } from "@/contexts/TitleContext";
 import { completeTask, uncompleteTask } from "@/apiServices/task";
