@@ -53,7 +53,7 @@ export default function TaskFilterPanel({
     return () => subscription.unsubscribe();
   }, [formWatcher, filter, onFilterChange]);
 
-  const defaultClass = "w-full flex flex-row items-start gap-6";
+  const defaultClass = "w-full flex flex-row items-start gap-x-8";
   const finalClass = cn(defaultClass, className);
   return (
     <Form {...form}>
@@ -80,17 +80,14 @@ function SortFormFields({
           control={form.control}
           name="sortBy"
           render={({ field }) => (
-            <TaskFilterFormItem>
-              <FormLabel className="font-normal">Sorted by</FormLabel>
-              <TaskFilterFormSelect
-                field={field}
-                items={[
-                  { value: "due", label: "due date" },
-                  { value: "priority", label: "priority" },
-                ]}
-              />
-              <FormMessage />
-            </TaskFilterFormItem>
+            <TaskFilterFormSelect
+              field={field}
+              label="Sorted by"
+              items={[
+                { value: "due", label: "due date" },
+                { value: "priority", label: "priority" },
+              ]}
+            />
           )}
         />
         <FormField
@@ -98,7 +95,7 @@ function SortFormFields({
           name="desc"
           render={({ field }) => (
             <TaskFilterFormItem>
-              <FormLabel className="font-normal">Descending</FormLabel>
+              <FormLabel className="font-normal ">Descending</FormLabel>
               <FormControl>
                 <Switch
                   checked={field.value}
@@ -126,34 +123,28 @@ function FilterFormFields({
           control={form.control}
           name="includeDone"
           render={({ field }) => (
-            <TaskFilterFormItem>
-              <FormLabel className="font-normal text-right">Showing</FormLabel>
-              <TaskFilterFormSelect
-                field={field}
-                items={[
-                  { value: "false", label: "incomplete tasks" },
-                  { value: "true", label: "all tasks" },
-                ]}
-              />
-              <FormMessage />
-            </TaskFilterFormItem>
+            <TaskFilterFormSelect
+              field={field}
+              label="Showing"
+              items={[
+                { value: "false", label: "incomplete tasks" },
+                { value: "true", label: "all tasks" },
+              ]}
+            />
           )}
         />
         <FormField
           control={form.control}
           name="includeChildProjects"
           render={({ field }) => (
-            <TaskFilterFormItem>
-              <FormLabel className="font-normal text-right">in</FormLabel>
-              <TaskFilterFormSelect
-                field={field}
-                items={[
-                  { value: "false", label: "this project" },
-                  { value: "true", label: "this & child projects" },
-                ]}
-              />
-              <FormMessage />
-            </TaskFilterFormItem>
+            <TaskFilterFormSelect
+              field={field}
+              label="in"
+              items={[
+                { value: "false", label: "this project" },
+                { value: "true", label: "this & child projects" },
+              ]}
+            />
           )}
         />
       </div>
@@ -168,7 +159,7 @@ function TaskFilterFormFieldsContainer({
   children,
 }: TaskFilterFormFieldsContainerProps) {
   return (
-    <div className="grid grid-cols-[1rem_1fr] gap-x-5 text-gray-400">
+    <div className="grid grid-flow-col grid-cols-[auto auto] gap-x-3 text-gray-400">
       {children}
     </div>
   );
@@ -180,7 +171,7 @@ interface TaskFilterFormItemProps {
 
 function TaskFilterFormItem({ children }: TaskFilterFormItemProps) {
   return (
-    <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between">
+    <FormItem className="flex flex-row items-center gap-x-2 space-y-0 justify-between min-w-fit">
       {children}
     </FormItem>
   );
@@ -190,29 +181,34 @@ interface TaskFilterFormSelectProps<
   T extends keyof z.infer<typeof TaskFilterSchema>,
 > {
   field: ControllerRenderProps<z.infer<typeof TaskFilterSchema>, T>;
+  label: string;
   items: { value: string; label: string }[];
 }
 
 function TaskFilterFormSelect<
   T extends keyof z.infer<typeof TaskFilterSchema>,
->({ field, items }: TaskFilterFormSelectProps<T>) {
+>({ field, label, items }: TaskFilterFormSelectProps<T>) {
   return (
-    <Select
-      onValueChange={field.onChange}
-      defaultValue={field.value.toString()}
-    >
-      <FormControl>
-        <SelectTrigger className="border-0 px-0 h-6 bg-inherit justify-end font-medium">
-          <SelectValue placeholder="..." />
-        </SelectTrigger>
-      </FormControl>
-      <SelectContent>
-        {items.map((item) => (
-          <SelectItem key={item.value} value={item.value}>
-            {item.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <TaskFilterFormItem>
+      <FormLabel className="font-normal flex-shrink-0">{label}</FormLabel>
+      <Select
+        onValueChange={field.onChange}
+        defaultValue={field.value.toString()}
+      >
+        <FormControl>
+          <SelectTrigger className="border-0 px-0 h-6 bg-inherit justify-end font-medium">
+            <SelectValue placeholder="..." />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </TaskFilterFormItem>
   );
 }
