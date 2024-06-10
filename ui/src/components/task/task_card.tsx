@@ -5,7 +5,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
 import { Task } from "@/types/task";
@@ -21,35 +20,24 @@ interface TaskCardProps {
 export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
   return (
     <Dialog>
-      <Card>
-        <CardContent className="px-4 py-3">
-          <div className="flex flex-row flex-wrap w-full justify-between pl-12 pr-4 mb-1">
-            <div className="text-sm font-semibold text-orange-700">
-              {task.project && (
-                <div className="flex flex-row justify-start items-center gap-2">
-                  <FolderOpen size={18} />
-                  <a href={`/projects/${task.project.id}`}>
-                    {task.project.name}
-                  </a>
-                </div>
-              )}
-            </div>
-            <PriorityBadge priority={task.priority} />
+      <div className="grid grid-cols-[2rem_1fr] gap-2 mb-4">
+        <div className="flex flex-row items-center justify-center">
+          <Checkbox
+            checked={task.done}
+            onCheckedChange={() => onToggleCompletion(task.id, !task.done)}
+            className="h-6 w-6 mr-1.5 border-[1.5px] border-gray-400"
+          />
+        </div>
+        <div className="flex flex-row justify-between items-center w-full">
+          <div className="flex flex-row items-start justify-between gap-2">
+            <DialogTrigger>
+              <h3 className="text-lg">
+                {task.name}
+                <Ellipsis className="ml-2 inline text-gray-400" />
+              </h3>
+            </DialogTrigger>
           </div>
-          <div className="flex flex-row justify-between items-center w-full border-b border-b-gray-200 px-4">
-            <div className="flex flex-row items-center justify-start gap-2">
-              <Checkbox
-                checked={task.done}
-                onCheckedChange={() => onToggleCompletion(task.id, !task.done)}
-                className="h-5 w-5 mr-1.5 border border-gray-400"
-              />
-              <DialogTrigger>
-                <h3 className="font-semibold text-lg">
-                  {task.name}
-                  <Ellipsis className="ml-2 inline text-gray-500" />
-                </h3>
-              </DialogTrigger>
-            </div>
+          <div className="flex flex-row items-center justify-end gap-2">
             {task.due ? (
               <HoverCard>
                 <HoverCardTrigger>
@@ -71,15 +59,25 @@ export default function TaskCard({ task, onToggleCompletion }: TaskCardProps) {
                 </HoverCardContent>
               </HoverCard>
             ) : (
-              <p className="text-gray-400 text-xs mr-2">No due date</p>
+              <p className="text-gray-400 text-sm mr-2">No due date</p>
+            )}
+            <PriorityBadge priority={task.priority} />
+          </div>
+        </div>
+        <div></div>
+        <div className="flex flex-row flex-wrap justify-between">
+          <div className="text-gray-400 text-sm">{task.description}</div>
+          <div className="text-sm text-gray-400 mr-1">
+            {task.project && (
+              <div className="flex flex-row justify-end items-center">
+                <FolderOpen size={16} className="inline mr-2" />
+                <a href={`/projects/${task.project.id}`}>{task.project.name}</a>
+              </div>
             )}
           </div>
-          <div className="flex flex-row flex-wrap w-full justify-between pl-14 pt-1">
-            <div className="text-gray-400 text-sm">{task.description}</div>
-          </div>
-        </CardContent>
-      </Card>
-      <TaskDialog task={task} onToggleCompletion={onToggleCompletion} />
+        </div>
+        <TaskDialog task={task} onToggleCompletion={onToggleCompletion} />
+      </div>
     </Dialog>
   );
 }
