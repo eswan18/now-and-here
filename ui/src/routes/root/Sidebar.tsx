@@ -90,7 +90,7 @@ function SidebarLinkAccordion({
             <p className="text-sm text-gray-600">{title}</p>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="pl-8 mb-4">
+        <AccordionContent className="pb-0 ml-2 pl-4 mb-4 border-l">
           <ul className="space-y-3">
             {links.map(({ title, href }) => (
               <LinkListItem title={title} href={href} />
