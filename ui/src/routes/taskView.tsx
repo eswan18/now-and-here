@@ -2,8 +2,8 @@ import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import TaskCardList from "@/components/task/task_card_list";
-import CreateTaskCard from "@/components/task/create_task_card";
+import TaskList from "@/components/task/TaskList";
+import CreateTaskButton from "@/components/task/CreateTaskButton";
 import { useTitle } from "@/contexts/TitleContext";
 import { completeTask, uncompleteTask } from "@/apiServices/task";
 import { getTaskView, buildTaskView } from "@/apiServices/view";
@@ -73,11 +73,11 @@ export default function TaskView() {
   return (
     <>
       <PageHeading title={`Task view: ${viewName}`} />
-      <TaskCardList
+      <TaskList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
       />
-      <CreateTaskCard taskDefaults={{}} onAddTask={handleAddTask} />
+      <CreateTaskButton taskDefaults={{}} onAddTask={handleAddTask} />
     </>
   );
 }

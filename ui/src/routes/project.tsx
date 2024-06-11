@@ -4,11 +4,11 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
-import TaskCardList from "@/components/task/task_card_list";
-import CreateTaskCard from "@/components/task/create_task_card";
+import TaskList from "@/components/task/TaskList";
+import CreateTaskButton from "@/components/task/CreateTaskButton";
 import TaskFilterPanel, {
   TaskFilterSchema,
-} from "@/components/task/task_filter_panel";
+} from "@/components/task/TaskFilterPanel";
 import { useTitle } from "@/contexts/TitleContext";
 import { NewTask } from "@/types/task";
 import {
@@ -138,13 +138,21 @@ export default function Project() {
 
   return (
     <>
-      <PageHeading title={projectName} className="mb-8 lg:mb-8" />
-      <TaskFilterPanel filter={filter} onFilterChange={handleFilterChange} />
-      <TaskCardList
+      <PageHeading title={projectName}>
+        <TaskFilterPanel
+          filter={filter}
+          onFilterChange={handleFilterChange}
+          className="mt-1"
+        />
+      </PageHeading>
+      <TaskList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
       />
-      <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
+      <CreateTaskButton
+        taskDefaults={{ projectId }}
+        onAddTask={handleAddTask}
+      />
     </>
   );
 }

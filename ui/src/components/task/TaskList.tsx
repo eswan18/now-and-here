@@ -1,5 +1,5 @@
 import { Task } from "../../types/task";
-import TaskCard from "./task_card";
+import TaskListItem from "./TaskListItem";
 
 interface TaskCardListProps {
   tasks: Task[];
@@ -11,9 +11,9 @@ export default function TaskCardList({
   onCompletionToggle,
 }: TaskCardListProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {tasks.map((task) => (
-        <TaskCard
+        <TaskListItem
           key={task.id}
           task={task}
           onToggleCompletion={onCompletionToggle}

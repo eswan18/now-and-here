@@ -42,7 +42,7 @@ export default function Sidebar() {
   const otherLinks = [{ title: "API Docs", href: "/docs" }];
 
   return (
-    <div className="pt-20 min-h-full">
+    <div className="my-4 min-h-full">
       <ul>
         <li>
           <SidebarLinkAccordion
@@ -84,13 +84,13 @@ function SidebarLinkAccordion({
   return (
     <Accordion type="single" collapsible>
       <AccordionItem value="item-1" className="border-b-0">
-        <AccordionTrigger>
+        <AccordionTrigger className="font-normal">
           <div className="flex justify-start items-center">
             <Icon className="inline mr-4" size={16} />
             <p className="text-sm text-gray-600">{title}</p>
           </div>
         </AccordionTrigger>
-        <AccordionContent className="pl-8 mb-4">
+        <AccordionContent className="pb-0 ml-2 pl-4 mb-4 border-l">
           <ul className="space-y-3">
             {links.map(({ title, href }) => (
               <LinkListItem title={title} href={href} />
@@ -110,7 +110,9 @@ interface LinkListItemProps {
 function LinkListItem({ title, href }: LinkListItemProps) {
   return (
     <li>
-      <Link to={href}>{title}</Link>
+      <Link to={href}>
+        <p className="text-sm">{title}</p>
+      </Link>
     </li>
   );
 }
