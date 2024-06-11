@@ -23,8 +23,12 @@ export default function CreateTaskButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger>
-        <Button variant={"outline"} size="sm" className="flex flex-row items-center gap-3 ">
-          <CirclePlus size={18} />
+        <Button
+          variant="outline"
+          size="lg"
+          className="flex flex-row items-center gap-3 px-3"
+        >
+          <CirclePlus size={24} />
           <span>New task</span>
         </Button>
       </DialogTrigger>

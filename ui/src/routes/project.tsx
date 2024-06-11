@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 import TaskList from "@/components/task/TaskList";
-import CreateTaskCard from "@/components/task/create_task_card";
+import CreateTaskButton from "@/components/task/CreateTaskButton";
 import TaskFilterPanel, {
   TaskFilterSchema,
 } from "@/components/task/TaskFilterPanel";
@@ -149,7 +149,10 @@ export default function Project() {
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
       />
-      <CreateTaskCard taskDefaults={{ projectId }} onAddTask={handleAddTask} />
+      <CreateTaskButton
+        taskDefaults={{ projectId }}
+        onAddTask={handleAddTask}
+      />
     </>
   );
 }

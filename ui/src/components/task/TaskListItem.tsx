@@ -36,32 +36,32 @@ export default function TaskListItem({
             <h3 className="text-lg">{task.name}</h3>
           </DialogTrigger>
           <DialogTrigger>
-          <div className="flex flex-row items-center justify-end gap-2">
-            {task.due ? (
-              <HoverCard>
-                <HoverCardTrigger>
-                  <Badge
-                    variant="outline"
-                    className="flex flex-row items-center text-orange-800"
-                  >
-                    <Clock size={16} className="inline-block mr-1" />
-                    <p>{relativeTimeString(new Date(task.due))}</p>
-                  </Badge>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-48">
-                  <div className="flex flex-col items-center">
-                    <p className="text-xs text-gray-400">Due:</p>
-                    <p className="text-sm text-gray-800">
-                      {new Date(task.due).toLocaleString()}
-                    </p>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            ) : (
-              <p className="text-gray-400 text-sm mr-2">No due date</p>
-            )}
-            <PriorityBadge priority={task.priority} />
-          </div>
+            <div className="flex flex-row items-center justify-end gap-2">
+              {task.due ? (
+                <HoverCard>
+                  <HoverCardTrigger>
+                    <Badge
+                      variant="outline"
+                      className="flex flex-row items-center text-orange-800"
+                    >
+                      <Clock size={16} className="inline-block mr-1" />
+                      <p>{relativeTimeString(new Date(task.due))}</p>
+                    </Badge>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-48">
+                    <div className="flex flex-col items-center">
+                      <p className="text-xs text-gray-400">Due:</p>
+                      <p className="text-sm text-gray-800">
+                        {new Date(task.due).toLocaleString()}
+                      </p>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+              ) : (
+                <p className="text-gray-400 text-sm mr-2">No due date</p>
+              )}
+              <PriorityBadge priority={task.priority} />
+            </div>
           </DialogTrigger>
         </div>
         <div></div>
