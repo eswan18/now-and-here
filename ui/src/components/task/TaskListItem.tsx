@@ -1,4 +1,4 @@
-import { Clock, Ellipsis, FolderOpen } from "lucide-react";
+import { Clock, FolderOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   HoverCard,
@@ -23,23 +23,19 @@ export default function TaskListItem({
 }: TaskCardProps) {
   return (
     <Dialog>
-      <div className="grid grid-cols-[2rem_1fr] gap-2 mb-4">
+      <div className="grid grid-cols-[2rem_1fr] gap-3 mb-4">
         <div className="flex flex-row items-center justify-center">
           <Checkbox
             checked={task.done}
             onCheckedChange={() => onToggleCompletion(task.id, !task.done)}
-            className="h-6 w-6 mr-1.5 border-[1.5px] border-gray-400"
+            className="h-6 w-6 border-[1.5px] border-gray-400"
           />
         </div>
         <div className="flex flex-row justify-between items-center w-full gap-2">
-          <div className="flex flex-row items-start justify-between gap-2">
-            <DialogTrigger>
-              <h3 className="text-lg">
-                {task.name}
-                <Ellipsis className="ml-2 inline text-gray-400" />
-              </h3>
-            </DialogTrigger>
-          </div>
+          <DialogTrigger>
+            <h3 className="text-lg">{task.name}</h3>
+          </DialogTrigger>
+          <DialogTrigger>
           <div className="flex flex-row items-center justify-end gap-2">
             {task.due ? (
               <HoverCard>
@@ -66,6 +62,7 @@ export default function TaskListItem({
             )}
             <PriorityBadge priority={task.priority} />
           </div>
+          </DialogTrigger>
         </div>
         <div></div>
         <div className="flex flex-row flex-wrap justify-between">
