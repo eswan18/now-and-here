@@ -5,6 +5,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
 import { Task } from "@/types/task";
@@ -71,7 +72,9 @@ export default function TaskListItem({
             {task.project && (
               <div className="flex flex-row justify-end items-center">
                 <FolderOpen size={16} className="inline mr-2" />
-                <a href={`/projects/${task.project.id}`}>{task.project.name}</a>
+                <Link to={`/projects/${task.project.id}`}>
+                  {task.project.name}
+                </Link>
               </div>
             )}
           </div>
