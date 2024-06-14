@@ -1,4 +1,4 @@
-import { Clock, FolderOpen } from "lucide-react";
+import { Clock, FolderOpen, Repeat } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   HoverCard,
@@ -11,7 +11,8 @@ import { relativeTimeString } from "@/lib/time";
 import { Task } from "@/types/task";
 import PriorityBadge from "./priority_badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import TaskDialog from "./task_dialog";
+import EditTaskDialog from "./EditTaskDialog";
+import { repeatAsString } from "@/lib/repeat";
 
 interface TaskCardProps {
   task: Task;
@@ -61,6 +62,15 @@ export default function TaskListItem({
               ) : (
                 <p className="text-gray-400 text-sm mr-2">No due date</p>
               )}
+              {task.repeat && (
+                <Badge
+                  variant="outline"
+                  className="flex flex-row items-center text-orange-800"
+                >
+                  <Repeat size={16} className="inline-block mr-1" />
+                  <p>{repeatAsString(task.repeat)}</p>
+                </Badge>
+              )}
               <PriorityBadge priority={task.priority} />
             </div>
           </DialogTrigger>
@@ -79,7 +89,7 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <TaskDialog task={task} onToggleCompletion={onToggleCompletion} />
+        <EditTaskDialog task={task} />
       </div>
     </Dialog>
   );
