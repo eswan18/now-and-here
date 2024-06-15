@@ -1,6 +1,7 @@
-import { Task } from "@/types/task";
+import { Task, TaskFromBackend } from "@/types/task";
 import { extractErrorDetail, baseUrl } from "./common";
 import { TaskView } from "@/types/view";
+import { prepareTaskFromBackend } from "./task";
 
 export async function getTaskViews(): Promise<TaskView[]> {
   const url = new URL("/api/task_views", baseUrl());
@@ -59,6 +60,7 @@ export async function buildTaskView(viewName: string): Promise<Task[]> {
       }
       throw new Error(errorMsg);
     }
-    return res.json();
+    const tasks = (await res.json()) as TaskFromBackend[];
+    return tasks.map(prepareTaskFromBackend);
   });
 }
