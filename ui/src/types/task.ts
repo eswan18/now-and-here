@@ -1,6 +1,8 @@
 import { Project } from "./project";
 import { RepeatInterval } from "./repeatInterval";
 
+export type Priority = 0 | 1 | 2 | 3;
+
 export type Task = {
   id: string;
   name: string;
@@ -9,7 +11,7 @@ export type Task = {
   parent: Task | null;
   project: Project | null;
   labels: string[];
-  priority: number;
+  priority: Priority;
   due: Date | null;
   repeat: RepeatInterval | null;
 };
@@ -20,7 +22,7 @@ export type TaskFromBackend = Omit<Task, "due" | "repeat"> & {
 } & { repeat: string | null };
 
 // A task as it is stored in the database, with parent and project stored as IDs instead
-// of nested fields.
+// of nested fields (and no attached ID).
 export interface NewTask {
   name: string;
   description: string | null;
@@ -28,7 +30,7 @@ export interface NewTask {
   parent_id: string | null;
   project_id: string | null;
   labels: string[];
-  priority: number;
+  priority: Priority;
   due: Date | null;
   repeat: RepeatInterval | null;
 }

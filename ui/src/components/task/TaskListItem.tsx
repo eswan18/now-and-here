@@ -8,7 +8,7 @@ import {
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
-import { Task } from "@/types/task";
+import { Task, NewTask } from "@/types/task";
 import PriorityBadge from "./priority_badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import EditTaskDialog from "./EditTaskDialog";
@@ -17,11 +17,13 @@ import { repeatAsString } from "@/lib/repeat";
 interface TaskCardProps {
   task: Task;
   onToggleCompletion: (taskId: string, completed: boolean) => void;
+  onUpdateTask: (updatedTask: NewTask) => void;
 }
 
 export default function TaskListItem({
   task,
   onToggleCompletion,
+  onUpdateTask,
 }: TaskCardProps) {
   return (
     <Dialog>
@@ -89,7 +91,7 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <EditTaskDialog task={task} />
+        <EditTaskDialog task={task} onUpdateTask={onUpdateTask} />
       </div>
     </Dialog>
   );

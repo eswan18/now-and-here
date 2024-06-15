@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { Clock, FolderOpen, Pencil, Repeat } from "lucide-react";
-import { DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { Task } from "@/types/task";
+import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog";
+import { Task, NewTask, Priority } from "@/types/task";
 import { Badge } from "@/components/ui/badge";
 import PriorityBadge from "./priority_badge";
 import {
@@ -8,32 +13,48 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { repeatAsString } from "@/lib/repeat";
 import { relativeTimeString } from "@/lib/time";
+import PriorityPickerPopover from "@/components/pickers/PriorityPicker";
+import { Button } from "../ui/button";
+import { deepEqual } from "@/lib/utils";
 
 export interface TaskDialogProps {
   task: Task;
+  onUpdateTask: (updatedTask: NewTask) => void;
 }
 
 export default function EditTaskDialog({ task }: TaskDialogProps) {
+  const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
+  const [taskValues, setTaskValues] = useState(task);
+  const isEdited = !deepEqual(taskValues, task);
+
+  const handlePriorityPickerPopoverChange = (priority: Priority) => {
+    setTaskValues({ ...taskValues, priority });
+    setPriorityPopoverOpen(false);
+  };
+
   return (
     <DialogContent className="px-4 md:px-12 py-2 md:py-6 lg:max-w-2xl">
       <DialogHeader className="mb-4">
-        <div className="flex flex-row justify-start items-center gap-3 text-gray-400">
-          <Pencil size={20} className="inline-block" />
-          <h2 className="text-xl font-semibold inline">Edit Task</h2>
+        <div className="flex flex-row justify-between items-center gap-3 mr-5">
+          <div className="flex flex-row justify-start items-center text-gray-900 gap-3">
+            <Pencil size={20} className="inline-block" />
+            <h2 className="text-xl font-semibold inline">Edit Task</h2>
+          </div>
         </div>
       </DialogHeader>
       <div className="flex flex-col justify-between items-start w-full gap-1">
-        <h3 className="text-lg w-full border-b">{task.name}</h3>
-        {task.description && (
-          <div className="text-gray-400 text-sm">{task.description}</div>
+        <h3 className="text-lg w-full border-b">{taskValues.name}</h3>
+        {taskValues.description && (
+          <div className="text-gray-400 text-sm">{taskValues.description}</div>
         )}
         <div className="flex flex-row flex-wrap items-center justify-start gap-2 mt-4 text-xs text-gray-400 font-semibold">
-          {task.project ? (
+          {taskValues.project ? (
             <div className="flex flex-row justify-end items-center mr-4 text-gray-800">
               <FolderOpen size={16} className="inline mr-2" />
-              {task.project.name}
+              {taskValues.project.name}
             </div>
           ) : (
             <div className="flex flex-row justify-end items-center mr-4 text-gray-400">
@@ -42,7 +63,7 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
             </div>
           )}
           <div className="flex flex-row justify-start items-center text-gray-400">
-            {task.due ? (
+            {taskValues.due ? (
               <HoverCard>
                 <HoverCardTrigger>
                   <Badge
@@ -50,14 +71,14 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
                     className="flex flex-row items-center text-orange-800"
                   >
                     <Clock size={16} className="inline-block mr-1" />
-                    <p>{relativeTimeString(task.due)}</p>
+                    <p>{relativeTimeString(taskValues.due)}</p>
                   </Badge>
                 </HoverCardTrigger>
                 <HoverCardContent className="w-48">
                   <div className="flex flex-col items-center">
                     <p className="text-xs text-gray-400">Due:</p>
                     <p className="text-sm text-gray-800">
-                      {new Date(task.due).toLocaleString()}
+                      {new Date(taskValues.due).toLocaleString()}
                     </p>
                   </div>
                 </HoverCardContent>
@@ -71,13 +92,13 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
                 <p className="text-xs">No due date</p>
               </Badge>
             )}
-            {task.repeat ? (
+            {taskValues.repeat ? (
               <Badge
                 variant="outline"
                 className="flex flex-row items-center text-orange-800"
               >
                 <Repeat size={16} className="inline-block mr-1" />
-                <p>{repeatAsString(task.repeat)}</p>
+                <p>{repeatAsString(taskValues.repeat)}</p>
               </Badge>
             ) : (
               <Badge
@@ -89,8 +110,31 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
               </Badge>
             )}
           </div>
-          <PriorityBadge priority={task.priority} />
+          <Popover
+            open={priorityPopoverOpen}
+            onOpenChange={setPriorityPopoverOpen}
+          >
+            <PopoverTrigger>
+              <PriorityBadge priority={taskValues.priority} />
+            </PopoverTrigger>
+            <PriorityPickerPopover
+              defaultPriority={taskValues.priority}
+              onChange={handlePriorityPickerPopoverChange}
+            />
+          </Popover>
         </div>
+        <DialogFooter className="mt-6 h-8 justify-end w-full">
+          {isEdited && (
+            <>
+              <Button variant="destructive" size="sm" className="w-20">
+                Discard
+              </Button>
+              <Button size="sm" className="w-20">
+                Save
+              </Button>
+            </>
+          )}
+        </DialogFooter>
       </div>
     </DialogContent>
   );
