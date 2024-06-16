@@ -172,8 +172,6 @@ class UnstructuredSQLiteStore:
         return tasks
 
     def update_task(self, id: str, task: Task) -> None:
-        print(type(id), type(task))
-        print(task)
         data = task.as_json()
         with self.conn as conn:
             cursor = conn.cursor()

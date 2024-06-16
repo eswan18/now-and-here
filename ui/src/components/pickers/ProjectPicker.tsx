@@ -38,7 +38,7 @@ export default function ProjectPickerPopover({
       <Command>
         <CommandInput placeholder="Search projects..." />
         <CommandList>
-          <CommandEmpty>No priority found.</CommandEmpty>
+          <CommandEmpty>No projects found.</CommandEmpty>
           <CommandGroup>
             {projectsQuery.isSuccess &&
               projectsQuery.data.map((p) => (

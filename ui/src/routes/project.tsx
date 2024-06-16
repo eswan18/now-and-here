@@ -73,7 +73,7 @@ export default function Project() {
   const { setPageTitle } = useTitle();
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
-    queryKey: ["tasks", projectId, filter],
+    queryKey: ["tasks", { projectId }, { filter }],
     queryFn: () =>
       getTasks({
         projectId: projectId as string,
@@ -84,14 +84,14 @@ export default function Project() {
       }),
   });
   const projectQuery = useQuery({
-    queryKey: ["projects", projectId],
+    queryKey: ["projects", { id: projectId }],
     queryFn: () => getProject(projectId),
   });
   const addTaskMutation = useMutation({
     mutationFn: createTask,
     onSettled: async () => {
       return await queryClient.invalidateQueries({
-        queryKey: ["tasks", projectId, filter],
+        queryKey: ["tasks", { projectId }, { filter }],
       });
     },
   });
@@ -120,7 +120,7 @@ export default function Project() {
     },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
-        queryKey: ["tasks", projectId, filter],
+        queryKey: ["tasks", { projectId }, { filter }],
       });
     },
   });
@@ -134,7 +134,7 @@ export default function Project() {
     },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
-        queryKey: ["tasks", projectId, filter],
+        queryKey: ["tasks", { projectId }, { filter }],
       });
     },
   });
