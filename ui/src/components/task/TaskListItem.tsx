@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Clock, FolderOpen, Repeat } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,7 +18,7 @@ import { repeatAsString } from "@/lib/repeat";
 interface TaskCardProps {
   task: Task;
   onToggleCompletion: (taskId: string, completed: boolean) => void;
-  onUpdateTask: (updatedTask: NewTask) => void;
+  onUpdateTask: (updatedTask: NewTask) => Promise<void>;
 }
 
 export default function TaskListItem({
@@ -25,8 +26,14 @@ export default function TaskListItem({
   onToggleCompletion,
   onUpdateTask,
 }: TaskCardProps) {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const handleUpdateTask = async (updatedTask: NewTask) => {
+    onUpdateTask(updatedTask).then(() => setEditDialogOpen(false));
+  };
+
   return (
-    <Dialog>
+    <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
       <div className="grid grid-cols-[2rem_1fr] gap-3 mb-4">
         <div className="flex flex-row items-center justify-center">
           <Checkbox
@@ -91,7 +98,7 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <EditTaskDialog task={task} onUpdateTask={onUpdateTask} />
+        <EditTaskDialog task={task} onUpdateTask={handleUpdateTask} />
       </div>
     </Dialog>
   );

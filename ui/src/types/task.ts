@@ -34,3 +34,17 @@ export interface NewTask {
   due: Date | null;
   repeat: RepeatInterval | null;
 }
+
+export function taskAsNewTask(t: Task): NewTask {
+  return {
+    name: t.name,
+    description: t.description,
+    done: t.done,
+    parent_id: t.parent?.id ?? null,
+    project_id: t.project?.id ?? null,
+    labels: t.labels,
+    priority: t.priority,
+    due: t.due,
+    repeat: t.repeat,
+  };
+}

@@ -5,7 +5,7 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog";
-import { Task, NewTask, Priority } from "@/types/task";
+import { Task, NewTask, Priority, taskAsNewTask } from "@/types/task";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import PriorityBadge from "./priority_badge";
@@ -24,10 +24,13 @@ import { deepEqual } from "@/lib/utils";
 
 export interface TaskDialogProps {
   task: Task;
-  onUpdateTask: (updatedTask: NewTask) => void;
+  onUpdateTask: (updatedTask: NewTask) => Promise<void>;
 }
 
-export default function EditTaskDialog({ task }: TaskDialogProps) {
+export default function EditTaskDialog({
+  task,
+  onUpdateTask,
+}: TaskDialogProps) {
   const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
   const [taskValues, setTaskValues] = useState(task);
@@ -41,6 +44,11 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
   const handleProjectPickerPopoverChange = (project: Project) => {
     setTaskValues({ ...taskValues, project });
     setProjectPopoverOpen(false);
+  };
+
+  const saveTaskUpdates = () => {
+    const newTask = taskAsNewTask(taskValues);
+    onUpdateTask(newTask);
   };
 
   return (
@@ -148,7 +156,7 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
               <Button variant="destructive" size="sm" className="w-20">
                 Discard
               </Button>
-              <Button size="sm" className="w-20">
+              <Button size="sm" className="w-20" onClick={saveTaskUpdates}>
                 Save
               </Button>
             </>

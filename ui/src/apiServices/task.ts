@@ -133,3 +133,26 @@ export function prepareTaskFromBackend(task: TaskFromBackend): Task {
     repeat: task.repeat ? JSON.parse(task.repeat) : null,
   };
 }
+
+export async function updateTask(taskId: string, task: NewTask): Promise<Task> {
+  const url = new URL(`/api/tasks/${taskId}`, baseUrl());
+  return await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(task),
+  }).then(async (res) => {
+    if (!res.ok) {
+      let errorMsg = res.statusText;
+      const data = await res.json();
+      const errorDetail = extractErrorDetail(data);
+      if (errorDetail) {
+        errorMsg += `\n\n"${errorDetail}"`;
+      }
+      throw new Error(errorMsg);
+    }
+    const task = (await res.json()) as TaskFromBackend;
+    return prepareTaskFromBackend(task);
+  });
+}

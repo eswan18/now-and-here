@@ -16,6 +16,7 @@ import {
   getTasks,
   createTask,
   uncompleteTask,
+  updateTask,
 } from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
 import PageHeading from "@/components/common/pageHeading";
@@ -127,6 +128,20 @@ export default function Project() {
     completeTaskMutation.mutate({ taskId, completed });
   };
 
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, task }: { taskId: string; task: NewTask }) => {
+      updateTask(taskId, task);
+    },
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({
+        queryKey: ["tasks", projectId, filter],
+      });
+    },
+  });
+  const handleUpdateTask = async (taskId: string, task: NewTask) => {
+    updateTaskMutation.mutate({ taskId, task });
+  };
+
   // Handle changes to any filter
   const handleFilterChange = (filter: z.infer<typeof TaskFilterSchema>) => {
     setFilter(filter);
@@ -148,6 +163,7 @@ export default function Project() {
       <TaskList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
+        onUpdateTask={handleUpdateTask}
       />
       <CreateTaskButton
         taskDefaults={{ projectId }}

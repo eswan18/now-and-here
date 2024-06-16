@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import TaskList from "@/components/task/TaskList";
 import CreateTaskButton from "@/components/task/CreateTaskButton";
 import { useTitle } from "@/contexts/TitleContext";
-import { completeTask, uncompleteTask } from "@/apiServices/task";
+import { completeTask, uncompleteTask, updateTask } from "@/apiServices/task";
 import { getTaskView, buildTaskView } from "@/apiServices/view";
 import { NewTask } from "@/types/task";
 import { createTask } from "@/apiServices/task";
@@ -66,6 +66,20 @@ export default function TaskView() {
     completeTaskMutation.mutate({ taskId, completed });
   };
 
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, task }: { taskId: string; task: NewTask }) => {
+      updateTask(taskId, task);
+    },
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({
+        queryKey: ["build", "taskViews", viewName],
+      });
+    },
+  });
+  const handleUpdateTask = async (taskId: string, task: NewTask) => {
+    updateTaskMutation.mutate({ taskId, task });
+  };
+
   const handleAddTask = async (newTask: NewTask) => {
     addTaskMutation.mutate(newTask);
   };
@@ -76,6 +90,7 @@ export default function TaskView() {
       <TaskList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
+        onUpdateTask={handleUpdateTask}
       />
       <CreateTaskButton taskDefaults={{}} onAddTask={handleAddTask} />
     </>
