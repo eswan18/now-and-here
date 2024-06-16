@@ -6,6 +6,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Task, NewTask, Priority } from "@/types/task";
+import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import PriorityBadge from "./priority_badge";
 import {
@@ -17,6 +18,7 @@ import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { repeatAsString } from "@/lib/repeat";
 import { relativeTimeString } from "@/lib/time";
 import PriorityPickerPopover from "@/components/pickers/PriorityPicker";
+import ProjectPickerPopover from "@/components/pickers/ProjectPicker";
 import { Button } from "../ui/button";
 import { deepEqual } from "@/lib/utils";
 
@@ -27,12 +29,18 @@ export interface TaskDialogProps {
 
 export default function EditTaskDialog({ task }: TaskDialogProps) {
   const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
+  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
 
   const handlePriorityPickerPopoverChange = (priority: Priority) => {
     setTaskValues({ ...taskValues, priority });
     setPriorityPopoverOpen(false);
+  };
+
+  const handleProjectPickerPopoverChange = (project: Project) => {
+    setTaskValues({ ...taskValues, project });
+    setProjectPopoverOpen(false);
   };
 
   return (
@@ -51,17 +59,28 @@ export default function EditTaskDialog({ task }: TaskDialogProps) {
           <div className="text-gray-400 text-sm">{taskValues.description}</div>
         )}
         <div className="flex flex-row flex-wrap items-center justify-start gap-2 mt-4 text-xs text-gray-400 font-semibold">
-          {taskValues.project ? (
-            <div className="flex flex-row justify-end items-center mr-4 text-gray-800">
-              <FolderOpen size={16} className="inline mr-2" />
-              {taskValues.project.name}
-            </div>
-          ) : (
-            <div className="flex flex-row justify-end items-center mr-4 text-gray-400">
-              <FolderOpen size={16} className="inline mr-2" />
-              No project
-            </div>
-          )}
+          <Popover
+            open={projectPopoverOpen}
+            onOpenChange={setProjectPopoverOpen}
+          >
+            <PopoverTrigger>
+              {taskValues.project ? (
+                <div className="flex flex-row justify-end items-center mr-4 text-gray-800">
+                  <FolderOpen size={16} className="inline mr-2" />
+                  {taskValues.project.name}
+                </div>
+              ) : (
+                <div className="flex flex-row justify-end items-center mr-4 text-gray-400">
+                  <FolderOpen size={16} className="inline mr-2" />
+                  No project
+                </div>
+              )}
+            </PopoverTrigger>
+            <ProjectPickerPopover
+              onChange={handleProjectPickerPopoverChange}
+              defaultProjectId={taskValues.project?.id}
+            />
+          </Popover>
           <div className="flex flex-row justify-start items-center text-gray-400">
             {taskValues.due ? (
               <HoverCard>
