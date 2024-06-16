@@ -65,7 +65,7 @@ def get_project_by_id(id: str) -> FEProject:
 
 
 @api_router.post("/tasks")
-def post_task(task: FENewTaskIn) -> FETaskOut:
+def create_task(task: FENewTaskIn) -> FETaskOut:
     store = datastore.get_store()
     backend_task = task.to_task(store=store)
     store.save_task(backend_task)
@@ -116,3 +116,15 @@ def search_tasks(query: str = Body(..., embed=True)) -> list[FETaskOut]:
     store = datastore.get_store()
     tasks = store.search_tasks(query)
     return [FETaskOut.from_task(t) for t in tasks]
+
+
+@api_router.put("/tasks/{id}")
+def update_task(id: str, task: FENewTaskIn) -> FETaskOut:
+    store = datastore.get_store()
+    as_backend_task = task.to_task(store=store)
+    as_backend_task.id = id
+    try:
+        store.update_task(id, as_backend_task)
+    except RecordNotFoundError:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return FETaskOut.from_task(as_backend_task)

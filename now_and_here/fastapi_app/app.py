@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
 
 from .api import api_router
 
@@ -27,7 +27,6 @@ app.include_router(api_router)
 # Important: this *must* be placed after the `include_router` call for the catchall
 # route (below) to work.
 ui_templates = Jinja2Templates(directory=UI_DIR)
-
 
 
 @app.get("/{_rest_of_path:path}")
