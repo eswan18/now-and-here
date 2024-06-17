@@ -10,7 +10,6 @@ import {
   CommandList,
   CommandInput,
 } from "@/components/ui/command";
-import { PopoverContent } from "@/components/ui/popover";
 
 import { cn } from "@/lib/utils";
 import { Project } from "@/types/project";
@@ -21,7 +20,7 @@ export interface ProjectPickerPopoverProps {
   onChange: (project: Project) => void;
 }
 
-export default function ProjectPickerPopover({
+export default function ProjectPicker({
   defaultProjectId,
   onChange,
 }: ProjectPickerPopoverProps) {
@@ -34,38 +33,36 @@ export default function ProjectPickerPopover({
   });
 
   return (
-    <PopoverContent className="w-48 p-0">
-      <Command>
-        <CommandInput placeholder="Search projects..." />
-        <CommandList>
-          <CommandEmpty>No projects found.</CommandEmpty>
-          <CommandGroup>
-            {projectsQuery.isSuccess &&
-              projectsQuery.data.map((p) => (
-                <CommandItem
-                  key={p.id}
-                  value={p.id}
-                  onSelect={(currentValue) => {
-                    setProjectId(currentValue);
-                    const projects = projectsQuery.data as Project[];
-                    const selectedProject = projects.find(
-                      (project) => project.id === currentValue,
-                    )!;
-                    onChange(selectedProject);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      p.id === projectId ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  {p.name}
-                </CommandItem>
-              ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </PopoverContent>
+    <Command className="font-normal">
+      <CommandInput placeholder="Search projects..." />
+      <CommandList>
+        <CommandEmpty>No projects found.</CommandEmpty>
+        <CommandGroup>
+          {projectsQuery.isSuccess &&
+            projectsQuery.data.map((p) => (
+              <CommandItem
+                key={p.id}
+                value={p.id}
+                onSelect={(currentValue) => {
+                  setProjectId(currentValue);
+                  const projects = projectsQuery.data as Project[];
+                  const selectedProject = projects.find(
+                    (project) => project.id === currentValue,
+                  )!;
+                  onChange(selectedProject);
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    p.id === projectId ? "opacity-100" : "opacity-0",
+                  )}
+                />
+                <span>{p.name}</span>
+              </CommandItem>
+            ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
   );
 }

@@ -17,8 +17,8 @@ import {
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { repeatAsString } from "@/lib/repeat";
 import { relativeTimeString } from "@/lib/time";
-import PriorityPickerPopover from "@/components/pickers/PriorityPicker";
-import ProjectPickerPopover from "@/components/pickers/ProjectPicker";
+import PriorityPicker from "@/components/pickers/PriorityPicker";
+import ProjectPicker from "@/components/pickers/ProjectPicker";
 import { Button } from "../ui/button";
 import { deepEqual } from "@/lib/utils";
 import {
@@ -26,6 +26,7 @@ import {
   DuePickerPopoverContent,
   DuePickerPopoverTrigger,
 } from "../pickers/DuePickerPopover";
+import { PopoverContent } from "@radix-ui/react-popover";
 
 export interface TaskDialogProps {
   task: Task;
@@ -94,10 +95,12 @@ export default function EditTaskDialog({
                 </div>
               )}
             </PopoverTrigger>
-            <ProjectPickerPopover
-              onChange={handleProjectPickerPopoverChange}
-              defaultProjectId={taskValues.project?.id}
-            />
+            <PopoverContent className="w-48 p-0">
+              <ProjectPicker
+                onChange={handleProjectPickerPopoverChange}
+                defaultProjectId={taskValues.project?.id}
+              />
+            </PopoverContent>
           </Popover>
           <div className="flex flex-row justify-start items-center text-gray-400">
             <DuePickerPopover
@@ -165,10 +168,12 @@ export default function EditTaskDialog({
             <PopoverTrigger>
               <PriorityBadge priority={taskValues.priority} />
             </PopoverTrigger>
-            <PriorityPickerPopover
-              defaultPriority={taskValues.priority}
-              onChange={handlePriorityPickerPopoverChange}
-            />
+            <PopoverContent className="w-28 p-0">
+              <PriorityPicker
+                defaultPriority={taskValues.priority}
+                onChange={handlePriorityPickerPopoverChange}
+              />
+            </PopoverContent>
           </Popover>
         </div>
         <DialogFooter className="mt-6 h-8 justify-end w-full">
