@@ -2,62 +2,27 @@ import { Matcher } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-export interface DuePickerPopoverProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  children: React.ReactNode;
-}
-
-export function DuePickerPopover({
-  open,
-  onOpenChange,
-  children,
-}: DuePickerPopoverProps) {
-  return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      {children}
-    </Popover>
-  );
-}
-
-export interface DuePickerPopoverTriggerProps {
-  asChild?: boolean;
-  children: React.ReactNode;
-}
-
-export function DuePickerPopoverTrigger({
-  asChild,
-  children,
-}: DuePickerPopoverTriggerProps) {
-  return <PopoverTrigger asChild={asChild}>{children}</PopoverTrigger>;
-}
-
-export interface DuePickerPopoverContentProps {
+export interface DuePickerProps {
   className?: string;
   selected?: Date;
   onSelect: (date: Date | undefined) => void;
   disabled?: Matcher | Matcher[];
 }
 
-export function DuePickerPopoverContent({
+export default function DuePicker({
   selected,
   onSelect,
   className,
   disabled,
-}: DuePickerPopoverContentProps) {
+}: DuePickerProps) {
   const handleDaySelect = (day: Date | undefined) => {
     onSelect(day);
   };
   const classes = cn("flex flex-col justify-start items-center", className);
   return (
-    <PopoverContent className={classes}>
+    <div className={classes}>
       <Calendar
         className="p-0"
         mode="single"
@@ -92,6 +57,6 @@ export function DuePickerPopoverContent({
           onSelect(currentTime);
         }}
       />
-    </PopoverContent>
+    </div>
   );
 }

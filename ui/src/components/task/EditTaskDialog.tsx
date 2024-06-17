@@ -14,19 +14,18 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { repeatAsString } from "@/lib/repeat";
 import { relativeTimeString } from "@/lib/time";
 import PriorityPicker from "@/components/pickers/PriorityPicker";
 import ProjectPicker from "@/components/pickers/ProjectPicker";
 import { Button } from "../ui/button";
 import { deepEqual } from "@/lib/utils";
-import {
-  DuePickerPopover,
-  DuePickerPopoverContent,
-  DuePickerPopoverTrigger,
-} from "../pickers/DuePickerPopover";
-import { PopoverContent } from "@radix-ui/react-popover";
+import DuePicker from "@/components/pickers/DuePicker";
 
 export interface TaskDialogProps {
   task: Task;
@@ -103,11 +102,8 @@ export default function EditTaskDialog({
             </PopoverContent>
           </Popover>
           <div className="flex flex-row justify-start items-center text-gray-400">
-            <DuePickerPopover
-              open={duePopoverOpen}
-              onOpenChange={setDuePopoverOpen}
-            >
-              <DuePickerPopoverTrigger>
+            <Popover open={duePopoverOpen} onOpenChange={setDuePopoverOpen}>
+              <PopoverTrigger>
                 {taskValues.due ? (
                   <HoverCard>
                     <HoverCardTrigger>
@@ -137,12 +133,14 @@ export default function EditTaskDialog({
                     <p className="text-xs">No due date</p>
                   </Badge>
                 )}
-              </DuePickerPopoverTrigger>
-              <DuePickerPopoverContent
-                selected={taskValues.due || undefined}
-                onSelect={handleDuePickerChange}
-              />
-            </DuePickerPopover>
+              </PopoverTrigger>
+              <PopoverContent>
+                <DuePicker
+                  selected={taskValues.due || undefined}
+                  onSelect={handleDuePickerChange}
+                />
+              </PopoverContent>
+            </Popover>
             {taskValues.repeat ? (
               <Badge
                 variant="outline"

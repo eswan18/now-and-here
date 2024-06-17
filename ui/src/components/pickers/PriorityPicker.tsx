@@ -34,10 +34,7 @@ export default function PriorityPicker({
               key={p}
               value={String(p)}
               onSelect={(currentValue) => {
-                const valueAsPriority = parseInt(
-                  currentValue,
-                  10,
-                ) as Priority;
+                const valueAsPriority = parseInt(currentValue, 10) as Priority;
                 setPriority(valueAsPriority);
                 onChange(valueAsPriority);
               }}
