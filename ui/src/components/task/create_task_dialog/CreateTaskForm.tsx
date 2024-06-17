@@ -193,10 +193,7 @@ export default function CreateTaskForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="pr-4">Date</FormLabel>
-              <Popover
-                open={calendarOpen}
-                onOpenChange={(open) => setCalendarOpen(open)}
-              >
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button

@@ -9,9 +9,13 @@ export function cn(...inputs: ClassValue[]) {
 type PlainObject = Record<string, any>;
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export function deepEqual<T extends PlainObject>(obj1: T, obj2: T): boolean {
+export function deepEqual<T extends PlainObject | Date>(
+  obj1: T,
+  obj2: T,
+): boolean {
   if (obj1 === obj2) return true;
 
+  // Special cases: nulls, dates
   if (
     typeof obj1 !== "object" ||
     obj1 === null ||
@@ -19,6 +23,12 @@ export function deepEqual<T extends PlainObject>(obj1: T, obj2: T): boolean {
     obj2 === null
   ) {
     return false;
+  }
+  if (obj1 instanceof Date || obj2 instanceof Date) {
+    if (!(obj1 instanceof Date && obj2 instanceof Date)) {
+      return false;
+    }
+    return obj1.getTime() === obj2.getTime();
   }
 
   const keys1 = Object.keys(obj1);

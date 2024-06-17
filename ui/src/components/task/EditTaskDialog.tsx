@@ -21,6 +21,11 @@ import PriorityPickerPopover from "@/components/pickers/PriorityPicker";
 import ProjectPickerPopover from "@/components/pickers/ProjectPicker";
 import { Button } from "../ui/button";
 import { deepEqual } from "@/lib/utils";
+import {
+  DuePickerPopover,
+  DuePickerPopoverContent,
+  DuePickerPopoverTrigger,
+} from "../pickers/DuePickerPopover";
 
 export interface TaskDialogProps {
   task: Task;
@@ -33,6 +38,7 @@ export default function EditTaskDialog({
 }: TaskDialogProps) {
   const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
   const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
+  const [duePopoverOpen, setDuePopoverOpen] = useState(false);
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
 
@@ -44,6 +50,10 @@ export default function EditTaskDialog({
   const handleProjectPickerPopoverChange = (project: Project) => {
     setTaskValues({ ...taskValues, project });
     setProjectPopoverOpen(false);
+  };
+
+  const handleDuePickerChange = (due: Date | undefined) => {
+    setTaskValues({ ...taskValues, due: due || null });
   };
 
   const saveTaskUpdates = () => {
@@ -90,35 +100,46 @@ export default function EditTaskDialog({
             />
           </Popover>
           <div className="flex flex-row justify-start items-center text-gray-400">
-            {taskValues.due ? (
-              <HoverCard>
-                <HoverCardTrigger>
+            <DuePickerPopover
+              open={duePopoverOpen}
+              onOpenChange={setDuePopoverOpen}
+            >
+              <DuePickerPopoverTrigger>
+                {taskValues.due ? (
+                  <HoverCard>
+                    <HoverCardTrigger>
+                      <Badge
+                        variant="outline"
+                        className="flex flex-row items-center text-orange-800"
+                      >
+                        <Clock size={16} className="inline-block mr-1" />
+                        <p>{relativeTimeString(taskValues.due)}</p>
+                      </Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-48">
+                      <div className="flex flex-col items-center">
+                        <p className="text-xs text-gray-400">Due:</p>
+                        <p className="text-sm text-gray-800">
+                          {new Date(taskValues.due).toLocaleString()}
+                        </p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                ) : (
                   <Badge
                     variant="outline"
-                    className="flex flex-row items-center text-orange-800"
+                    className="flex flex-row items-center text-gray-400"
                   >
                     <Clock size={16} className="inline-block mr-1" />
-                    <p>{relativeTimeString(taskValues.due)}</p>
+                    <p className="text-xs">No due date</p>
                   </Badge>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-48">
-                  <div className="flex flex-col items-center">
-                    <p className="text-xs text-gray-400">Due:</p>
-                    <p className="text-sm text-gray-800">
-                      {new Date(taskValues.due).toLocaleString()}
-                    </p>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            ) : (
-              <Badge
-                variant="outline"
-                className="flex flex-row items-center text-gray-400"
-              >
-                <Clock size={16} className="inline-block mr-1" />
-                <p className="text-xs">No due date</p>
-              </Badge>
-            )}
+                )}
+              </DuePickerPopoverTrigger>
+              <DuePickerPopoverContent
+                selected={taskValues.due || undefined}
+                onSelect={handleDuePickerChange}
+              />
+            </DuePickerPopover>
             {taskValues.repeat ? (
               <Badge
                 variant="outline"

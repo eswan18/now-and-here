@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { CirclePlus } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import CreateTaskDialog from "./create_task_dialog/create_task_dialog";
-import { TaskDefaults } from "@/components/task/create_task_dialog/create_task_form";
+import CreateTaskDialog from "./create_task_dialog/CreateTaskDialog";
+import { TaskDefaults } from "@/components/task/create_task_dialog/CreateTaskForm";
 import { NewTask } from "@/types/task";
 import { Button } from "../ui/button";
 

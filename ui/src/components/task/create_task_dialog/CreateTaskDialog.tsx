@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import CreateTaskForm, { TaskDefaults } from "./create_task_form";
+import CreateTaskForm, { TaskDefaults } from "./CreateTaskForm";
 import { NewTask } from "@/types/task";
 
 interface CreateTaskModalProps {
