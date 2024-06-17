@@ -16,6 +16,7 @@ import {
   getTasks,
   createTask,
   uncompleteTask,
+  updateTask,
 } from "@/apiServices/task";
 import { getProject } from "@/apiServices/project";
 import PageHeading from "@/components/common/pageHeading";
@@ -72,7 +73,7 @@ export default function Project() {
   const { setPageTitle } = useTitle();
   const queryClient = useQueryClient();
   const tasksQuery = useQuery({
-    queryKey: ["tasks", projectId, filter],
+    queryKey: ["tasks", { projectId }, { filter }],
     queryFn: () =>
       getTasks({
         projectId: projectId as string,
@@ -83,14 +84,14 @@ export default function Project() {
       }),
   });
   const projectQuery = useQuery({
-    queryKey: ["projects", projectId],
+    queryKey: ["projects", { id: projectId }],
     queryFn: () => getProject(projectId),
   });
   const addTaskMutation = useMutation({
     mutationFn: createTask,
     onSettled: async () => {
       return await queryClient.invalidateQueries({
-        queryKey: ["tasks", projectId, filter],
+        queryKey: ["tasks", { projectId }, { filter }],
       });
     },
   });
@@ -119,12 +120,26 @@ export default function Project() {
     },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
-        queryKey: ["tasks", projectId, filter],
+        queryKey: ["tasks", { projectId }, { filter }],
       });
     },
   });
   const handleCompletion = async (taskId: string, completed: boolean) => {
     completeTaskMutation.mutate({ taskId, completed });
+  };
+
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, task }: { taskId: string; task: NewTask }) => {
+      updateTask(taskId, task);
+    },
+    onSettled: async () => {
+      return await queryClient.invalidateQueries({
+        queryKey: ["tasks", { projectId }, { filter }],
+      });
+    },
+  });
+  const handleUpdateTask = async (taskId: string, task: NewTask) => {
+    updateTaskMutation.mutate({ taskId, task });
   };
 
   // Handle changes to any filter
@@ -148,6 +163,7 @@ export default function Project() {
       <TaskList
         tasks={tasksQuery.data || []}
         onCompletionToggle={handleCompletion}
+        onUpdateTask={handleUpdateTask}
       />
       <CreateTaskButton
         taskDefaults={{ projectId }}

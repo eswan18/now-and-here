@@ -29,7 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { getProjects } from "@/apiServices/project";
-import { NewTask } from "@/types/task";
+import { NewTask, Priority } from "@/types/task";
 import PriorityBadge from "../priority_badge";
 import { CalendarClock } from "lucide-react";
 import { yesterday } from "@/lib/time";
@@ -84,7 +84,7 @@ export default function CreateTaskForm({
       name: data.name,
       description: data.description || null,
       project_id: data.projectId || null,
-      priority: data.priority,
+      priority: data.priority as Priority,
       due: data.due || null,
       done: false,
       parent_id: null,
@@ -193,10 +193,7 @@ export default function CreateTaskForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="pr-4">Date</FormLabel>
-              <Popover
-                open={calendarOpen}
-                onOpenChange={(open) => setCalendarOpen(open)}
-              >
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button

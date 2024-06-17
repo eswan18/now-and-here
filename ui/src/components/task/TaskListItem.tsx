@@ -1,4 +1,5 @@
-import { Clock, FolderOpen } from "lucide-react";
+import { useState } from "react";
+import { Clock, FolderOpen, Repeat } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   HoverCard,
@@ -8,22 +9,31 @@ import {
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
-import { Task } from "@/types/task";
+import { Task, NewTask } from "@/types/task";
 import PriorityBadge from "./priority_badge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import TaskDialog from "./task_dialog";
+import EditTaskDialog from "./EditTaskDialog";
+import { repeatAsString } from "@/lib/repeat";
 
 interface TaskCardProps {
   task: Task;
   onToggleCompletion: (taskId: string, completed: boolean) => void;
+  onUpdateTask: (updatedTask: NewTask) => Promise<void>;
 }
 
 export default function TaskListItem({
   task,
   onToggleCompletion,
+  onUpdateTask,
 }: TaskCardProps) {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  const handleUpdateTask = async (updatedTask: NewTask) => {
+    onUpdateTask(updatedTask).then(() => setEditDialogOpen(false));
+  };
+
   return (
-    <Dialog>
+    <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
       <div className="grid grid-cols-[2rem_1fr] gap-3 mb-4">
         <div className="flex flex-row items-center justify-center">
           <Checkbox
@@ -61,6 +71,15 @@ export default function TaskListItem({
               ) : (
                 <p className="text-gray-400 text-sm mr-2">No due date</p>
               )}
+              {task.repeat && (
+                <Badge
+                  variant="outline"
+                  className="flex flex-row items-center text-orange-800"
+                >
+                  <Repeat size={16} className="inline-block mr-1" />
+                  <p>{repeatAsString(task.repeat)}</p>
+                </Badge>
+              )}
               <PriorityBadge priority={task.priority} />
             </div>
           </DialogTrigger>
@@ -79,7 +98,7 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <TaskDialog task={task} onToggleCompletion={onToggleCompletion} />
+        <EditTaskDialog task={task} onUpdateTask={handleUpdateTask} />
       </div>
     </Dialog>
   );

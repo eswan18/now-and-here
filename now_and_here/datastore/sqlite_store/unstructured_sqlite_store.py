@@ -174,7 +174,10 @@ class UnstructuredSQLiteStore:
     def update_task(self, id: str, task: Task) -> None:
         data = task.as_json()
         with self.conn as conn:
-            conn.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
+            cursor = conn.cursor()
+            cursor.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
+            if cursor.rowcount == 0:
+                raise RecordNotFoundError(f"No task with id {id}")
         self._update_embeddings([task])
 
     def checkoff_task(self, id: str) -> tuple[bool, datetime | None]:
