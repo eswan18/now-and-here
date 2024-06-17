@@ -138,6 +138,7 @@ export default function EditTaskDialog({
                 <DuePicker
                   selected={taskValues.due || undefined}
                   onSelect={handleDuePickerChange}
+                  onCompleted={() => setDuePopoverOpen(false)}
                 />
               </PopoverContent>
             </Popover>
