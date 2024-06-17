@@ -21,11 +21,13 @@ import {
 } from "@/components/ui/popover";
 import { repeatAsString } from "@/lib/repeat";
 import { relativeTimeString } from "@/lib/time";
-import PriorityPicker from "@/components/pickers/PriorityPicker";
-import ProjectPicker from "@/components/pickers/ProjectPicker";
+import {
+  PriorityPicker,
+  ProjectPicker,
+  DuePicker,
+} from "@/components/common/pickers";
 import { Button } from "@/components/ui/button";
 import { deepEqual } from "@/lib/utils";
-import DuePicker from "@/components/pickers/DuePicker";
 import EditableField from "@/components/common/EditableField";
 
 export interface TaskDialogProps {

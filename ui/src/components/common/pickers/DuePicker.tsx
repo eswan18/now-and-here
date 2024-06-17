@@ -3,7 +3,7 @@ import { Matcher } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { ChangeEvent } from "react";
 
 export interface DuePickerProps {
