@@ -23,9 +23,10 @@ import { repeatAsString } from "@/lib/repeat";
 import { relativeTimeString } from "@/lib/time";
 import PriorityPicker from "@/components/pickers/PriorityPicker";
 import ProjectPicker from "@/components/pickers/ProjectPicker";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { deepEqual } from "@/lib/utils";
 import DuePicker from "@/components/pickers/DuePicker";
+import EditableField from "@/components/common/EditableField";
 
 export interface TaskDialogProps {
   task: Task;
@@ -72,11 +73,22 @@ export default function EditTaskDialog({
         </div>
       </DialogHeader>
       <div className="flex flex-col justify-between items-start w-full gap-1">
-        <h3 className="text-lg w-full border-b">{taskValues.name}</h3>
-        {taskValues.description && (
-          <div className="text-gray-400 text-sm">{taskValues.description}</div>
-        )}
-        <div className="flex flex-row flex-wrap items-center justify-start gap-2 mt-4 text-xs text-gray-400 font-semibold">
+        <EditableField
+          value={taskValues.name}
+          setValue={(name: string) => setTaskValues({ ...taskValues, name })}
+          size="lg"
+          className="border-b"
+        />
+        <EditableField
+          value={taskValues.description || undefined}
+          setValue={(desc: string | undefined) =>
+            setTaskValues({ ...taskValues, description: desc || null })
+          }
+          defaultText="No description"
+          size="sm"
+          className="text-gray-400"
+        />
+        <div className="flex flex-row flex-wrap items-center justify-start gap-2 mt-4 text-xs text-gray-400 font-semibold px-2">
           <Popover
             open={projectPopoverOpen}
             onOpenChange={setProjectPopoverOpen}
@@ -101,7 +113,7 @@ export default function EditTaskDialog({
               />
             </PopoverContent>
           </Popover>
-          <div className="flex flex-row justify-start items-center text-gray-400">
+          <div className="flex flex-row justify-start items-center text-gray-400 gap-2">
             <Popover open={duePopoverOpen} onOpenChange={setDuePopoverOpen}>
               <PopoverTrigger>
                 {taskValues.due ? (
@@ -109,9 +121,9 @@ export default function EditTaskDialog({
                     <HoverCardTrigger>
                       <Badge
                         variant="outline"
-                        className="flex flex-row items-center text-orange-800"
+                        className="flex flex-row items-center text-orange-800 gap-1.5"
                       >
-                        <Clock size={16} className="inline-block mr-1" />
+                        <Clock size={16} className="inline-block" />
                         <p>{relativeTimeString(taskValues.due)}</p>
                       </Badge>
                     </HoverCardTrigger>
@@ -127,9 +139,9 @@ export default function EditTaskDialog({
                 ) : (
                   <Badge
                     variant="outline"
-                    className="flex flex-row items-center text-gray-400"
+                    className="flex flex-row items-center text-gray-400 gap-1.5"
                   >
-                    <Clock size={16} className="inline-block mr-1" />
+                    <Clock size={16} className="inline-block" />
                     <p className="text-xs">No due date</p>
                   </Badge>
                 )}
@@ -145,17 +157,17 @@ export default function EditTaskDialog({
             {taskValues.repeat ? (
               <Badge
                 variant="outline"
-                className="flex flex-row items-center text-orange-800"
+                className="flex flex-row items-center text-orange-800 gap-1.5"
               >
-                <Repeat size={16} className="inline-block mr-1" />
+                <Repeat size={16} className="inline-block" />
                 <p>{repeatAsString(taskValues.repeat)}</p>
               </Badge>
             ) : (
               <Badge
                 variant="outline"
-                className="flex flex-row items-center text-gray-400"
+                className="flex flex-row items-center text-gray-400 gap-1.5"
               >
-                <Repeat size={16} className="inline-block mr-1" />
+                <Repeat size={16} className="inline-block" />
                 <p className="text-xs">No repeat</p>
               </Badge>
             )}

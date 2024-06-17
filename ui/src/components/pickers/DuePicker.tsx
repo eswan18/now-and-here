@@ -4,6 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import { ChangeEvent } from "react";
 
 export interface DuePickerProps {
   className?: string;
@@ -13,6 +14,12 @@ export interface DuePickerProps {
   onCompleted: () => void;
 }
 
+// The time that's set when a new date is selected.
+const defaultTime = {
+  hours: 12,
+  minutes: 0,
+};
+
 export default function DuePicker({
   selected,
   onSelect,
@@ -21,11 +28,31 @@ export default function DuePicker({
   onCompleted,
 }: DuePickerProps) {
   const handleDaySelect = (day: Date | undefined) => {
+    let hour = 12;
+    let minute = 0;
+    if (day && selected) {
+      // If there was already a selected date/time, use the time from the selected date.
+      hour = selected?.getHours() || defaultTime.hours;
+      minute = selected?.getMinutes() || defaultTime.minutes;
+    }
+    day?.setHours(hour, minute, 0, 0);
     onSelect(day);
   };
   const handleClearDueDate = () => {
     onSelect(undefined);
     onCompleted();
+  };
+  const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!selected) {
+      return;
+    }
+    const currentTime = selected;
+    currentTime?.setHours(
+      parseInt(e.target.value.split(":")[0]),
+      parseInt(e.target.value.split(":")[1]),
+      0,
+    );
+    onSelect(currentTime);
   };
 
   const classes = cn(
@@ -56,20 +83,11 @@ export default function DuePicker({
             }) || ""
           }
           // take hours and minutes and update our Date object then change date object to our new value
-          onChange={(selectedTime) => {
-            if (!selected) {
-              return;
-            }
-            const currentTime = selected;
-            currentTime?.setHours(
-              parseInt(selectedTime.target.value.split(":")[0]),
-              parseInt(selectedTime.target.value.split(":")[1]),
-              0,
-            );
-            onSelect(currentTime);
-          }}
+          onChange={handleTimeChange}
         />
-        <Button onClick={onCompleted}>Done</Button>
+        <Button disabled={!selected} onClick={onCompleted}>
+          Done
+        </Button>
       </div>
       <Button variant="ghost" onClick={handleClearDueDate}>
         Clear due date
