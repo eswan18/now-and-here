@@ -33,9 +33,6 @@ class MonthlyInterval(BaseModel):
     months: int = 1
     day: int = DEFAULT_DAY
     at: time = DEFAULT_TIME
-    # Unfortunately we have to override match_args so that this class conforms to the
-    # RepeatInterval protocol.
-    __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
         # Get the number of days in the current month

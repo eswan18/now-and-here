@@ -12,9 +12,6 @@ class DailyInterval(BaseModel):
     kind: Literal["daily"] = "daily"
     days: int = 1
     at: time = DEFAULT_TIME
-    # Unfortunately we have to override match_args so that this class conforms to the
-    # RepeatInterval protocol.
-    __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
         if current.time() > self.at:

@@ -31,7 +31,6 @@ class Task(BaseModel):
     labels: list[Label] = Field(default_factory=list)
     priority: int = Field(default=0, ge=0, le=3)
     due: AwareDatetime | None = Field(None)
-    # We can't validate this field because it's a protocol
     repeat: RepeatIntervalType | None = Field(None)
 
     @classmethod
