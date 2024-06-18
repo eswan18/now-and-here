@@ -1,6 +1,7 @@
 import json
 
 from .daily_interval import DailyInterval
+from .monthly_interval import MonthlyInterval
 from .repeat_interval import RepeatIntervalType
 from .weekly_interval import Weekday, WeeklyInterval
 
@@ -11,6 +12,8 @@ def try_parse(text: str) -> RepeatIntervalType | None:
     if interval := DailyInterval.try_parse(text):
         return interval
     if interval := WeeklyInterval.try_parse(text):
+        return interval
+    if interval := MonthlyInterval.try_parse(text):
         return interval
     return None
 

@@ -59,7 +59,9 @@ export async function getTasks({
       }
       throw new Error(errorMsg);
     }
+    console.log("here");
     const tasks = (await res.json()) as TaskFromBackend[];
+    console.log("there");
     return tasks.map(prepareTaskFromBackend);
   });
 }
@@ -130,7 +132,6 @@ export function prepareTaskFromBackend(task: TaskFromBackend): Task {
   return {
     ...task,
     due: task.due ? new Date(task.due) : null,
-    repeat: task.repeat ? JSON.parse(task.repeat) : null,
   };
 }
 
