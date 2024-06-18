@@ -228,7 +228,7 @@ Error generating stack: `+a.message+`
 
 "${i}"`),new Error(o)}const r=await n.json();return qa(r)})}async function UN({projectId:e,sortBy:t,desc:n,includeDone:r,includeChildProjects:o}){const a=new URL("/api/tasks",or());return a.searchParams.set("project_id",e),a.searchParams.set("sort_by",t),a.searchParams.set("desc",n?"true":"false"),a.searchParams.set("include_done",r?"true":"false"),a.searchParams.set("include_child_projects",o?"true":"false"),await fetch(a,{method:"GET",headers:{"Content-Type":"application/json"}}).then(async i=>{if(!i.ok){let l=i.statusText;const c=await i.json(),u=ar(c);throw u&&(l+=`
 
-"${u}"`),new Error(l)}console.log("here");const s=await i.json();return console.log("there"),s.map(qa)})}async function Ov(e){const t=new URL(`/api/checkoff_task/${e}`,or());return await fetch(t,{method:"POST"}).then(async n=>{if(!n.ok){let o=n.statusText;const a=n.json(),i=ar(a);throw i&&(o+=`
+"${u}"`),new Error(l)}return(await i.json()).map(qa)})}async function Ov(e){const t=new URL(`/api/checkoff_task/${e}`,or());return await fetch(t,{method:"POST"}).then(async n=>{if(!n.ok){let o=n.statusText;const a=n.json(),i=ar(a);throw i&&(o+=`
 
 "${i}"`),new Error(o)}const r=await n.json();return qa(r)})}async function jv(e){const t=new URL(`/api/uncheckoff_task/${e}`,or());return await fetch(t,{method:"POST"}).then(async n=>{if(!n.ok){let o=n.statusText;const a=n.json(),i=ar(a);throw i&&(o+=`
 

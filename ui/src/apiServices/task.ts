@@ -59,9 +59,7 @@ export async function getTasks({
       }
       throw new Error(errorMsg);
     }
-    console.log("here");
     const tasks = (await res.json()) as TaskFromBackend[];
-    console.log("there");
     return tasks.map(prepareTaskFromBackend);
   });
 }
