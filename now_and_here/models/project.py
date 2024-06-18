@@ -3,8 +3,7 @@ from __future__ import annotations
 import json
 from typing import Iterable, Self
 
-from pydantic import RootModel, field_serializer
-from pydantic.dataclasses import Field, dataclass
+from pydantic import BaseModel, Field, field_serializer
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.rule import Rule
 from rich.table import Table
@@ -12,11 +11,8 @@ from rich.text import Text
 
 from .common import ID_LENGTH, format_id, random_id
 
-# mypy: disable-error-code="misc"
 
-
-@dataclass
-class Project:
+class Project(BaseModel):
     """
     A project is a collection of tasks.
     """
@@ -57,9 +53,6 @@ class Project:
             parent_text,
         )
 
-    def as_json(self) -> str:
-        return RootModel[Project](self).model_dump_json()
-
     @classmethod
     def from_json(cls, data: str) -> Self:
         values = json.loads(data)
@@ -96,7 +89,7 @@ class Project:
         """Make a copy of this project with a new ID."""
         # Writing to/from json is kinda janky, but we know it works robustly since
         # that's how all projects are stored on disk.
-        as_json = self.as_json()
+        as_json = self.model_dump_json()
         new_project = self.__class__.from_json(as_json)
         new_project.id = random_id()
         return new_project

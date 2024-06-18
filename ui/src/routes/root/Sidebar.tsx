@@ -35,7 +35,7 @@ export default function Sidebar() {
   const taskViewsLinks = taskViewsQuery.isSuccess
     ? taskViewsQuery.data.map((view) => ({
         title: view.name,
-        href: `/task_views/${view.name.toLowerCase()}`,
+        href: `/task_views/${view.name.toLowerCase().replace(" ", "-")}`,
       }))
     : [];
 

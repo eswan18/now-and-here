@@ -16,10 +16,10 @@ export type Task = {
   repeat: RepeatInterval | null;
 };
 
-// A TaskFromBackend is a task from the backend, where `due` and `repeat` haven't been converted yet.
-export type TaskFromBackend = Omit<Task, "due" | "repeat"> & {
+// A TaskFromBackend is a task from the backend, where `due` hasn't been converted yet.
+export type TaskFromBackend = Omit<Task, "due"> & {
   due: string | null;
-} & { repeat: string | null };
+};
 
 // A task as it is stored in the database, with parent and project stored as IDs instead
 // of nested fields (and no attached ID).

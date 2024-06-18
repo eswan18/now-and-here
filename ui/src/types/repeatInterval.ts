@@ -1,20 +1,22 @@
 export type RepeatInterval = DailyInterval | WeeklyInterval | MonthlyInterval;
 
+export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
 export type DailyInterval = {
-  kind: "DailyInterval";
+  kind: "daily";
   days: number;
   at: string;
 };
 
 export type WeeklyInterval = {
-  kind: "WeeklyInterval";
+  kind: "weekly";
   weeks: number;
-  weekdays: string[];
+  weekdays: Weekday[];
   at: string;
 };
 
 export type MonthlyInterval = {
-  kind: "MonthlyInterval";
+  kind: "monthly";
   months: number;
   day: number;
   at: string;

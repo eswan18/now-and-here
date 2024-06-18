@@ -2,9 +2,9 @@ import calendar
 import json
 import re
 from datetime import datetime, time
-from typing import Self
+from typing import Literal, Self
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
 
 DEFAULT_DAY = 1
 DEFAULT_TIME = time(9, 0)
@@ -28,14 +28,11 @@ def _make_ordinal(n):
     return str(n) + suffix
 
 
-@dataclass
-class MonthlyInterval:
+class MonthlyInterval(BaseModel):
+    kind: Literal["monthly"] = "monthly"
     months: int = 1
     day: int = DEFAULT_DAY
     at: time = DEFAULT_TIME
-    # Unfortunately we have to override match_args so that this class conforms to the
-    # RepeatInterval protocol.
-    __match_args__ = ()
 
     def next(self, current: datetime) -> datetime:
         # Get the number of days in the current month

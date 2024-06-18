@@ -1,21 +1,24 @@
 import json
 
 from .daily_interval import DailyInterval
-from .repeat_interval import RepeatInterval
+from .monthly_interval import MonthlyInterval
+from .repeat_interval import RepeatIntervalType
 from .weekly_interval import Weekday, WeeklyInterval
 
 
-def try_parse(text: str) -> RepeatInterval | None:
+def try_parse(text: str) -> RepeatIntervalType | None:
     """Try to parse a string into a repeat interval."""
-    interval: RepeatInterval | None  # This helps mypy not get confused.
+    interval: RepeatIntervalType | None  # This helps mypy not get confused.
     if interval := DailyInterval.try_parse(text):
         return interval
     if interval := WeeklyInterval.try_parse(text):
         return interval
+    if interval := MonthlyInterval.try_parse(text):
+        return interval
     return None
 
 
-def parse_json(text: str) -> RepeatInterval:
+def parse_json(text: str) -> RepeatIntervalType:
     """Parse a repeat interval from JSON data."""
     data = json.loads(text)
     kind = data["kind"]

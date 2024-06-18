@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Iterable, Self
 
-from pydantic import AwareDatetime, Field, RootModel, field_serializer
-from pydantic.dataclasses import dataclass
-from pydantic.functional_validators import SkipValidation
+from pydantic import AwareDatetime, BaseModel, Field, RootModel, field_serializer
 from rich.console import Console, ConsoleOptions, RenderResult
 from rich.layout import Layout
 from rich.padding import Padding
@@ -16,18 +13,15 @@ from rich.text import Text
 
 if TYPE_CHECKING:
     from now_and_here.datastore import DataStore
-from now_and_here.models.repeat_interval import RepeatInterval, parse_json
+from now_and_here.models.repeat_interval import RepeatIntervalType
 from now_and_here.time import format_time, relative_time
 
 from .common import ID_LENGTH, format_id, format_priority, random_id
 from .label import Label
 from .project import Project
 
-# mypy: disable-error-code="misc"
 
-
-@dataclass
-class Task:
+class Task(BaseModel):
     id: str = Field(default_factory=random_id)
     name: str = Field(..., min_length=1, max_length=100)
     description: str | None = Field(None)
@@ -37,8 +31,7 @@ class Task:
     labels: list[Label] = Field(default_factory=list)
     priority: int = Field(default=0, ge=0, le=3)
     due: AwareDatetime | None = Field(None)
-    # We can't validate this field because it's a protocol
-    repeat: SkipValidation[RepeatInterval | None] = Field(None)
+    repeat: RepeatIntervalType | None = Field(None)
 
     @classmethod
     def as_rich_table(cls, tasks: Iterable[Self]) -> Table:
@@ -166,12 +159,6 @@ class Task:
     def sortable_columns(cls) -> tuple[str, ...]:
         return ("due", "priority")
 
-    @field_serializer("repeat")
-    def serialize_repeat(self, value: RepeatInterval | None) -> str | None:
-        if value is None:
-            return None
-        return value.as_json()
-
     @field_serializer("parent")
     def serialize_parent(self, value: Task | None) -> str | Task | None:
         # Save the parent just by its ID.
@@ -181,19 +168,6 @@ class Task:
     def serialize_project(self, value: Project | None) -> str | Project | None:
         # Save the project just by its ID.
         return value.id if value is not None else None
-
-    @classmethod
-    def from_json(cls, data: str) -> Self:
-        """Build a Task instance from a JSON string."""
-        values = json.loads(data)
-        # We need a custom deserialization approach for the repeat field because it's a
-        # protocol.
-        if repeat := values.get("repeat"):
-            parsed_repeat = parse_json(repeat)
-            if values["repeat"] is None:
-                raise ValueError(f"Could not parse repeat interval '{repeat}'")
-            values["repeat"] = parsed_repeat
-        return cls(**values)
 
     def clone(self) -> Self:
         """Make a copy of this task with a new ID."""
@@ -244,7 +218,6 @@ class FETaskOut(Task):
         )
 
 
-@dataclass
 class FENewTaskIn(Task):
     """A task received from the front end."""
 
