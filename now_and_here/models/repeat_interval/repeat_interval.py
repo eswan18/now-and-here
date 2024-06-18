@@ -1,41 +1,12 @@
-from datetime import datetime
-from typing import Protocol, Self, runtime_checkable
+from typing import Annotated
 
-from pydantic.dataclasses import dataclass
+from pydantic import Field, TypeAdapter
 
-# Some intervals I need to support:
-# "Regular"
-# - [x] Every day
-# - [x] Every week on certain weekdays (weekly on MTWTF but not Saturday or Sunday)
-# - [x] Every week (weekly on tuesdays)
-# - [ ] Every month (monthly on the 3rd of the month)
-# - [ ] The last day of every month (this is a special case of the above)
-# - [ ] Every year (yearly on March 23rd)
+from .daily_interval import DailyInterval
+from .monthly_interval import MonthlyInterval
+from .weekly_interval import WeeklyInterval
 
-# "Counting intervals"
-# - [ ] every 4 hours
-# - [x] every 3 days
-# - [x] every 2 weeks
-# - [ ] every 3 months
-# - [ ] every 2 years
-
-
-@runtime_checkable
-@dataclass
-class RepeatInterval(Protocol):
-    def next(self, current: datetime) -> datetime:
-        """Get the next occurrence of this interval after the given datetime."""
-        ...
-
-    def previous(self, current: datetime) -> datetime:
-        """Get the previous occurrence of this interval before the given datetime."""
-        ...
-
-    @classmethod
-    def try_parse(cls: type[Self], text: str) -> Self | None:
-        """Try to parse a string into this repeat interval."""
-        ...
-
-    def as_json(self) -> str:
-        """Serialize this repeat interval to JSON."""
-        ...
+RepeatIntervalType = Annotated[
+    DailyInterval | WeeklyInterval | MonthlyInterval, Field(discriminator="kind")
+]
+RepeatIntervalModel = TypeAdapter(RepeatIntervalType)

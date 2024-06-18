@@ -5,10 +5,10 @@ import json
 import re
 from datetime import datetime, time
 from enum import Enum
-from typing import Self
+from typing import Any, Literal, Self
 
 from dateutil.relativedelta import relativedelta
-from pydantic.dataclasses import Field, dataclass
+from pydantic import BaseModel, Field
 
 
 def as_ordinal(n: int) -> str:
@@ -41,14 +41,23 @@ DEFAULT_TIME = time(9, 0)
 DEFAULT_WEEKDAY = Weekday.MONDAY
 
 
-@dataclass(order=True)
-class Occurence:
+@functools.total_ordering
+class Occurence(BaseModel):
     weekday: Weekday
     time: time
 
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, Occurence):
+            return NotImplemented
+        if self.weekday < other.weekday:
+            return True
+        if self.weekday > other.weekday:
+            return False
+        return self.time < other.time
 
-@dataclass
-class WeeklyInterval:
+
+class WeeklyInterval(BaseModel):
+    kind: Literal["weekly"] = "weekly"
     weeks: int = 1
     weekdays: set[Weekday] = Field(default_factory=lambda: {DEFAULT_WEEKDAY})
     at: time = DEFAULT_TIME
@@ -62,8 +71,8 @@ class WeeklyInterval:
         repeat_weekdays = sorted(list(self.weekdays))
         # This is a bit tricky. WeeklyIntervals occur can occur multiple times in a week
         # and only "skip forward" after the final day.
-        final_occurence_of_week = Occurence(repeat_weekdays[-1], self.at)
-        current_as_occurence = Occurence(current_weekday, current.time())
+        final_occurence_of_week = Occurence(weekday=repeat_weekdays[-1], time=self.at)
+        current_as_occurence = Occurence(weekday=current_weekday, time=current.time())
         if current_as_occurence >= final_occurence_of_week:
             # Go to the beginning of the following day and increment forward until we're
             # at the beginning of the following week.
@@ -73,7 +82,9 @@ class WeeklyInterval:
                 current += relativedelta(days=1)
             # Then skip forward the right number of weeks.
             current += relativedelta(weeks=self.weeks - 1)
-            current_as_occurence = Occurence(Weekday(current.weekday()), current.time())
+            current_as_occurence = Occurence(
+                weekday=Weekday(current.weekday()), time=current.time()
+            )
         else:
             # If we don't need to skip to the next week, we still want to advance one
             # day to avoid selecting the original date.

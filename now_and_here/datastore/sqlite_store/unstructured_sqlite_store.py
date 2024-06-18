@@ -34,7 +34,7 @@ class UnstructuredSQLiteStore:
         create_db(path)
 
     def save_task(self, task: Task) -> str:
-        data = task.as_json()
+        data = task.model_dump_json()
         with self.conn as conn:
             conn.execute("INSERT INTO tasks (id, json) VALUES (?, ?)", (task.id, data))
         self._update_embeddings([task])
@@ -110,7 +110,7 @@ class UnstructuredSQLiteStore:
             row = cursor.fetchone()
         if not row:
             raise RecordNotFoundError(f"No task with id {id}")
-        task = Task.from_json(row[0])
+        task = Task.model_validate_json(row[0])
         return task
 
     def get_tasks(
@@ -168,11 +168,11 @@ class UnstructuredSQLiteStore:
                 cursor = conn.execute(query, params)
             else:
                 cursor = conn.execute(query)
-            tasks = [Task.from_json(task) for (task,) in cursor.fetchall()]
+            tasks = [Task.model_validate_json(task) for (task,) in cursor.fetchall()]
         return tasks
 
     def update_task(self, id: str, task: Task) -> None:
-        data = task.as_json()
+        data = task.model_dump_json()
         with self.conn as conn:
             cursor = conn.cursor()
             cursor.execute("UPDATE tasks SET json = (?) WHERE id = (?)", (data, id))
@@ -237,7 +237,7 @@ class UnstructuredSQLiteStore:
         return result.rowcount > 0
 
     def save_project(self, project: Project) -> str:
-        data = project.as_json()
+        data = project.model_dump_json()
         with self.conn as conn:
             conn.execute(
                 "INSERT INTO projects (id, json) VALUES (?, ?)", (project.id, data)
@@ -282,7 +282,7 @@ class UnstructuredSQLiteStore:
         return projects
 
     def update_project(self, id: str, project: Project) -> None:
-        data = project.as_json()
+        data = project.model_dump_json()
         with self.conn as conn:
             conn.execute("UPDATE projects SET json = (?) WHERE id = (?)", (data, id))
 
