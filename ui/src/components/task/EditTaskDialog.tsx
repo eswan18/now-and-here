@@ -39,14 +39,8 @@ export default function EditTaskDialog({
   task,
   onUpdateTask,
 }: TaskDialogProps) {
-  const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
-
-  const handlePriorityPickerPopoverChange = (priority: Priority) => {
-    setTaskValues({ ...taskValues, priority });
-    setPriorityPopoverOpen(false);
-  };
 
   const saveTaskUpdates = () => {
     const newTask = taskAsNewTask(taskValues);
@@ -90,39 +84,27 @@ export default function EditTaskDialog({
               setTaskValues({ ...taskValues, due: due || null })
             }
           />
-          <div className="flex flex-row justify-start items-center text-gray-400 gap-2">
-            {taskValues.repeat ? (
-              <Badge
-                variant="outline"
-                className="flex flex-row items-center text-orange-800 gap-1.5"
-              >
-                <Repeat size={16} className="inline-block" />
-                <p>{repeatAsString(taskValues.repeat)}</p>
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="flex flex-row items-center text-gray-400 gap-1.5"
-              >
-                <Repeat size={16} className="inline-block" />
-                <p className="text-xs">No repeat</p>
-              </Badge>
-            )}
-          </div>
-          <Popover
-            open={priorityPopoverOpen}
-            onOpenChange={setPriorityPopoverOpen}
-          >
-            <PopoverTrigger>
-              <PriorityBadge priority={taskValues.priority} />
-            </PopoverTrigger>
-            <PopoverContent className="w-28 p-0">
-              <PriorityPicker
-                defaultPriority={taskValues.priority}
-                onChange={handlePriorityPickerPopoverChange}
-              />
-            </PopoverContent>
-          </Popover>
+          {taskValues.repeat ? (
+            <Badge
+              variant="outline"
+              className="flex flex-row items-center text-orange-800 gap-1.5"
+            >
+              <Repeat size={16} className="inline-block" />
+              <p>{repeatAsString(taskValues.repeat)}</p>
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className="flex flex-row items-center text-gray-400 gap-1.5"
+            >
+              <Repeat size={16} className="inline-block" />
+              <p className="text-xs">No repeat</p>
+            </Badge>
+          )}
+          <EditablePriorityLabel
+            priority={taskValues.priority}
+            onChange={(priority) => setTaskValues({ ...taskValues, priority })}
+          />
         </div>
         <DialogFooter className="mt-6 h-8 justify-end w-full">
           {isEdited && (
@@ -225,6 +207,35 @@ function EditableDueDateLabel({ due, onChange }: EditableDueDateLabelProps) {
           selected={due || undefined}
           onSelect={onChange}
           onCompleted={() => setOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface EditablePriorityLabelProps {
+  priority: Priority;
+  onChange: (priority: Priority) => void;
+}
+
+function EditablePriorityLabel({
+  priority,
+  onChange,
+}: EditablePriorityLabelProps) {
+  const [open, setOpen] = useState(false);
+  const handlePriorityPickerPopoverChange = (priority: Priority) => {
+    onChange(priority);
+    setOpen(false);
+  };
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        <PriorityBadge priority={priority} />
+      </PopoverTrigger>
+      <PopoverContent className="w-28 p-0">
+        <PriorityPicker
+          defaultPriority={priority}
+          onChange={handlePriorityPickerPopoverChange}
         />
       </PopoverContent>
     </Popover>
