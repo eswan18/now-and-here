@@ -10,6 +10,7 @@ import {
 } from "@/types/repeatInterval";
 import { repeatAsString } from "@/lib/repeat";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export interface RepeatIntervalPickerProps {
   value?: RepeatInterval;
@@ -21,6 +22,9 @@ export default function RepeatIntervalPicker({
   onChange,
 }: RepeatIntervalPickerProps) {
   const [currentVal, setCurrentVal] = useState(value);
+
+  const disabled =
+    !currentVal || (currentVal.kind === "weekly" && isNaN(currentVal.weeks));
 
   return (
     <div className="flex flex-col items-center">
@@ -43,16 +47,24 @@ export default function RepeatIntervalPicker({
           Monthly: {value ? repeatAsString(value) : "no value"}
         </TabsContent>
       </Tabs>
-      <Button
-        className="mt-2"
-        disabled={!currentVal}
-        onClick={() => onChange(currentVal as RepeatInterval)}
-      >
-        Done
-      </Button>
-      <Button className="mt-2" variant="outline" onClick={() => onChange(null)}>
-        Clear
-      </Button>
+      <div className="flex flex-row justify-center gap-2">
+        <Button
+          className="mt-2"
+          size="sm"
+          variant="outline"
+          onClick={() => onChange(null)}
+        >
+          Clear
+        </Button>
+        <Button
+          className="mt-2"
+          disabled={disabled}
+          onClick={() => onChange(currentVal as RepeatInterval)}
+          size="sm"
+        >
+          Done
+        </Button>
+      </div>
     </div>
   );
 }
@@ -87,27 +99,44 @@ function WeeklyTabContent({ value, onChange }: WeeklyTabContentProps) {
       });
     }
   };
+  const handleWeeksChange = (weeks: number) => {
+    if (weeks < 1) {
+      return;
+    }
+    onChange({ ...currentVal, weeks });
+  };
   return (
-    <div>
-      Weekdays:
-      <div className="grid grid-cols-7 divide-x w-fit">
-        {weekdaySymbols.map((day) => (
-          <div className="w-5 h-5 text-center text-gray-400 text-xs border-transparent">
-            {day}
-          </div>
-        ))}
+    <div className="flex flex-col items-center gap-4 my-5">
+      <div className="flex flex-row items-center gap-2">
+        <p>Every</p>
+        <Input
+          type="number"
+          className="w-14 px-2 h-8"
+          value={currentVal.weeks}
+          onChange={(e) => handleWeeksChange(parseInt(e.target.value))}
+        />
+        <p>Weeks</p>
       </div>
-      <div className="grid grid-cols-7 w-fit">
-        {weekdaySymbols.map((_, idx) => (
-          <Checkbox
-            key={idx}
-            checked={currentVal.weekdays.includes(idx as Weekday)}
-            className="rounded-none border-r-0 w-5 h-5 first:rounded-l-sm last:rounded-r-sm last-of-type:border-r"
-            onCheckedChange={(checked) =>
-              handleCheckChange(checked, idx as Weekday)
-            }
-          />
-        ))}
+      <div className="flex flex-col items-center">
+        <div className="grid grid-cols-7 divide-x w-fit">
+          {weekdaySymbols.map((day) => (
+            <div className="w-6 h-6 text-center text-gray-400 text-xs border-transparent">
+              {day}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 w-fit">
+          {weekdaySymbols.map((_, idx) => (
+            <Checkbox
+              key={idx}
+              checked={currentVal.weekdays.includes(idx as Weekday)}
+              className="rounded-none border-r-0 w-6 h-6 first:rounded-l-sm last:rounded-r-sm last-of-type:border-r border-gray-400"
+              onCheckedChange={(checked) =>
+                handleCheckChange(checked, idx as Weekday)
+              }
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
