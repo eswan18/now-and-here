@@ -40,7 +40,6 @@ export default function EditTaskDialog({
   onUpdateTask,
 }: TaskDialogProps) {
   const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
-  const [projectPopoverOpen, setProjectPopoverOpen] = useState(false);
   const [duePopoverOpen, setDuePopoverOpen] = useState(false);
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
@@ -48,11 +47,6 @@ export default function EditTaskDialog({
   const handlePriorityPickerPopoverChange = (priority: Priority) => {
     setTaskValues({ ...taskValues, priority });
     setPriorityPopoverOpen(false);
-  };
-
-  const handleProjectPickerPopoverChange = (project: Project) => {
-    setTaskValues({ ...taskValues, project });
-    setProjectPopoverOpen(false);
   };
 
   const handleDuePickerChange = (due: Date | undefined) => {
@@ -91,30 +85,10 @@ export default function EditTaskDialog({
           className="text-gray-400"
         />
         <div className="flex flex-row flex-wrap items-center justify-start gap-2 mt-4 text-xs text-gray-400 font-semibold px-2">
-          <Popover
-            open={projectPopoverOpen}
-            onOpenChange={setProjectPopoverOpen}
-          >
-            <PopoverTrigger>
-              {taskValues.project ? (
-                <div className="flex flex-row justify-end items-center mr-4 text-gray-800">
-                  <FolderOpen size={16} className="inline mr-2" />
-                  {taskValues.project.name}
-                </div>
-              ) : (
-                <div className="flex flex-row justify-end items-center mr-4 text-gray-400">
-                  <FolderOpen size={16} className="inline mr-2" />
-                  No project
-                </div>
-              )}
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-0">
-              <ProjectPicker
-                onChange={handleProjectPickerPopoverChange}
-                defaultProjectId={taskValues.project?.id}
-              />
-            </PopoverContent>
-          </Popover>
+          <EditableProjectLabel
+            project={taskValues.project}
+            onChange={(project) => setTaskValues({ ...taskValues, project })}
+          />
           <div className="flex flex-row justify-start items-center text-gray-400 gap-2">
             <Popover open={duePopoverOpen} onOpenChange={setDuePopoverOpen}>
               <PopoverTrigger>
@@ -203,5 +177,44 @@ export default function EditTaskDialog({
         </DialogFooter>
       </div>
     </DialogContent>
+  );
+}
+
+interface EditableProjectLabelProps {
+  project?: Project | null;
+  onChange: (project: Project) => void;
+}
+
+function EditableProjectLabel({
+  project,
+  onChange,
+}: EditableProjectLabelProps) {
+  const [open, setOpen] = useState(false);
+  const handleProjectPickerPopoverChange = (project: Project) => {
+    onChange(project);
+    setOpen(false);
+  };
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        {project ? (
+          <div className="flex flex-row justify-end items-center mr-4 text-gray-800">
+            <FolderOpen size={16} className="inline mr-2" />
+            {project.name}
+          </div>
+        ) : (
+          <div className="flex flex-row justify-end items-center mr-4 text-gray-400">
+            <FolderOpen size={16} className="inline mr-2" />
+            No project
+          </div>
+        )}
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-0">
+        <ProjectPicker
+          onChange={handleProjectPickerPopoverChange}
+          defaultProjectId={project?.id}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }
