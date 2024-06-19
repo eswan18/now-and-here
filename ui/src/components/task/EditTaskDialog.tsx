@@ -6,6 +6,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { Task, NewTask, Priority, taskAsNewTask } from "@/types/task";
+import { RepeatInterval } from "@/types/repeatInterval";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
 import PriorityBadge from "./priority_badge";
@@ -25,6 +26,7 @@ import {
   PriorityPicker,
   ProjectPicker,
   DuePicker,
+  RepeatIntervalPicker,
 } from "@/components/common/pickers";
 import { Button } from "@/components/ui/button";
 import { deepEqual } from "@/lib/utils";
@@ -84,23 +86,10 @@ export default function EditTaskDialog({
               setTaskValues({ ...taskValues, due: due || null })
             }
           />
-          {taskValues.repeat ? (
-            <Badge
-              variant="outline"
-              className="flex flex-row items-center text-orange-800 gap-1.5"
-            >
-              <Repeat size={16} className="inline-block" />
-              <p>{repeatAsString(taskValues.repeat)}</p>
-            </Badge>
-          ) : (
-            <Badge
-              variant="outline"
-              className="flex flex-row items-center text-gray-400 gap-1.5"
-            >
-              <Repeat size={16} className="inline-block" />
-              <p className="text-xs">No repeat</p>
-            </Badge>
-          )}
+          <EditableRepeatLabel
+            repeat={taskValues.repeat}
+            onChange={(repeat) => setTaskValues({ ...taskValues, repeat })}
+          />
           <EditablePriorityLabel
             priority={taskValues.priority}
             onChange={(priority) => setTaskValues({ ...taskValues, priority })}
@@ -236,6 +225,43 @@ function EditablePriorityLabel({
         <PriorityPicker
           defaultPriority={priority}
           onChange={handlePriorityPickerPopoverChange}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface EditableRepeatLabelProps {
+  repeat: RepeatInterval | null;
+  onChange: (repeat: RepeatInterval | null) => void;
+}
+
+function EditableRepeatLabel({ repeat, onChange }: EditableRepeatLabelProps) {
+  const [open, setOpen] = useState(false);
+  const textColor = repeat ? "text-orange-800" : "text-gray-400";
+  const handleRepeatChange = (repeat: RepeatInterval | null) => {
+    onChange(repeat);
+    setOpen(false);
+  };
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        <Badge
+          variant="outline"
+          className={`flex flex-row items-center gap-1.5 ${textColor}`}
+        >
+          <Repeat size={16} className="inline-block" />
+          {repeat ? (
+            <p>{repeatAsString(repeat)}</p>
+          ) : (
+            <p className="text-xs">No repeat</p>
+          )}
+        </Badge>
+      </PopoverTrigger>
+      <PopoverContent>
+        <RepeatIntervalPicker
+          value={repeat || undefined}
+          onChange={handleRepeatChange}
         />
       </PopoverContent>
     </Popover>

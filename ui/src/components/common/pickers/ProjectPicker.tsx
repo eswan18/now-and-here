@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { Project } from "@/types/project";
 import { getProjects } from "@/apiServices/project";
 
-export interface ProjectPickerPopoverProps {
+export interface ProjectPickerProps {
   defaultProjectId?: string;
   onChange: (project: Project) => void;
 }
@@ -23,7 +23,7 @@ export interface ProjectPickerPopoverProps {
 export default function ProjectPicker({
   defaultProjectId,
   onChange,
-}: ProjectPickerPopoverProps) {
+}: ProjectPickerProps) {
   const [projectId, setProjectId] = useState<string | undefined>(
     defaultProjectId,
   );
