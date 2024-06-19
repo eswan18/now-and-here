@@ -40,17 +40,12 @@ export default function EditTaskDialog({
   onUpdateTask,
 }: TaskDialogProps) {
   const [priorityPopoverOpen, setPriorityPopoverOpen] = useState(false);
-  const [duePopoverOpen, setDuePopoverOpen] = useState(false);
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
 
   const handlePriorityPickerPopoverChange = (priority: Priority) => {
     setTaskValues({ ...taskValues, priority });
     setPriorityPopoverOpen(false);
-  };
-
-  const handleDuePickerChange = (due: Date | undefined) => {
-    setTaskValues({ ...taskValues, due: due || null });
   };
 
   const saveTaskUpdates = () => {
@@ -89,47 +84,13 @@ export default function EditTaskDialog({
             project={taskValues.project}
             onChange={(project) => setTaskValues({ ...taskValues, project })}
           />
+          <EditableDueDateLabel
+            due={taskValues.due}
+            onChange={(due) =>
+              setTaskValues({ ...taskValues, due: due || null })
+            }
+          />
           <div className="flex flex-row justify-start items-center text-gray-400 gap-2">
-            <Popover open={duePopoverOpen} onOpenChange={setDuePopoverOpen}>
-              <PopoverTrigger>
-                {taskValues.due ? (
-                  <HoverCard>
-                    <HoverCardTrigger>
-                      <Badge
-                        variant="outline"
-                        className="flex flex-row items-center text-orange-800 gap-1.5"
-                      >
-                        <Clock size={16} className="inline-block" />
-                        <p>{relativeTimeString(taskValues.due)}</p>
-                      </Badge>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-48">
-                      <div className="flex flex-col items-center">
-                        <p className="text-xs text-gray-400">Due:</p>
-                        <p className="text-sm text-gray-800">
-                          {new Date(taskValues.due).toLocaleString()}
-                        </p>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="flex flex-row items-center text-gray-400 gap-1.5"
-                  >
-                    <Clock size={16} className="inline-block" />
-                    <p className="text-xs">No due date</p>
-                  </Badge>
-                )}
-              </PopoverTrigger>
-              <PopoverContent>
-                <DuePicker
-                  selected={taskValues.due || undefined}
-                  onSelect={handleDuePickerChange}
-                  onCompleted={() => setDuePopoverOpen(false)}
-                />
-              </PopoverContent>
-            </Popover>
             {taskValues.repeat ? (
               <Badge
                 variant="outline"
@@ -182,7 +143,7 @@ export default function EditTaskDialog({
 
 interface EditableProjectLabelProps {
   project?: Project | null;
-  onChange: (project: Project) => void;
+  onChange: (project: Project | null) => void;
 }
 
 function EditableProjectLabel({
@@ -213,6 +174,57 @@ function EditableProjectLabel({
         <ProjectPicker
           onChange={handleProjectPickerPopoverChange}
           defaultProjectId={project?.id}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+interface EditableDueDateLabelProps {
+  due: Date | null;
+  onChange: (due: Date | undefined) => void;
+}
+
+function EditableDueDateLabel({ due, onChange }: EditableDueDateLabelProps) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        {due ? (
+          <HoverCard>
+            <HoverCardTrigger>
+              <Badge
+                variant="outline"
+                className="flex flex-row items-center text-orange-800 gap-1.5"
+              >
+                <Clock size={16} className="inline-block" />
+                <p>{relativeTimeString(due)}</p>
+              </Badge>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-48">
+              <div className="flex flex-col items-center">
+                <p className="text-xs text-gray-400">Due:</p>
+                <p className="text-sm text-gray-800">
+                  {new Date(due).toLocaleString()}
+                </p>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        ) : (
+          <Badge
+            variant="outline"
+            className="flex flex-row items-center text-gray-400 gap-1.5"
+          >
+            <Clock size={16} className="inline-block" />
+            <p className="text-xs">No due date</p>
+          </Badge>
+        )}
+      </PopoverTrigger>
+      <PopoverContent>
+        <DuePicker
+          selected={due || undefined}
+          onSelect={onChange}
+          onCompleted={() => setOpen(false)}
         />
       </PopoverContent>
     </Popover>
