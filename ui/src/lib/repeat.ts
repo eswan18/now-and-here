@@ -14,6 +14,11 @@ function integerToOrdinal(n: number): string {
 export function repeatAsString(repeat: RepeatInterval): string {
   switch (repeat.kind) {
     case "daily":
+      if (repeat.days == 1) {
+        return `Every day at ${repeat.at}`;
+      } else if (repeat.days == 2) {
+        return `Every other day at ${repeat.at}`;
+      }
       return `Every ${repeat.days} days at ${repeat.at}`;
     case "weekly": {
       const weekdaysFormatted = repeat.weekdays.map(weekdayName);

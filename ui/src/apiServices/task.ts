@@ -135,6 +135,7 @@ export function prepareTaskFromBackend(task: TaskFromBackend): Task {
 
 export async function updateTask(taskId: string, task: NewTask): Promise<Task> {
   const url = new URL(`/api/tasks/${taskId}`, baseUrl());
+  console.log(JSON.stringify(task));
   return await fetch(url, {
     method: "PUT",
     headers: {
