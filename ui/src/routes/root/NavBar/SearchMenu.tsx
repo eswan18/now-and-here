@@ -15,7 +15,7 @@ import {
   updateTask,
 } from "@/apiServices/task";
 import TaskList from "@/components/task/TaskList";
-import { NewTask } from "@/types/task";
+import { taskAsShallowTask, Task } from "@/types/task";
 
 export default function SearchMenu() {
   const [open, setOpen] = useState(false);
@@ -102,8 +102,9 @@ export function SearchDialog() {
   };
 
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, task }: { taskId: string; task: NewTask }) => {
-      updateTask(taskId, task);
+    mutationFn: async (task: Task) => {
+      const shallowTask = taskAsShallowTask(task);
+      updateTask(task.id, shallowTask);
     },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
@@ -111,9 +112,6 @@ export function SearchDialog() {
       });
     },
   });
-  const handleUpdateTask = async (taskId: string, task: NewTask) => {
-    updateTaskMutation.mutate({ taskId, task });
-  };
 
   return (
     <div className="flex flex-col items-center justify-start gap-y-4 w-full h-max">
@@ -126,7 +124,7 @@ export function SearchDialog() {
           <TaskList
             tasks={data}
             onCompletionToggle={handleCompletion}
-            onUpdateTask={handleUpdateTask}
+            onUpdateTask={async (task: Task) => updateTaskMutation.mutate(task)}
           />
         )}
       </ScrollArea>
