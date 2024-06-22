@@ -2,7 +2,6 @@ import { useState } from "react";
 import { CirclePlus } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { TaskWithoutId } from "@/types/task";
-import { Button } from "../ui/button";
 import EditTaskDialog from "./EditTaskDialog";
 
 type PartialTask = {
@@ -38,15 +37,9 @@ export default function CreateTaskButton({
   const task = { ...defaults, ...taskValues };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex flex-row items-center gap-3 px-3"
-        >
-          <CirclePlus size={24} />
-          <span>New task</span>
-        </Button>
+      <DialogTrigger className="flex flex-row items-center gap-3.5 px-0.5 w-36 text-gray-400">
+        <CirclePlus size={28} strokeWidth={1.5} className="text-gray-400" />
+        <span>New task</span>
       </DialogTrigger>
       <EditTaskDialog
         task={task}
