@@ -48,7 +48,11 @@ export default function CreateTaskButton({
           <span>New task</span>
         </Button>
       </DialogTrigger>
-      <EditTaskDialog task={task} onSaveTask={handleCreateTask} />
+      <EditTaskDialog
+        task={task}
+        onSaveTask={handleCreateTask}
+        title="New Task"
+      />
     </Dialog>
   );
 }
