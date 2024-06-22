@@ -1,10 +1,10 @@
-import { Task, NewTask } from "../../types/task";
+import { Task } from "../../types/task";
 import TaskListItem from "./TaskListItem";
 
 interface TaskListProps {
   tasks: Task[];
   onCompletionToggle: (taskId: string, completed: boolean) => void;
-  onUpdateTask: (taskId: string, task: NewTask) => Promise<void>;
+  onUpdateTask: (task: Task) => Promise<void>;
 }
 
 export default function TaskList({
@@ -19,9 +19,7 @@ export default function TaskList({
           key={task.id}
           task={task}
           onToggleCompletion={onCompletionToggle}
-          onUpdateTask={async (updatedTask) =>
-            onUpdateTask(task.id, updatedTask)
-          }
+          onUpdateTask={(updatedTask) => onUpdateTask(updatedTask)}
         />
       ))}
     </div>

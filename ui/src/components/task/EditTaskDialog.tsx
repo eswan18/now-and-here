@@ -5,11 +5,11 @@ import {
   DialogFooter,
   DialogHeader,
 } from "@/components/ui/dialog";
-import { Task, NewTask, Priority, taskAsNewTask } from "@/types/task";
+import { Task, Priority, TaskWithoutId } from "@/types/task";
 import { RepeatInterval } from "@/types/repeatInterval";
 import { Project } from "@/types/project";
 import { Badge } from "@/components/ui/badge";
-import PriorityBadge from "./priority_badge";
+import PriorityBadge from "./PriorityBadge";
 import {
   HoverCard,
   HoverCardContent,
@@ -32,21 +32,20 @@ import { Button } from "@/components/ui/button";
 import { deepEqual } from "@/lib/utils";
 import EditableField from "@/components/common/EditableField";
 
-export interface TaskDialogProps {
-  task: Task;
-  onUpdateTask: (updatedTask: NewTask) => Promise<void>;
+export interface TaskDialogProps<T = Task | TaskWithoutId> {
+  task: T;
+  onSaveTask: (t: T) => void;
 }
 
-export default function EditTaskDialog({
+export default function EditTaskDialog<T extends TaskWithoutId>({
   task,
-  onUpdateTask,
-}: TaskDialogProps) {
+  onSaveTask,
+}: TaskDialogProps<T>) {
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
 
   const saveTaskUpdates = () => {
-    const newTask = taskAsNewTask(taskValues);
-    onUpdateTask(newTask);
+    onSaveTask(taskValues);
   };
 
   return (

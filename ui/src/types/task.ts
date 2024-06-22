@@ -16,14 +16,18 @@ export type Task = {
   repeat: RepeatInterval | null;
 };
 
-// A TaskFromBackend is a task from the backend, where `due` hasn't been converted yet.
+export type TaskWithoutId = Omit<Task, "id">;
+
+// A TaskFromBackend represents the format task comes in as from the backend, where
+// `due` hasn't been converted yet.
 export type TaskFromBackend = Omit<Task, "due"> & {
   due: string | null;
 };
 
 // A task as it is stored in the database, with parent and project stored as IDs instead
-// of nested fields (and no attached ID).
-export interface NewTask {
+// of nested fields, and optionally no ID (for creating new tasks).
+export type ShallowTask = {
+  id: string;
   name: string;
   description: string | null;
   done: boolean;
@@ -33,9 +37,29 @@ export interface NewTask {
   priority: Priority;
   due: Date | null;
   repeat: RepeatInterval | null;
+};
+
+// A shallow task without an ID is what is sent to the backend when creating a new task.
+export type ShallowTaskWithoutId = Omit<ShallowTask, "id">;
+
+export function taskAsShallowTask(t: Task): ShallowTask {
+  return {
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    done: t.done,
+    parent_id: t.parent?.id ?? null,
+    project_id: t.project?.id ?? null,
+    labels: t.labels,
+    priority: t.priority,
+    due: t.due,
+    repeat: t.repeat,
+  };
 }
 
-export function taskAsNewTask(t: Task): NewTask {
+export function taskWithoutIdAsShallowTask(
+  t: TaskWithoutId,
+): ShallowTaskWithoutId {
   return {
     name: t.name,
     description: t.description,
