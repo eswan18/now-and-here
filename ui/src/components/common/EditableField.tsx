@@ -15,6 +15,7 @@ type EditableFieldBaseProps<T> = {
   setValue: (value: T) => void;
   className?: string;
   size?: "sm" | "lg";
+  allowGrow?: boolean;
 };
 
 type EditableFieldStringProps = EditableFieldBaseProps<string>;
@@ -31,6 +32,7 @@ export default function EditableField({
   value,
   setValue,
   size = "lg",
+  allowGrow = false,
   ...props
 }: EditableFieldProps) {
   const [isBeingEdited, setIsBeingEdited] = useState(false);
@@ -59,8 +61,10 @@ export default function EditableField({
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
-  const inputClass = `px-2 py-0 text-inherit ${size === "lg" ? "text-lg h-10" : "text-sm h-8"}`;
-  const staticClass = `flex items-center px-2 py-0 ${size === "lg" ? "text-lg h-10" : "text-sm h-8"}`;
+  const sizeBasis = size === "lg" ? "h-10 text-lg" : "h-8 text-sm";
+  const sizeClass = allowGrow ? `min-${sizeBasis}` : `truncate ${sizeBasis}`;
+  const inputClass = `max-w-full px-2 py-0 text-inherit ${sizeClass}`;
+  const staticClass = `max-w-full flex items-center px-2 py-0 ${sizeClass}`;
   return (
     <div className={cn("w-full", className)}>
       {isBeingEdited ? (

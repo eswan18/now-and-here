@@ -12,8 +12,9 @@ import { relativeTimeString } from "@/lib/time";
 import { Task } from "@/types/task";
 import PriorityBadge from "./PriorityBadge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import EditTaskDialog from "./EditTaskDialog";
+import EditTaskView from "./EditTaskView";
 import { repeatAsString } from "@/lib/repeat";
+import { DialogContent } from "@radix-ui/react-dialog";
 
 interface TaskCardProps {
   task: Task;
@@ -98,7 +99,9 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <EditTaskDialog task={task} onSaveTask={handleUpdateTask} />
+        <DialogContent>
+          <EditTaskView task={task} onSaveTask={handleUpdateTask} />
+        </DialogContent>
       </div>
     </Dialog>
   );
