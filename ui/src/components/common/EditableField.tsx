@@ -62,7 +62,9 @@ export default function EditableField({
     setValue(e.target.value);
   };
   const sizeBasis = size === "lg" ? "h-10 text-lg" : "h-8 text-sm";
-  const sizeClass = allowGrow ? `min-${sizeBasis}` : `truncate ${sizeBasis}`;
+  const sizeClass = allowGrow
+    ? `min-${sizeBasis} h-auto`
+    : `truncate ${sizeBasis}`;
   const inputClass = `max-w-full px-2 py-0 text-inherit ${sizeClass}`;
   const staticClass = `max-w-full flex items-center px-2 py-0 ${sizeClass}`;
   return (

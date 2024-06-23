@@ -41,7 +41,7 @@ export default function CreateTaskButton({
         <CirclePlus size={28} strokeWidth={1.5} className="text-gray-400" />
         <span>New task</span>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <EditTaskView
           task={task}
           onSaveTask={handleCreateTask}

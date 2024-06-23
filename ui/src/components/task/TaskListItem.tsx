@@ -98,7 +98,7 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <EditTaskView task={task} onSaveTask={handleUpdateTask} />
         </DialogContent>
       </div>
