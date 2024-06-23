@@ -1,33 +1,21 @@
 import { Badge } from "@/components/ui/badge";
+import { Priority } from "@/types/task";
 import { TriangleAlert } from "lucide-react";
 
-export default function PriorityBadge({ priority }: { priority: number }) {
-  let colors = null;
-  switch (priority) {
-    case 3:
-      colors = "bg-red-200 hover:bg-red-200 text-red-900";
-      break;
-    case 2:
-      colors = "bg-orange-200 hover:bg-orange-200 text-orange-900";
-      break;
-    case 1:
-      colors = "bg-yellow-200 hover:bg-yellow-200 text-yellow-900";
-      break;
-    case 0:
-      colors = "bg-blue-200 hover:bg-blue-200 text-blue-900";
-      break;
-  }
-  return (
-    <Badge
-      className={`inline-block w-24 ${colors} flex flex-row items-center justify-center gap-1`}
-    >
-      <TriangleAlert size={14} className="inline" />
-      Priority {priority}
-    </Badge>
-  );
+interface PriorityBadgeProps {
+  /** Priority level */
+  priority: Priority;
+  /** Size of the badge and its contents */
+  size?: "sm" | "lg";
 }
 
-export function BigPriorityBadge({ priority }: { priority: number }) {
+/**
+ * A colored badge that indicates the priority (0-3, inclusive) of a task.
+ */
+export default function PriorityBadge({
+  priority,
+  size = "sm",
+}: PriorityBadgeProps) {
   let colors = null;
   switch (priority) {
     case 3:
@@ -43,11 +31,12 @@ export function BigPriorityBadge({ priority }: { priority: number }) {
       colors = "bg-blue-200 hover:bg-blue-200 text-blue-900";
       break;
   }
+  const sizeClasses = size === "sm" ? "w-24 gap-1" : "w-32 text-base gap-1.5";
   return (
     <Badge
-      className={`inline-block w-32 ${colors} text-base flex flex-row items-center justify-center gap-1.5`}
+      className={`inline-block ${sizeClasses} ${colors} flex flex-row items-center justify-center`}
     >
-      <TriangleAlert size={16} />
+      <TriangleAlert size={size === "sm" ? 14 : 16} className="inline" />
       Priority {priority}
     </Badge>
   );
