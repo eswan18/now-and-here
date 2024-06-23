@@ -44,21 +44,21 @@ export default function Sidebar() {
   return (
     <div className="my-4 min-h-full">
       <ul>
-        <li>
+        <li key="projects">
           <SidebarLinkAccordion
             title="Projects"
             links={projectsLinks}
             icon={FolderOpen}
           />
         </li>
-        <li>
+        <li key="views">
           <SidebarLinkAccordion
             title="Views"
             links={taskViewsLinks}
             icon={ScanSearch}
           />
         </li>
-        <li>
+        <li key="other-links">
           <SidebarLinkAccordion
             title="Other Links"
             links={otherLinks}
@@ -93,7 +93,7 @@ function SidebarLinkAccordion({
         <AccordionContent className="pb-0 ml-2 pl-4 mb-4 border-l">
           <ul className="space-y-3">
             {links.map(({ title, href }) => (
-              <LinkListItem title={title} href={href} />
+              <LinkListItem title={title} href={href} key={href} />
             ))}
           </ul>
         </AccordionContent>

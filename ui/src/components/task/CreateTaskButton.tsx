@@ -1,40 +1,50 @@
 import { useState } from "react";
 import { CirclePlus } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import CreateTaskDialog from "./create_task_dialog/CreateTaskDialog";
-import { TaskDefaults } from "@/components/task/create_task_dialog/CreateTaskForm";
-import { NewTask } from "@/types/task";
-import { Button } from "../ui/button";
+import { TaskWithoutId } from "@/types/task";
+import EditTaskDialog from "./EditTaskDialog";
+
+type PartialTask = {
+  [K in keyof TaskWithoutId]?: TaskWithoutId[K];
+};
+
+const defaults: TaskWithoutId = {
+  name: "",
+  description: null,
+  priority: 0,
+  due: null,
+  project: null,
+  done: false,
+  labels: [],
+  repeat: null,
+  parent: null,
+};
 
 interface CreateTaskButtonProps {
-  onAddTask: (newTask: NewTask) => void;
-  taskDefaults: TaskDefaults;
+  taskValues: PartialTask;
+  onAddTask: (newTask: TaskWithoutId) => void;
 }
 
 export default function CreateTaskButton({
-  taskDefaults,
+  taskValues,
   onAddTask,
 }: CreateTaskButtonProps) {
   const [open, setOpen] = useState(false);
-  const handleCreateTask = (newTask: NewTask) => {
+  const handleCreateTask = (newTask: TaskWithoutId) => {
     onAddTask(newTask);
     setOpen(false);
   };
+  const task = { ...defaults, ...taskValues };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex flex-row items-center gap-3 px-3"
-        >
-          <CirclePlus size={24} />
-          <span>New task</span>
-        </Button>
+      <DialogTrigger className="flex flex-row items-center gap-3.5 px-0.5 w-36 text-gray-400">
+        <CirclePlus size={28} strokeWidth={1.5} className="text-gray-400" />
+        <span>New task</span>
       </DialogTrigger>
-      <CreateTaskDialog
-        onCreateTask={handleCreateTask}
-        defaults={taskDefaults}
+      <EditTaskDialog
+        task={task}
+        onSaveTask={handleCreateTask}
+        title="New Task"
       />
     </Dialog>
   );

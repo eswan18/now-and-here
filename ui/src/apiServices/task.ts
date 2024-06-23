@@ -1,7 +1,12 @@
-import { NewTask, Task, TaskFromBackend } from "@/types/task";
+import {
+  ShallowTask,
+  ShallowTaskWithoutId,
+  Task,
+  TaskFromBackend,
+} from "@/types/task";
 import { extractErrorDetail, baseUrl } from "@/apiServices/common";
 
-export async function createTask(task: NewTask): Promise<Task> {
+export async function createTask(task: ShallowTaskWithoutId): Promise<Task> {
   const url = new URL("/api/tasks", baseUrl());
   return await fetch(url, {
     method: "POST",
@@ -133,7 +138,10 @@ export function prepareTaskFromBackend(task: TaskFromBackend): Task {
   };
 }
 
-export async function updateTask(taskId: string, task: NewTask): Promise<Task> {
+export async function updateTask(
+  taskId: string,
+  task: ShallowTask | ShallowTaskWithoutId,
+): Promise<Task> {
   const url = new URL(`/api/tasks/${taskId}`, baseUrl());
   console.log(JSON.stringify(task));
   return await fetch(url, {

@@ -6,7 +6,12 @@ import CreateTaskButton from "@/components/task/CreateTaskButton";
 import { useTitle } from "@/contexts/TitleContext";
 import { completeTask, uncompleteTask, updateTask } from "@/apiServices/task";
 import { getTaskView, buildTaskView } from "@/apiServices/view";
-import { NewTask } from "@/types/task";
+import {
+  Task,
+  TaskWithoutId,
+  taskAsShallowTask,
+  taskWithoutIdAsShallowTask,
+} from "@/types/task";
 import { createTask } from "@/apiServices/task";
 import PageHeading from "@/components/common/pageHeading";
 import { useEffect } from "react";
@@ -22,7 +27,10 @@ export default function TaskView() {
     queryFn: () => buildTaskView(viewName),
   });
   const addTaskMutation = useMutation({
-    mutationFn: createTask,
+    mutationFn: async (task: TaskWithoutId) => {
+      const shallowTask = taskWithoutIdAsShallowTask(task);
+      await createTask(shallowTask);
+    },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
         queryKey: ["tasks"],
@@ -61,13 +69,11 @@ export default function TaskView() {
       });
     },
   });
-  const handleCompletion = async (taskId: string, completed: boolean) => {
-    completeTaskMutation.mutate({ taskId, completed });
-  };
 
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, task }: { taskId: string; task: NewTask }) => {
-      updateTask(taskId, task);
+    mutationFn: async (task: Task) => {
+      const shallowTask = taskAsShallowTask(task);
+      await updateTask(task.id, shallowTask);
     },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
@@ -75,13 +81,6 @@ export default function TaskView() {
       });
     },
   });
-  const handleUpdateTask = async (taskId: string, task: NewTask) => {
-    updateTaskMutation.mutate({ taskId, task });
-  };
-
-  const handleAddTask = async (newTask: NewTask) => {
-    addTaskMutation.mutate(newTask);
-  };
 
   const headingTitle = viewQuery.isSuccess ? viewQuery.data.name : viewName;
   const headingDescription = viewQuery.isSuccess
@@ -99,10 +98,12 @@ export default function TaskView() {
       </PageHeading>
       <TaskList
         tasks={tasksQuery.data || []}
-        onCompletionToggle={handleCompletion}
-        onUpdateTask={handleUpdateTask}
+        onCompletionToggle={(taskId: string, completed: boolean) =>
+          completeTaskMutation.mutate({ taskId, completed })
+        }
+        onUpdateTask={async (t: Task) => updateTaskMutation.mutate(t)}
       />
-      <CreateTaskButton taskDefaults={{}} onAddTask={handleAddTask} />
+      <CreateTaskButton taskValues={{}} onAddTask={addTaskMutation.mutate} />
     </>
   );
 }

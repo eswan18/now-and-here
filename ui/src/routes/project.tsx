@@ -10,7 +10,12 @@ import TaskFilterPanel, {
   TaskFilterSchema,
 } from "@/components/task/TaskFilterPanel";
 import { useTitle } from "@/contexts/TitleContext";
-import { NewTask } from "@/types/task";
+import {
+  Task,
+  TaskWithoutId,
+  taskAsShallowTask,
+  taskWithoutIdAsShallowTask,
+} from "@/types/task";
 import {
   completeTask,
   getTasks,
@@ -88,7 +93,10 @@ export default function Project() {
     queryFn: () => getProject(projectId),
   });
   const addTaskMutation = useMutation({
-    mutationFn: createTask,
+    mutationFn: async (newTask: TaskWithoutId) => {
+      const shallowTask = taskWithoutIdAsShallowTask(newTask);
+      await createTask(shallowTask);
+    },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
         queryKey: ["tasks", { projectId }, { filter }],
@@ -124,13 +132,11 @@ export default function Project() {
       });
     },
   });
-  const handleCompletion = async (taskId: string, completed: boolean) => {
-    completeTaskMutation.mutate({ taskId, completed });
-  };
 
   const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, task }: { taskId: string; task: NewTask }) => {
-      updateTask(taskId, task);
+    mutationFn: async ({ task }: { task: Task }) => {
+      const shallowTask = taskAsShallowTask(task);
+      await updateTask(task.id, shallowTask);
     },
     onSettled: async () => {
       return await queryClient.invalidateQueries({
@@ -138,17 +144,10 @@ export default function Project() {
       });
     },
   });
-  const handleUpdateTask = async (taskId: string, task: NewTask) => {
-    updateTaskMutation.mutate({ taskId, task });
-  };
 
   // Handle changes to any filter
   const handleFilterChange = (filter: z.infer<typeof TaskFilterSchema>) => {
     setFilter(filter);
-  };
-
-  const handleAddTask = async (newTask: NewTask) => {
-    addTaskMutation.mutate(newTask);
   };
 
   return (
@@ -162,13 +161,19 @@ export default function Project() {
       </PageHeading>
       <TaskList
         tasks={tasksQuery.data || []}
-        onCompletionToggle={handleCompletion}
-        onUpdateTask={handleUpdateTask}
+        onCompletionToggle={(taskId: string, completed: boolean) =>
+          completeTaskMutation.mutate({ taskId, completed })
+        }
+        onUpdateTask={async (task: Task) => updateTaskMutation.mutate({ task })}
       />
-      <CreateTaskButton
-        taskDefaults={{ projectId }}
-        onAddTask={handleAddTask}
-      />
+      {projectQuery.isSuccess && (
+        <CreateTaskButton
+          taskValues={{ project: projectQuery.data }}
+          onAddTask={async (newTask: TaskWithoutId) =>
+            addTaskMutation.mutate(newTask)
+          }
+        />
+      )}
     </>
   );
 }

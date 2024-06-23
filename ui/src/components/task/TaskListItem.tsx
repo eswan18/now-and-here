@@ -9,8 +9,8 @@ import {
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
-import { Task, NewTask } from "@/types/task";
-import PriorityBadge from "./priority_badge";
+import { Task } from "@/types/task";
+import PriorityBadge from "./PriorityBadge";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import EditTaskDialog from "./EditTaskDialog";
 import { repeatAsString } from "@/lib/repeat";
@@ -18,7 +18,7 @@ import { repeatAsString } from "@/lib/repeat";
 interface TaskCardProps {
   task: Task;
   onToggleCompletion: (taskId: string, completed: boolean) => void;
-  onUpdateTask: (updatedTask: NewTask) => Promise<void>;
+  onUpdateTask: (updatedTask: Task) => Promise<void>;
 }
 
 export default function TaskListItem({
@@ -28,7 +28,7 @@ export default function TaskListItem({
 }: TaskCardProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const handleUpdateTask = async (updatedTask: NewTask) => {
+  const handleUpdateTask = async (updatedTask: Task) => {
     onUpdateTask(updatedTask).then(() => setEditDialogOpen(false));
   };
 
@@ -98,7 +98,7 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <EditTaskDialog task={task} onUpdateTask={handleUpdateTask} />
+        <EditTaskDialog task={task} onSaveTask={handleUpdateTask} />
       </div>
     </Dialog>
   );
