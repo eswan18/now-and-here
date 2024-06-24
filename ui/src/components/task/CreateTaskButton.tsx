@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { CirclePlus } from "lucide-react";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { TaskWithoutId } from "@/types/task";
-import EditTaskDialog from "./EditTaskDialog";
+import EditTaskView from "./EditTaskView";
 
 type PartialTask = {
   [K in keyof TaskWithoutId]?: TaskWithoutId[K];
@@ -41,11 +41,13 @@ export default function CreateTaskButton({
         <CirclePlus size={28} strokeWidth={1.5} className="text-gray-400" />
         <span>New task</span>
       </DialogTrigger>
-      <EditTaskDialog
-        task={task}
-        onSaveTask={handleCreateTask}
-        title="New Task"
-      />
+      <DialogContent className="max-w-2xl">
+        <EditTaskView
+          task={task}
+          onSaveTask={handleCreateTask}
+          title="New Task"
+        />
+      </DialogContent>
     </Dialog>
   );
 }

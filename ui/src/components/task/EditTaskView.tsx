@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { Clock, FolderOpen, Pencil, Repeat } from "lucide-react";
-import {
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from "@/components/ui/dialog";
+import { DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { Task, Priority, TaskWithoutId } from "@/types/task";
 import { RepeatInterval } from "@/types/repeatInterval";
 import { Project } from "@/types/project";
@@ -32,17 +28,25 @@ import { Button } from "@/components/ui/button";
 import { deepEqual } from "@/lib/utils";
 import EditableField from "@/components/common/EditableField";
 
-export interface TaskDialogProps<T = Task | TaskWithoutId> {
+export interface EditTaskViewProps<T = Task | TaskWithoutId> {
+  /** The task to edit. */
   task: T;
+  /** The function to call when the task is saved. */
   onSaveTask: (t: T) => void;
+  /** The title to show above the task. */
   title?: string;
 }
 
-export default function EditTaskDialog<T extends TaskWithoutId>({
+/**
+ * A view of a task where all fields are editable, and even unset fields are shown.
+ *
+ * Shows a Save button if the task has been modified and the name is not empty.
+ */
+export default function EditTaskView<T extends TaskWithoutId>({
   task,
   onSaveTask,
   title = "Edit Task",
-}: TaskDialogProps<T>) {
+}: EditTaskViewProps<T>) {
   const [taskValues, setTaskValues] = useState(task);
   const isEdited = !deepEqual(taskValues, task);
   const isSaveable = isEdited && taskValues.name.length > 0;
@@ -52,7 +56,7 @@ export default function EditTaskDialog<T extends TaskWithoutId>({
   };
 
   return (
-    <DialogContent className="px-4 md:px-12 py-2 md:py-6 lg:max-w-2xl">
+    <div className="px-4 md:px-12 py-2 md:py-6 max-w-2xl">
       <DialogHeader className="mb-4">
         <div className="flex flex-row justify-between items-center gap-3 mr-5">
           <div className="flex flex-row justify-start items-center text-gray-900 gap-3">
@@ -75,7 +79,8 @@ export default function EditTaskDialog<T extends TaskWithoutId>({
           }
           defaultText="No description"
           size="sm"
-          className="text-gray-400"
+          allowGrow={true}
+          className="text-gray-400 flex-auto"
         />
         <div className="flex flex-row flex-wrap items-center justify-start gap-2 mt-4 text-xs text-gray-400 font-semibold px-2">
           <EditableProjectLabel
@@ -110,7 +115,7 @@ export default function EditTaskDialog<T extends TaskWithoutId>({
           )}
         </DialogFooter>
       </div>
-    </DialogContent>
+    </div>
   );
 }
 

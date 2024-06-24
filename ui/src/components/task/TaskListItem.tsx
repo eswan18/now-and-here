@@ -11,8 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { relativeTimeString } from "@/lib/time";
 import { Task } from "@/types/task";
 import PriorityBadge from "./PriorityBadge";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import EditTaskDialog from "./EditTaskDialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import EditTaskView from "./EditTaskView";
 import { repeatAsString } from "@/lib/repeat";
 
 interface TaskCardProps {
@@ -98,7 +98,9 @@ export default function TaskListItem({
             )}
           </div>
         </div>
-        <EditTaskDialog task={task} onSaveTask={handleUpdateTask} />
+        <DialogContent className="max-w-2xl">
+          <EditTaskView task={task} onSaveTask={handleUpdateTask} />
+        </DialogContent>
       </div>
     </Dialog>
   );
