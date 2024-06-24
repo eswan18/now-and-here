@@ -38,14 +38,11 @@ export default function EditableField({
   const [isBeingEdited, setIsBeingEdited] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    // Bring focus into the Input as soon as it appears.
+    // Bring focus into the Input as soon as it it's selected.
     if (isBeingEdited && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isBeingEdited]);
-  if (value) {
-    props;
-  }
 
   const handleBlurOrEnter = (
     e: FocusEvent<HTMLInputElement> | KeyboardEvent<HTMLInputElement>,
@@ -65,30 +62,30 @@ export default function EditableField({
   const sizeClass = allowGrow
     ? `min-${sizeBasis} h-auto`
     : `truncate ${sizeBasis}`;
-  const inputClass = `max-w-full px-2 py-0 text-inherit ${sizeClass}`;
-  const staticClass = `max-w-full flex items-center px-2 py-0 ${sizeClass}`;
+  const inputClass = `max-w-full px-2 py-0 text-inherit ${sizeClass} ${isBeingEdited ? "" : "hidden"}`;
+  const staticClass = `max-w-full flex items-center px-2 py-0 ${sizeClass} ${isBeingEdited ? "hidden" : ""}`;
   return (
-    <div className={cn("w-full", className)}>
-      {isBeingEdited ? (
-        <Input
-          ref={inputRef}
-          value={value}
-          onChange={handleChange}
-          onBlur={handleBlurOrEnter}
-          onKeyDown={handleBlurOrEnter}
-          className={inputClass}
-        />
-      ) : (
-        <div className={staticClass} onClick={() => setIsBeingEdited(true)}>
-          {value ? (
-            <span>{value}</span>
-          ) : (
-            <span className="italic">
-              {(props as EditableFieldStringOrUndefinedProps).defaultText}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
+    <button
+      className={cn("w-full", className)}
+      onFocus={() => setIsBeingEdited(true)}
+    >
+      <Input
+        ref={inputRef}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlurOrEnter}
+        onKeyDown={handleBlurOrEnter}
+        className={inputClass}
+      />
+      <div className={staticClass}>
+        {value ? (
+          <span>{value}</span>
+        ) : (
+          <span className="italic">
+            {(props as EditableFieldStringOrUndefinedProps).defaultText}
+          </span>
+        )}
+      </div>
+    </button>
   );
 }
